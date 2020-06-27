@@ -1,37 +1,45 @@
-## Welcome to GitHub Pages
+## 计算机视觉中的一些图像三维重建技术
 
-You can use the [editor on GitHub](https://github.com/huluoboge/huluoboge.github.io/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+## 目录
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### 引子
+### 摄影测量学 Photogrammetry 的一些问题
+- 共线方程
+- 坐标系与内外参
+- 单幅影像后方交会（PnP问题）
+- 多幅影像前方交会（Triangulation问题）
+- 空中三角测量（空三加密）
+- 稀疏重建问题
+- 特征点问题
+- 图像的相似性问题
+- 特征点的相似性问题（特征匹配）
+- 光束法平差
+- 控制点的平差问题
+- GNSS平差问题
+###  恢复图像拍照时刻的位置和姿态问题--运动恢复结构Structure from Motion(SfM) 
+- 增量式重建
+- 全句式重建
+- 层级式重建
+- 混合式重建
 
-### Markdown
+###  恢复三维物体表面
+- 双目立体视觉
+- 标定相机内外参数
+- 核线影像的生成
+- 多视立体视觉
+- 匹配代价问题
+- 能量优化问题
+- 表面网格重建
+- 网格的简化技术
+- 纹理映射技术
+- 层次细节模型
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
+### 相机模型
+- 机内参数模型
+### 一些最优化问题
 
-# Header 1
-## Header 2
-### Header 3
 
-- Bulleted
-- List
 
-1. Numbered
-2. List
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/huluoboge/huluoboge.github.io/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
