@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>项目经历 &mdash; Hu Yang&#39;s Personal Homepage 1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Hu Yang's Personal Homepage
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="aboutme.html">关于我</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reconstruct3d/index.html">计算机图形学</a></li>
+<li class="toctree-l1"><a class="reference internal" href="computerVision/index.html">计算机视觉</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Hu Yang's Personal Homepage</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>项目经历</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/doc/project.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>项目经历<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<section id="id2">
+<h2>户型图解析<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<p>解析DXF数据，自动生成户型图</p>
+</section>
+<section id="id3">
+<h2>室内结构化自动重建<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h2>
+</section>
+<section id="lod">
+<h2>LOD生成<a class="headerlink" href="#lod" title="Permalink to this headline"></a></h2>
+<p>大场景展示需要使用LOD技术。重构场景重建流程，进行LOD重建。可重建任意大的场景。</p>
+<ol class="simple">
+<li><p>开发两种方案： 1)几何+纹理 LOD， 2)纹理 LOD。 两种情况各有不同的用途。</p></li>
+<li><p>纹理贴图拼缝优化（ 专利） ： 优化全景图贴图拼缝处存在误差， 两个层次： 刚性和非刚性。 刚性： 使用位姿引导的稀疏匹配优化图像位姿， 使用 Mesh 引导的稠密对应优化图像位姿。 非刚性： 使用 Mesh 引导的稠密对应优化图像像素非刚性形变从而优化贴图。</p></li>
+<li><p>大场景的无缝模型构建（ 专利） ： 使用分块合并方案， 分块重建。 然后使用无缝模型合并方案， 合并模型。构建分割合并策略。 构建无缝 Mesh 合并算法。 合并的 Mesh 保持拓扑关系。</p></li>
+<li><p>大场景纹理贴图方案： 使用可见性信息优化遮挡情况判定， 使用分块接边信息进行颜色调整</p></li>
+</ol>
+</section>
+<section id="id4">
+<h2>激光点云标定<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>单线激光雷达旋转轴标定： 使用点到平面距离为误差项， 优化旋转轴和平面方程， 构建最小二乘， 求解最优旋转轴</p></li>
+<li><p>激光与相机标定： 使用图像特征点对应三维点在平面上的信息构建最小二乘优化激光与相机位姿</p></li>
+<li><p>使用 Qt 开发可视化的刺点工具， 手工刺点进行标定， 及检查标定精度结果</p></li>
+<li><p>激光与相机投影深度遮挡剔除：
+相机中心和激光中心存在平移， 造成激光点云投影到图像上存在遮挡情况。 构建数学函数映射， 将激光点云时序信息和旋转角度映射到全景图中， 保持三维空间中的邻域关系到全景图中的二位邻域关系不变， 从而构建二维三角网， 使用三角网进行遮挡剔除</p></li>
+</ol>
+</section>
+<section id="id5">
+<h2>模型拍摄质量评价体系建立<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h2>
+<p>构建经纪人拍摄房屋质量体系， 建立模型质量与拍摄方案的评价关联性。 采用拍摄点位密度， 连通性， 完整性进行评价。</p>
+<ol class="simple">
+<li><p>点位密度： 使用 Occupancy Grid 构建点位拍摄密度指标</p></li>
+<li><p>连通性： 构建拍摄点位连通图， 根据连通图分析房屋漫游连接指标， 分析不连通的情况， 使用门的特征进行自动联通。</p></li>
+<li><p>完整性： 使用 Occupancy Grid 与 Mesh 空洞识别， 构建拍摄完整性指标</p></li>
+<li><p>全局位姿评价： 使用遮挡体积评价指标进行全局位姿评价。</p></li>
+</ol>
+</section>
+<section id="id6">
+<h2>模型优化相关<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>基于图像的 Mesh 优化
+纹理有更好的细节， 基于纹理信息来优化 Mesh， 使得模型可以更好的表达细节</p></li>
+<li><p>Poisson 重建 Mesh 优化方案（ 专利）
+针对 Poisson 重建 Mesh 在缺点的情况下缺点区域会出现”鼓包”，构建能量优化方程使得
+投影平面面积最小的方案来优化该区域。</p></li>
+<li><p>室内场景低置信度和不确定点云全局优化
+单张全景图深度图是有 AI 生成， 深度图置信度差， 且尺度一致性差， 导致最终模型差。
+综合使用图像， 点云及室内平面行特点进行全局位姿优化， 充分利用多视图信息和深度
+图置信度， 处理不一致平面， 生成正确， 平整， 光滑的室内模型</p></li>
+</ol>
+</section>
+<section id="id7">
+<h2>全景图相关<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>全景图竖直矫正（ 专利） ： 全景图拍摄由于三脚架等不可能完全竖直。 竖直矫正可以简化位姿拼接算法的复杂度。 提取全景图直线段， 根据全景图特点构建 RANSAC， 求解最优竖直轴， 最后根据竖直轴求解最小旋转矩阵， 然后矫正全景图。</p></li>
+<li><p>全景图拼接优化
+使用直线+半稠密方案来优化全景图拼接。
+使用金字塔策略， lm 算法逐层优化全景图拼接</p></li>
+</ol>
+</section>
+<section id="id8">
+<h2>点云拼接相关<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>点云粗拼算法（ 专利）
+使用 3-congruent Points 算法来进行点云粗拼接。 解决室内点云粗拼接问题。</p></li>
+<li><p>室内场景位恣评价算法（ 专利）
+传统点云拼接依靠重叠点数量， 然而在室内场景中， 每个点位不能看到全局信息， 仅仅依靠重叠数量并不能够表达拼接结果。 室内场景具有封闭特点， 使用遮挡体积来来描述拼接结果。 为融合多种位姿拼接提供了统一的判定标准</p></li>
+<li><p>深度图引导图像特征描述的位姿求解方案（ 专利）
+使用深度图信息+图像， 对图像进行局部变换后进行特征描述， 解决大角度下图像匹配差的问题</p></li>
+</ol>
+</section>
+<section id="id9">
+<h2>图像稠密匹配算法<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
+<p>实现基于 CUDA 的 Patch MVS 算法， 实现图像生成稠密点云。 效果， 效率， 占用资源等指标超过所有开源算法。</p>
+</section>
+<section id="sfm">
+<h2>图像 SfM 算法<a class="headerlink" href="#sfm" title="Permalink to this headline"></a></h2>
+<p>实现增量式 SfM 算法， 并优化算法效率， 包括图像特征提取， 匹配， BA 优化。</p>
+</section>
+<section id="id10">
+<h2>镶嵌线编辑软件<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h2>
+<p>是一款实时编辑预览镶嵌线结果的软件。 因为镶嵌线设计到的图像可能非常多， 设计并实现超大规模图像浏览算法（ 实时 LOD） 。 实现图像混合 OpenGL 渲染模式， 来支持镶嵌线实时编辑结果展示</p>
+</section>
+<section id="dsm">
+<h2>DSM 内插算法<a class="headerlink" href="#dsm" title="Permalink to this headline"></a></h2>
+<p>实现基于 CUDA 的 DSM 内插算法</p>
+</section>
+<section id="sgm">
+<h2>SGM 稠密重建<a class="headerlink" href="#sgm" title="Permalink to this headline"></a></h2>
+<p>实现基于 CUDA 的 SGM、 tSGM 稠密重建算法。 双目、 多视图重建。 生成的点云用于DSM 生成， 从而生成真正射影像， 算法速度效果与 Pix4D 相当。</p>
+</section>
+<section id="id11">
+<h2>人像阵列系统<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h2>
+<p>使用阵列相机瞬时捕捉拍摄人体， 从而进行建模。 主持阵列系统采集、 传输、 处
+理工具的开发</p>
+</section>
+<section id="id12">
+<h2>大场景图像三维重建软件<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h2>
+<p>国内第一套国产倾斜相机图像三维重建软件 Infinite3D RealScenes 开发。 涉及图像三维重建整体流程包括特征提取、 稀疏匹配、 空三、 稠密匹配、 网格重建、 网格简化、 纹理映射、 LOD 等。 对算法进行内存优化， 加速。 使用 QT 开发软件交互界面。</p>
+</section>
+<section id="lidar">
+<h2>Lidar 点云滤波算法<a class="headerlink" href="#lidar" title="Permalink to this headline"></a></h2>
+<p>实现IPTD算法，使用渐进三角网加密+形态学相结合， 克服森林地区 TIN 效果差的问题。</p>
+</section>
+<section id="id13">
+<h2>Lidar与影像的建筑物三维重建<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h2>
+<p>对建筑物进行矢量化建模</p>
+</section>
+<section id="id14">
+<h2>实时立体像对生成<a class="headerlink" href="#id14" title="Permalink to this headline"></a></h2>
+<p>对于立体量测来说，实时生成立体像对十分重要。利用立体像对成像原理，实现实时呈现立体像对，从而进行立体量测。与Info软件生成效果一致。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Hu Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

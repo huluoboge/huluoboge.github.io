@@ -7,14 +7,10 @@ Welcome to Hu Yang's Personal Homepage's documentation!
 =======================================================
 
 .. toctree::
-   :maxdepth: 2
    :caption: Contents:
 
+   ./doc/aboutme.md
+   ./doc/reconstruct3d/index.rst
+   ./doc/computerVision/index.rst
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
