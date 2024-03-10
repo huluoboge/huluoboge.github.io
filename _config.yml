@@ -8,25 +8,25 @@
 
 # Basic Site Settings
 locale                   : "en-US"
-title                    : "Your Name / Site Title"
+title                    : "主页"
 title_separator          : "-"
-name                     : &name "Your Name"
-description              : &description "personal description"
-url                      : https://academicpages.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+name                     : &name "胡 洋"
+description              : &description "地图学与地理信息系统专业硕士，主要从事计算机视觉三维重建相关工作"
+url                      : https://huluoboge.top/ # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
-repository               : "academicpages/academicpages.github.io"
+repository               : "huluoboge.github.io"
 
 # Site Author - The following control what appear as part of the author content on the side bar.
 #               If a field is blank the icon and link will not appear, otherwise it will be shown.
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "profile.png"
-  name             : "胡萝卜哥"
+  avatar           : "profile.jpg"
+  name             : "胡 洋"
   pronouns         : # example: "she/her"  
-  bio              : "一个大龄码农"
+  bio              : "地图学与地理信息系统专业硕士，主要从事计算机视觉三维重建相关工作"
   location         : "北京"
-  employer         : "realsee"
+  employer         : "贝壳-如视"
   uri              : # URL
   email            : "huluoboge@126.com" 
 
@@ -111,7 +111,7 @@ atom_feed:
 
 
 # SEO Related
-google_site_verification :
+google_site_verification :主要兴趣
 bing_site_verification   :
 alexa_site_verification  :
 yandex_site_verification :

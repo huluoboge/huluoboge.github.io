@@ -1,18 +1,10 @@
 ---
 permalink: /
-title: "胡 洋"
+title: "关于我"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
----
-
-
-### 教育经历
-
-- 硕士  武汉大学 地图学与地理信息系统 2010
-- 本科 东北石油大学 资源环境与城乡规划管理专业 2007
-
 ---
 
 ### 主要兴趣
