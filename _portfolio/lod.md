@@ -15,7 +15,6 @@ LOD
 [https://realsee.cn/vePPEkyl](https://realsee.cn/vePPEkyl)
 
 
-<video src="/portfolio/lod/22.mp4" controls="controls" width="800" ></video>
-
+<video src="/portfolio/lod/22.mp4" controls="controls" preload="auto" width="100%" height="100%"></video>
 
 
