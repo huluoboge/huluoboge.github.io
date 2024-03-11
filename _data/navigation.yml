@@ -1,22 +1,23 @@
 # main links links
 main:
   # - title: "Publications"
-  #   url: /publications/
+    # url: /publications/
+  # - title: "talks" 
+  #   url: /talks/    
 
   - title: "项目" #记录项目的内容，结果（效果，效率等）
-    url: /talks/    
+    url: /portfolio/
 
   - title: "学习笔记"
-    url: /teaching/    
-    
-  - title: "博文"
     url: /year-archive/
+
+  # - title: "学习笔记"
+  #   url: /teaching/    
     
   - title: "个人简历"
     url: /cv/
     
-  # - title: "portfolio"
-  #   url: /portfolio/
+  
         
   # - title: "Guide"
   #   url: /markdown/

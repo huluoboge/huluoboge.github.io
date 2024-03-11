@@ -2,17 +2,17 @@
 title: "List"
 collection: projects
 type: "列表"
-permalink: /talks/list
+permalink: /portfolio/list
 venue: "清单"
 date: 2024-03-01
 location: "北京, 中国"
 ---
 
-<!-- ![](/talks/2012-06-01/s4.png) -->
+<!-- ![](/portfolio/2012-06-01/s4.png) -->
 
 - 立体测图，实时核线影像生成
 - 融合lidar与航空影像的建筑物三维重建（矢量化重建）
-- 机载Lidar点云处理：地面与非地面点分类Talks
+- 机载Lidar点云处理：地面与非地面点分类portfolio
 - 倾斜影像的Structure from Motion 算法
 - 基于SGM的无人机影像快速密集匹配
 - 基于PatchMVS的倾斜影像密集匹配算法

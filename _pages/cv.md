@@ -56,48 +56,26 @@ redirect_from:
 ======
 * C++ ,Python，OpenGL，QT，CUDA
 * Structure from Motion(SfM)，空三，摄影测量
-  * 图像特征提取、匹配、外点去除、PnP、三角化、位姿估计和优化等
-  * 单目影像灭点（消影点）估计
-  * 全景图的拼接
 * Multi-view Stereo(MVS),双目，多相机，密集匹配
-* 点云处理
-  * 点云配准
-  * 点云法向量估计，平滑，滤波（去噪）
-  * 点云滤波（地面点和非地面点分类）
-  * 点云重建
-    * Mesh二维重建（Delaunay二维三角网）
-    * Mesh三维重建 (Graph-cut 三维重建、Poisson重建、SDF重建)
-* Mesh重建
-  * Mesh处理：切分、合并、光滑、锐化
-  * Mesh纹理映射，匀色
-  * Mesh形变
-* 图像处理
-  * 图像拼接
-  * 图像融合（Multi-blend,Poisson,Gradiant domain）
+* 点云处理，配准，法向量估计，滤波，平滑
+* Mesh处理，重建，切分，合并，简化，光滑，锐化，形变
+* 图像处理，图像拼接，图像融合
 * 纹理模型LOD算法
-  * 室内外大场景LOD算法
-  * 算法云端并行化设计
 
 
 
-Publications
+
+<div style="display:none">
+文章与专利
 ======
-  <ul>{% for post in site.publications reversed %}
+  <!-- <ul>{% for post in site.publications reversed %}
     {% include archive-single-cv.html %}
-  {% endfor %}</ul>
+  {% endfor %}</ul> -->
+  </div>
   
 项目经历
 ======
-  <ul>{% for post in site.talks reversed %}
-    {% include archive-single-talk-cv.html  %}
+  <ul>{% for post in site.portfolio reversed %}
+    {% include archive-single-cv.html  %}
   {% endfor %}</ul>
   
-Teaching
-======
-  <ul>{% for post in site.teaching reversed %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Service and leadership
-======
-* Currently signed in to 43 different slack teams

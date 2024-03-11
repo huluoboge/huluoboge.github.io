@@ -2,13 +2,13 @@
 title: "核线影像实时生成设计方案"
 collection: projects
 type: "摄影测量"
-permalink: /talks/epipolar_image_gen
+permalink: /portfolio/epipolar_image_gen
 venue: "立体影像测图软件"
 date: 2011-06-01
 location: "西安, 中国"
 ---
 
-![](/talks/epipolar_image_gen/1.png)
+![](/portfolio/epipolar_image_gen/1.png)
 
 
 
@@ -16,7 +16,7 @@ location: "西安, 中国"
 
 
 
-![](/talks/epipolar_image_gen/2.jpg)    
+![](/portfolio/epipolar_image_gen/2.jpg)    
 
 
 左右两张相片，通过给定的高程信息（可以是DEM）来进行核线影像生成。
