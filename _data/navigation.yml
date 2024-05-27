@@ -5,17 +5,19 @@ main:
   # - title: "talks" 
   #   url: /talks/    
 
-  - title: "项目" #记录项目的内容，结果（效果，效率等）
+  - title: "项目经历" #记录项目的内容，结果（效果，效率等）
     url: /portfolio/
 
-  - title: "学习笔记"
+  - title: "个人简历"
+    url: /cv/
+
+  - title: "笔记随笔"
     url: /year-archive/
 
   # - title: "学习笔记"
   #   url: /teaching/    
     
-  - title: "个人简历"
-    url: /cv/
+
     
   
         
