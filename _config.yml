@@ -21,7 +21,7 @@ repository               : "huluoboge.github.io"
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "profile.jpg"
+  avatar           : "profile.webp"
   name             : "胡 洋"
   pronouns         : # example: "she/her"  
   bio              : "地图学与地理信息系统专业硕士，主要从事计算机视觉三维重建相关工作"
