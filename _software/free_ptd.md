@@ -34,7 +34,7 @@ Free PTD采用CPU并行方式来进行加速，这可能会引起计算机CPU满
 >注意：
 Free PTD 不会对点云数据进行外点去除，因为极低点外点会影响滤波结果，所以请确定输入的点云
 没有极低点。  
->Free PTD目前版本只提供ubuntu x64 版本，有其他需求可以email<a href="mailto:3000huyang@163.com">3000huyang@163.com</a>
+>Free PTD目前版本只提供Windows x64 版本，有其他需求可以email<a href="mailto:3000huyang@163.com">3000huyang@163.com</a>
 
 ****
 <a name="1"> 参数设置</a>
