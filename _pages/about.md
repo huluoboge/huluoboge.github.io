@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "关于我"
+title: "Hu Yang 个人主页"
 author_profile: true
 redirect_from: 
   - /about/
@@ -13,7 +13,7 @@ redirect_from:
 - 计算机视觉
 - 计算机图形学
 - SLAM/SfM
----
+
 
 ### 主要工作
 
