@@ -3,7 +3,7 @@ title: "Free PTD"
 collection: software
 permalink: /software/free_ptd
 excerpt: 'Free PTD 是一个免费的机载激光雷达（Lidar)滤波软件，其使用渐进三角网加密算法对点云进行分类，得到地面点和非地面点'
-date: 2016-06-03
+date: 2019-06-03
 ---
 
 # Free software of Progressive TIN Densification for filtering airborne LiDAR data ----Free PTD  
@@ -11,12 +11,11 @@ date: 2016-06-03
 ## 机载LIDAR点云滤波算法之-渐进三角网加密算法免费软件 Free PTD
 
 
-Free PTD 是一个免费的机载激光雷达（Lidar)滤波软件
+Free PTD 是一个免费的机载激光雷达（Lidar)滤波软件,使用了自适应版本的渐进三角网加密算法（Progressive TIN Densification）进行点云的滤波。主要原理是通过迭代来计算自适应参数从而适应不同的地形，尤其是在陡峭的山区。为了适应更大的场景，FreePTD内部对点云进行分块处理并把结果合并。
 
 Free PTD 使用简单的命令行操作来提供处理的参数。使用方式可参见<a href="#1">参数设置</a>
 
-Free PTD 使用一个自适应版本的渐进三角网加密算法来进行滤波。其主要是通过迭代来计算自适应
-参数从而适应不同的地形，尤其是在陡峭的山区。为了适应更大的场景，FreePTD内部对点云进行分块处理并把结果合并。
+Free PTD 
 
 可以使用以下命令来处理一个las点云的滤波
 ```sh
@@ -51,5 +50,11 @@ Free PTD 不会对点云数据进行外点去除，因为极低点外点会影�
 
 
 如果在使用的过程中，发现有任何问题，可及时email <a href="mailto:3000huyang@163.com">3000huyang@163.com</a>
+
+- 下载地址：[百度网盘](https://pan.baidu.com/s/1CZanRgTymTotYv369ycPvQ ) 提取码: giin 
+
+- 参考文献
+> (1) Zhao, X.; Guo, Q.; Su, Y.; Xue, B. Improved Progressive TIN Densification Filtering Algorithm for Airborne LiDAR Data in Forested Areas. ISPRS Journal of Photogrammetry and Remote Sensing 2016, 117, 79–91. https://doi.org/10.1016/j.isprsjprs.2016.03.016.
+
 
 
