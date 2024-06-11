@@ -12,8 +12,8 @@ main:
   - title: "项目" #记录项目的内容，结果（效果，效率等）
     url: /portfolio/
 
-  - title: "随笔"
-    url: /year-archive/
+  # - title: "随笔"
+    # url: /year-archive/
 
   - title: "简历"
     url: /cv/
