@@ -10,7 +10,7 @@ redirect_from:
 {% include base_path %}
 
 
-教育北京
+教育背景
 ======
 
 * 武汉大学（2010）地图学与地理信息系统 硕士
