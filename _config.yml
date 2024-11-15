@@ -8,10 +8,10 @@
 
 # Basic Site Settings
 locale                   : "en-US"
-title                    : "主页"
+title                    : "Home Page"
 title_separator          : "-"
-name                     : &name "胡 洋"
-description              : &description "地图学与地理信息系统专业硕士，主要从事计算机视觉三维重建相关工作"
+name                     : &name "Hu Yang"
+# description              : &description "地图学与地理信息系统专业硕士，主要从事计算机视觉三维重建相关工作"
 url                      : https://huluoboge.top/ # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "huluoboge.github.io"
@@ -22,13 +22,13 @@ repository               : "huluoboge.github.io"
 author:
   # Biographic information
   avatar           : "profile.webp"
-  name             : "胡 洋"
+  name             : "Hu Yang"
   pronouns         : # example: "she/her"  
-  bio              : "地图学与地理信息系统专业硕士，主要从事计算机视觉三维重建相关工作"
-  location         : "北京"
-  employer         : "贝壳-如视"
+  # bio              : "地图学与地理信息系统专业硕士，主要从事计算机视觉三维重建相关工作"
+  location         : "China Beijing"
+  employer         : "Realsee Technology"
   uri              : # URL
-  email            : "3000huyang@163.com" 
+  email            : "huyang0909@gmail.com" 
 
   # Academic websites
   arxiv            : # URL - Update with the correct link to your profile

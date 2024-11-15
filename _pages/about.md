@@ -1,41 +1,32 @@
 ---
 permalink: /
-title: "Hu Yang 个人主页"
+title: "About me"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
 ---
 
-### 主要兴趣
 
-- 摄影测量与遥感
-- 计算机视觉
-- 计算机图形学
-- SLAM/SfM
+I am HuYang. I graduated with a bachelor's degree in Resources, Environment and Urban-Rural Planning and Management from Northeast Petroleum University in 2007. In 2010, I obtained a master's degree in Cartography and Geographic Information System from Wuhan University.
+
+I am mainly engaged in work related to photogrammetry, computer vision, and 3D reconstruction. Currently, I am working on 3D reconstruction at Realsee Technology. I possess a range of professional skills, including Structure from Motion, SLAM, Multi-View Stereo, Mesh Reconstruction, and Lidar point cloud processing algorithms.
 
 
-### 主要工作
+## Main work
 
-- 室内外场景三维重建
-
-  基于激光Lidar点云三维重建。包括位姿估计（SfM）点云配准、点云处理、网格重建、网格处理（简化、平滑、锐化）、纹理映射、LOD生成等。
-
-  基于图像的室外场景三维重建（倾斜摄影）。包括图像SfM、MVS算法。点云处理、网格重建、网格处理（简化、平滑、锐化）、纹理映射、LOD生成等
-
-- 室内场景户型解析与结构化重建
-
-  户型解析，生成户型图。
-
-  包括提取结构（墙面、地面、天花板），并重建。
-
-- 手持激光SLAM
-
-  包括SLAM、点云处理（点云滤波、法向量估计、动态物体去除等）、点云着色、匀色; 
-
-- 摄影测量软件
-
-  包括生成密集点云，生成DSM与DEM。机载激光Lidar的点云滤波（地面点和非地面点分类），建筑物矢量化（单体化）重建
+1. 3D reconstruction of indoor and outdoor scenes
+Laser Lidar point cloud-based 3D reconstruction. This includes pose estimation (SfM), point cloud registration, point cloud processing, mesh reconstruction, mesh processing (simplification, smoothing, sharpening), texture mapping, and LOD generation.
+Image-based outdoor scene 3D reconstruction (oblique photography). This involves image SfM, MVS algorithms, point cloud processing, mesh reconstruction, mesh processing (simplification, smoothing, sharpening), texture mapping, and LOD generation.
+2. Indoor scene house type analysis and structured reconstruction
+House type analysis and generation of floor plans.
+This includes extracting structures (walls, floors, ceilings) and reconstructing them.
+3. Handheld laser SLAM
+Includes SLAM, point cloud processing (point cloud filtering, normal vector estimation, dynamic object removal, etc.), point cloud coloring, and color equalization.
+4. Photogrammetry software
+Includes generating dense point clouds, generating DSM and DEM. Point cloud filtering of airborne laser Lidar (classification of ground points and non-ground points), and vectorized reconstruction of buildings (individualization).
+5. 3D reconstruction algorithm for aerial images
+This includes SfM, MVS, mesh generation, LOD, and more.
 
 
 

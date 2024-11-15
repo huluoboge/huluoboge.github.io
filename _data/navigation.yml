@@ -1,7 +1,7 @@
 # main links links
 main:
 
-  - title: "软件"
+  - title: "Software"
     url: /software/
 
   # - title: "Publications"
@@ -9,13 +9,13 @@ main:
   # - title: "talks" 
   #   url: /talks/    
 
-  - title: "项目" #记录项目的内容，结果（效果，效率等）
+  - title: "Portfolio" #记录项目的内容，结果（效果，效率等）
     url: /portfolio/
 
-  # - title: "随笔"
-    # url: /year-archive/
+  - title: "Blog post"
+    url: /year-archive/
 
-  - title: "简历"
+  - title: "CV"
     url: /cv/
 
 
