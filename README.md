@@ -1,11 +1,6 @@
 # About
 
-Personal blog, template focked from [Jekyll Now](https://github.com/barryclark/jekyll-now)
+Personal blog, use template from:
 
+https://github.com/huluoboge/blog_demo 
 
-
-## Local Development
-
-```
-jekyll serve -l -H localhost
-```
