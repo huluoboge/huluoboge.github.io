@@ -73,6 +73,9 @@ async function buildToDist() {
     
     console.log('构建完成！构建产物已输出到 dist/ 目录');
     
+    // 确保进程正确退出
+    process.exit(0);
+    
   } catch (error) {
     console.error('构建过程中发生错误:', error);
     process.exit(1);
@@ -81,7 +84,10 @@ async function buildToDist() {
 
 // 执行构建
 if (require.main === module) {
-  buildToDist();
+  buildToDist().catch(error => {
+    console.error('构建失败:', error);
+    process.exit(1);
+  });
 }
 
 module.exports = { buildToDist };
