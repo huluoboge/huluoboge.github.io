@@ -1,3 +1,11 @@
+---
+title: "BVH tree"
+date: 2025-08-27
+tags: ["BVH", "point cloud", "Computer Geometry", "Computer graphic", "mesh"]
+excerpt: "个高性能的Bounding Volume Hierarchy (BVH) 树库"
+---
+
+
 # BVH Tree Library
 
 一个高性能的Bounding Volume Hierarchy (BVH) 树库，支持面片网格和点云的快速射线相交检测。
