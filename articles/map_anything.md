@@ -1,8 +1,8 @@
 ---
-title: "3DGS Study"
+title: "Map Anything"
 date: 2025-09-19
 tags: ["Markdown", "LaTeX", "3DGS"]
-excerpt: "3D Gaussian Splatting Study"
+excerpt: "MapAnything: Universal Feed-Forward Metric 3D Reconstruction 论文总结"
 ---
 
 

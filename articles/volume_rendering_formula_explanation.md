@@ -1,8 +1,8 @@
 ---
-title: "3DGS Study"
+title: "体积渲染"
 date: 2025-09-19
 tags: ["Markdown", "LaTeX", "3DGS"]
-excerpt: "3D Gaussian Splatting Study"
+excerpt: "体积渲染公式详细解释"
 ---
 
 # 体积渲染公式详细解释
