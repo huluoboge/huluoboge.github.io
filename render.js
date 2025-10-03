@@ -46,8 +46,6 @@ function generateHTML(title, content, currentPath = "") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
     <link rel="stylesheet" href="../static/css/highlight-dark.min.css">
-    // <script src="../static/js/katex.min.js"></script>
-    // <script src="../static/js/auto-render.min.js"></script>
     <script src="../static/js/mermaid.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
     <script>
