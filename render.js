@@ -45,9 +45,11 @@ function generateHTML(title, content, currentPath = "") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <link rel="stylesheet" href="../static/css/katex.min.css">
     <link rel="stylesheet" href="../static/css/highlight-dark.min.css">
+    // <script src="../static/js/katex.min.js"></script>
+    // <script src="../static/js/auto-render.min.js"></script>
     <script src="../static/js/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化Mermaid - 根据主题设置不同的配置
@@ -143,6 +145,29 @@ function generateHTML(title, content, currentPath = "") {
                     navMenu.classList.remove('active');
                 });
             });
+            
+            // // 初始化KaTeX数学公式渲染
+            // function renderMath() {
+            //     renderMathInElement(document.body, {
+            //         delimiters: [
+            //             {left: '$$', right: '$$', display: true},
+            //             {left: '$', right: '$', display: false},
+            //             {left: '\\(', right: '\\)', display: false},
+            //             {left: '\\[', right: '\\]', display: true}
+            //         ],
+            //         throwOnError: false
+            //     });
+            // }
+            
+            // // 延迟渲染数学公式，确保DOM完全加载
+            // setTimeout(renderMath, 100);
+            
+            // // 主题切换时重新渲染数学公式
+            // const originalToggleTheme = window.toggleTheme;
+            // window.toggleTheme = function() {
+            //     originalToggleTheme();
+            //     setTimeout(renderMath, 200);
+            // };
         });
     </script>
     <style>
@@ -434,6 +459,12 @@ async function processMarkdownFile(filePath) {
         breakOnSingleNewLine: false,
         enableTypographer: false,
         enableEmoji: true,
+        // mathInlineDelimiters: [["$", "$"], ["\\(", "\\)"]],
+        // mathBlockDelimiters: [["$$", "$$"], ["\\[", "\\]"]],
+        // mathRenderingOnServerSide: false,
+        // usePandocParser: false,
+        // protocolsWhiteList: "http,https,file,data",
+        // mathRenderer: "KaTeX",
       },
     });
 
