@@ -1,0 +1,30 @@
+# 构建产物 - 所有生成的HTML文件
+*.html
+!about/about.md
+!articles/*.md
+!blog/*.md
+!projects/*.md
+
+# 排除根目录的HTML文件（构建时复制过来的）
+/index.html
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时文件
+.tmp/
+.temp/
+dist/

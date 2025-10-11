@@ -1,0 +1,31 @@
+{
+  "name": "tech-blog",
+  "version": "1.0.0",
+  "description": "A technical blog with Markdown support, LaTeX math formulas, and Mermaid diagrams",
+  "main": "render.js",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node render.js --watch",
+    "build:clean": "node render.js",
+    "clean": "rm -rf dist/*.html dist/about/ dist/articles/ dist/blog/ dist/projects/ dist/static/"
+  },
+  "dependencies": {
+    "@shd101wyy/mume": "^0.7.9",
+    "chokidar": "^3.5.0",
+    "front-matter": "^4.0.2",
+    "fs-extra": "^11.0.0",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.0",
+    "marked": "^5.0.0",
+    "mermaid": "^10.0.0"
+  },
+  "keywords": [
+    "blog",
+    "markdown",
+    "latex",
+    "mermaid",
+    "static-site"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
