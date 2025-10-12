@@ -87,7 +87,7 @@ $$E_{\text{Sampson}}(\mathbf{x}, \mathbf{x}') = \frac{( \mathbf{x}'^T F \mathbf{
 
 
 这里展示了三种误差的直观区别：
-![sampson_error_compare](./sampson_error/f1.png)
+![sampson_error_compare](./f1.png)
 
 1. **代数误差 (左图)**  
    只是代入公式 $\mathbf{x}'^T F \mathbf{x}$，值不为零说明点不在对应对极线上，但它没有几何意义。

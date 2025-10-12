@@ -4,14 +4,42 @@ const mume = require("@shd101wyy/mume");
 const fs = require("fs-extra");
 const path = require("path");
 const frontMatter = require("front-matter");
+const yaml = require("yaml");
 
-// 导航菜单配置
-const navItems = [
-  { name: "首页", path: "/", folder: "about", isHome: true },
-  { name: "技术文章", path: "/articles/", folder: "articles" },
-  { name: "随笔", path: "/blog/", folder: "blog" },
-  { name: "开源项目", path: "/projects/", folder: "projects" },
-];
+// 读取配置文件
+let config = null;
+let navItems = [];
+
+async function loadConfig() {
+  try {
+    const configContent = await fs.readFile('config.yml', 'utf8');
+    config = yaml.parse(configContent);
+    navItems = config.navigation || [];
+    console.log('配置文件加载成功');
+  } catch (error) {
+    console.error('加载配置文件失败，使用默认配置:', error);
+    // 默认配置
+    config = {
+      site: {
+        title: "我的博客",
+        description: "个人技术博客",
+        author: "作者"
+      },
+      navigation: [
+        { name: "首页", path: "/", folder: "home", isHome: true, type: "page" },
+        { name: "技术文章", path: "/articles/", folder: "articles", type: "articles" },
+        { name: "随笔", path: "/blog/", folder: "blog", type: "blog" },
+        { name: "开源项目", path: "/projects/", folder: "projects", type: "projects" }
+      ],
+      homepage: {
+        latest_articles_count: 3,
+        show_projects: true,
+        show_blog_posts: false
+      }
+    };
+    navItems = config.navigation;
+  }
+}
 
 // 生成导航HTML
 function generateNav(currentPath = "") {
@@ -45,11 +73,11 @@ function generateHTML(title, content, currentPath = "") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <!-- <link rel="stylesheet" href="../static/css/highlight-dark.min.css"> -->
-    <link rel="stylesheet" href="../static/css/highlight.min.css">
-    <script src="../static/js/mermaid.min.js"></script>
-    <script src="../static/js/highlight.min.js"></script>
-    <link rel="stylesheet" href="../static/css/katex.min.css">
+    <!-- <link rel="stylesheet" href="/static/css/highlight-dark.min.css"> -->
+    <link rel="stylesheet" href="/static/css/highlight.min.css">
+    <script src="/static/js/mermaid.min.js"></script>
+    <script src="/static/js/highlight.min.js"></script>
+    <link rel="stylesheet" href="/static/css/katex.min.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化Mermaid - 根据主题设置不同的配置
@@ -719,15 +747,16 @@ async function processMarkdownFile(filePath) {
 
     // 返回按钮
     const folderName = path.dirname(filePath).split(path.sep).pop();
+    const parentFolder = path.dirname(filePath).split(path.sep).slice(-2, -1)[0];
     const isArticlePage =
       folderName !== "." &&
-      navItems.some((item) => item.folder === folderName) &&
-      !navItems.find((item) => item.folder === folderName)?.isHome;
+      navItems.some((item) => item.folder === parentFolder) &&
+      !navItems.find((item) => item.folder === parentFolder)?.isHome;
 
     let finalContent = htmlContent;
     if (isArticlePage) {
-      const backButton = `<a href="index.html" class="back-button">← 返回${
-        navItems.find((item) => item.folder === folderName).name
+      const backButton = `<a href="../index.html" class="back-button">← 返回${
+        navItems.find((item) => item.folder === parentFolder).name
       }</a>`;
       finalContent = backButton + htmlContent;
     }
@@ -755,27 +784,39 @@ async function processMarkdownFile(filePath) {
 async function generateIndexPage(folder, articles, allArticles = []) {
   const navItem = navItems.find((item) => item.folder === folder);
 
-  // 如果是主页（关于我页面），则生成主页内容
+  // 如果是主页，则生成主页内容
   if (navItem.isHome) {
-    // 读取关于我页面的HTML内容
-    const aboutContent = await fs.readFile(
-      path.join(folder, "about.html"),
-      "utf8"
-    );
+    // 首页应该和其他文章一样，使用传入的 articles 参数
+    if (articles.length === 0) {
+      console.log("首页没有找到文章，跳过主页生成");
+      return;
+    }
+
+    // 处理首页文章（应该只有一个）
+    const homeArticle = articles[0];
+    const meta = await processMarkdownFile(homeArticle.articlePath);
+    if (!meta) {
+      console.log("处理首页文章失败");
+      return;
+    }
+
+    // 读取生成的 HTML 内容
+    const homeHtmlPath = homeArticle.articlePath.replace('.md', '.html');
+    const indexContent = await fs.readFile(homeHtmlPath, "utf8");
 
     // 提取main标签内的内容
-    const mainContentMatch = aboutContent.match(/<main>([\s\S]*?)<\/main>/);
+    const mainContentMatch = indexContent.match(/<main>([\s\S]*?)<\/main>/);
     if (mainContentMatch && mainContentMatch[1]) {
       let mainContent = mainContentMatch[1];
 
       // 修复相对路径链接
       mainContent = mainContent.replace(
-        /file:\/\/\/home\/jones\/Git\/huluoboge\/blog\/about\//g,
-        "../"
+        /file:\/\/\//g,
+        "./"
       );
       mainContent = mainContent.replace(
-        /file:\/\/\/home\/jones\/Git\/huluoboge\/blog\//g,
-        "../"
+        /file:\/\/\/\//g,
+        "./"
       );
 
       // 获取最新文章（只从技术文章中获取，按日期排序的前3篇），排除关于我页面
@@ -783,7 +824,6 @@ async function generateIndexPage(folder, articles, allArticles = []) {
         .filter(
           (article) =>
             article.date &&
-            !article.file.includes("about.md") &&
             article.folder === "articles"
         ) // 只包含有日期的技术文章，排除关于我页面
         .sort((a, b) => new Date(b.date) - new Date(a.date)) // 按日期降序
@@ -794,16 +834,16 @@ async function generateIndexPage(folder, articles, allArticles = []) {
       // 生成最新文章列表HTML
       const latestArticlesHTML = allArticlesSorted
         .map((article) => {
-          // 根据文章所在的文件夹生成正确的相对路径
+          // 根据文章所在的文件夹生成正确的相对路径（新的文件夹结构）
           let articlePath;
           if (article.folder === "articles") {
-            articlePath = `articles/${article.file.replace(".md", ".html")}`;
+            articlePath = `articles/${article.slug}/index.html`;
           } else if (article.folder === "blog") {
-            articlePath = `blog/${article.file.replace(".md", ".html")}`;
+            articlePath = `blog/${article.slug}/index.html`;
           } else if (article.folder === "projects") {
-            articlePath = `projects/${article.file.replace(".md", ".html")}`;
+            articlePath = `projects/${article.slug}/index.html`;
           } else {
-            articlePath = article.file.replace(".md", ".html");
+            articlePath = `${article.slug}/index.html`;
           }
 
           return `<li><a href="${articlePath}">${
@@ -894,7 +934,7 @@ async function generateIndexPage(folder, articles, allArticles = []) {
               : ""
           }
           <div class="article-content">
-              <h3><a href="${article.slug}.html">${article.title}</a></h3>
+              <h3><a href="${article.slug}/index.html">${article.title}</a></h3>
               <div class="article-meta">
                   ${article.date ? `发布于: ${article.date}` : ""}
                   ${article.tags ? ` | 标签: ${article.tags.join(", ")}` : ""}
@@ -941,11 +981,63 @@ async function copyStaticAssets(outputDir = ".") {
   }
 }
 
+// 查找子目录中的 index.md 文件
+async function discoverArticles(folderPath) {
+  const articles = [];
+  
+  if (!(await fs.pathExists(folderPath))) {
+    return articles;
+  }
+
+  const items = await fs.readdir(folderPath);
+  
+  for (const item of items) {
+    const itemPath = path.join(folderPath, item);
+    const stat = await fs.stat(itemPath);
+    
+    // 只处理子目录
+    if (stat.isDirectory()) {
+      const indexPath = path.join(itemPath, 'index.md');
+      
+      if (await fs.pathExists(indexPath)) {
+        try {
+          // 读取文件内容解析 Front Matter
+          const content = await fs.readFile(indexPath, 'utf8');
+          const parsed = frontMatter(content);
+          const attributes = parsed.attributes;
+          
+          // 检查草稿状态，默认发布（draft: false 或没有 draft 字段）
+          if (attributes.draft === true) {
+            console.log(`跳过草稿文章: ${item}`);
+            continue;
+          }
+          
+          articles.push({
+            path: indexPath,
+            folder: itemPath,
+            slug: item,
+            attributes: attributes
+          });
+          
+          console.log(`发现文章: ${item}`);
+        } catch (error) {
+          console.error(`解析文章 ${item} 失败:`, error);
+        }
+      }
+    }
+  }
+  
+  return articles;
+}
+
 // 主渲染函数
 async function renderAll() {
   console.log("开始使用Mume生成博客...");
 
   try {
+    // 加载配置文件
+    await loadConfig();
+    
     // 初始化Mume
     console.log("初始化Mume...");
     await mume.init();
@@ -959,31 +1051,28 @@ async function renderAll() {
     for (const navItem of navItems) {
       const folderPath = navItem.folder;
 
-      if (await fs.pathExists(folderPath)) {
-        const files = await fs.readdir(folderPath);
-        const mdFiles = files.filter(
-          (file) => file.endsWith(".md") && file !== "README.md"
-        );
+      // 使用新的文章发现逻辑
+      const discoveredArticles = await discoverArticles(folderPath);
+      
+      console.log(
+        `收集文件夹 ${folderPath}: 找到 ${discoveredArticles.length} 篇文章`
+      );
 
-        console.log(
-          `收集文件夹 ${folderPath}: 找到 ${mdFiles.length} 个Markdown文件`
-        );
-
-        for (const file of mdFiles) {
-          const filePath = path.join(folderPath, file);
-          try {
-            const meta = await processMarkdownFile(filePath);
-            if (meta) {
-              allArticles.push({
-                ...meta,
-                slug: path.basename(file, ".md"),
-                file: file,
-                folder: folderPath,
-              });
-            }
-          } catch (error) {
-            console.error(`处理文件 ${file} 失败:`, error);
+      for (const articleInfo of discoveredArticles) {
+        try {
+          const meta = await processMarkdownFile(articleInfo.path);
+          if (meta) {
+            allArticles.push({
+              ...meta,
+              slug: articleInfo.slug,
+              file: 'index.md', // 统一使用 index.md
+              folder: folderPath,
+              articlePath: articleInfo.path,
+              articleFolder: articleInfo.folder
+            });
           }
+        } catch (error) {
+          console.error(`处理文章 ${articleInfo.slug} 失败:`, error);
         }
       }
     }
@@ -994,24 +1083,17 @@ async function renderAll() {
     for (const navItem of navItems) {
       const folderPath = navItem.folder;
 
-      if (await fs.pathExists(folderPath)) {
-        const files = await fs.readdir(folderPath);
-        const mdFiles = files.filter(
-          (file) => file.endsWith(".md") && file !== "README.md"
-        );
+      const articles = allArticles.filter(
+        (article) => article.folder === folderPath
+      );
 
-        const articles = allArticles.filter(
-          (article) => article.folder === folderPath
-        );
+      console.log(
+        `生成文件夹 ${folderPath} 的页面: ${articles.length} 篇文章`
+      );
 
-        console.log(
-          `生成文件夹 ${folderPath} 的页面: ${articles.length} 篇文章`
-        );
-
-        // 生成索引页面
-        if (articles.length > 0) {
-          await generateIndexPage(navItem.folder, articles, allArticles);
-        }
+      // 生成索引页面
+      if (articles.length > 0) {
+        await generateIndexPage(navItem.folder, articles, allArticles);
       }
     }
 

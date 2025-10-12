@@ -1,8 +1,9 @@
 ---
-title: "体积渲染"
-date: 2025-09-19
-tags: ["Markdown", "LaTeX", "3DGS"]
-excerpt: "体积渲染公式详细解释"
+title: "体积渲染公式详细解释"
+date: 2025-10-12
+tags: ["3DGS", "Volume Rendering"]
+excerpt: "本篇文章详细解释体积渲染的公式，并给出实际计算中的离散化实现。"
+draft: true
 ---
 
 # 体积渲染公式详细解释

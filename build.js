@@ -3,9 +3,33 @@
 const { renderAll } = require('./render.js');
 const fs = require('fs-extra');
 const path = require('path');
+const yaml = require('yaml');
+
+// 读取配置文件
+async function loadConfig() {
+  try {
+    const configContent = await fs.readFile('config.yml', 'utf8');
+    return yaml.parse(configContent);
+  } catch (error) {
+    console.error('加载配置文件失败:', error);
+    // 默认配置
+    return {
+      navigation: [
+        { name: "首页", path: "/", folder: "home", isHome: true, type: "page" },
+        { name: "技术文章", path: "/articles/", folder: "articles", type: "articles" },
+        { name: "随笔", path: "/blog/", folder: "blog", type: "blog" },
+        { name: "开源项目", path: "/projects/", folder: "projects", type: "projects" }
+      ]
+    };
+  }
+}
 
 async function buildToDist() {
   console.log('开始构建到dist目录...');
+  
+  // 加载配置文件
+  const config = await loadConfig();
+  const navItems = config.navigation || [];
   
   // 清理dist目录
   const distDir = 'dist';
@@ -19,16 +43,15 @@ async function buildToDist() {
     console.log('在源代码目录生成HTML文件...');
     await renderAll();
     
-    // 定义需要复制的文件和文件夹
+    // 从配置中获取需要复制的文件夹
+    const foldersToCopy = navItems.map(item => item.folder);
     const itemsToCopy = [
       // HTML文件
       'index.html',
-      // 文件夹
-      'about',
-      'articles', 
-      'blog',
-      'projects',
-      'static'
+      // 静态资源
+      'static',
+      // 配置文件夹
+      ...foldersToCopy
     ];
     
     console.log('复制文件到dist目录...');
@@ -45,12 +68,12 @@ async function buildToDist() {
     
     // 清理源代码目录中的HTML文件
     console.log('清理源代码目录中的构建产物...');
+    
+    // 从配置中获取需要清理的文件夹
+    const foldersToCleanup = navItems.map(item => item.folder);
     const cleanupItems = [
       'index.html',
-      'about/*.html',
-      'articles/*.html',
-      'blog/*.html', 
-      'projects/*.html'
+      ...foldersToCleanup.map(folder => `${folder}/*.html`)
     ];
     
     const cleanupPromises = cleanupItems.map(pattern => {
@@ -59,14 +82,34 @@ async function buildToDist() {
     
     await Promise.all(cleanupPromises);
     
-    // 额外清理：删除所有文件夹中的HTML文件
-    const folders = ['about', 'articles', 'blog', 'projects'];
-    for (const folder of folders) {
+    // 额外清理：递归删除所有文件夹中的HTML文件
+    for (const folder of foldersToCleanup) {
       if (await fs.pathExists(folder)) {
-        const files = await fs.readdir(folder);
-        const htmlFiles = files.filter(file => file.endsWith('.html'));
+        // 递归查找所有HTML文件
+        const findHtmlFiles = async (dir) => {
+          const items = await fs.readdir(dir);
+          const htmlFiles = [];
+          
+          for (const item of items) {
+            const itemPath = path.join(dir, item);
+            const stat = await fs.stat(itemPath);
+            
+            if (stat.isDirectory()) {
+              // 递归查找子目录
+              const subHtmlFiles = await findHtmlFiles(itemPath);
+              htmlFiles.push(...subHtmlFiles);
+            } else if (item.endsWith('.html')) {
+              htmlFiles.push(itemPath);
+            }
+          }
+          
+          return htmlFiles;
+        };
+        
+        const htmlFiles = await findHtmlFiles(folder);
         for (const file of htmlFiles) {
-          await fs.remove(path.join(folder, file)).catch(() => {});
+          await fs.remove(file).catch(() => {});
+          console.log(`已清理: ${file}`);
         }
       }
     }

@@ -3,6 +3,7 @@ title: "Fixing the RANSAC Stopping Criterion"
 date: 2025-10-03
 tags: ["RANSAC", "Multi-View Geometry"]
 excerpt: "Fixing the RANSAC Stopping Criterion 论文总结"
+draft: false
 ---
 
 # RANSAC 停止准则的修正：从近似到精确
@@ -54,14 +55,14 @@ $$
 ## 效果
 作者实验了使用精确计算和近似计算的效果。 
 
-![alt text](./fix_ransac_stop/image1.png)
+![alt text](./image1.png)
 
 并且分析了pa与pe之间的相对误差关系与内点率和sample 维度K之间的关系，见下图。 
-![图像2：pa与pe之间的相对误差](./fix_ransac_stop/image.png)
+![图像2：pa与pe之间的相对误差](./image.png)
 <center>图像2：pa与pe之间的相对误差</center>
 
 作者还分析了概率估计对真正的s（RANSAC正确工作的概率）的影响
-![alt text](./fix_ransac_stop/image2.png)
+![alt text](./image2.png)
 其中
 $$
 \begin{equation}
@@ -78,7 +79,7 @@ $$
 - **参数K数量**：K越大越容易出现错误
 
 下图是我自己写的一个脚本来直观的看下近似估计和精确估计之间，对于迭代次数N的估计差异。 
-![图像3：RANSAC迭代次数与内殿比例之间的关系](./fix_ransac_stop/iteration_comparison.png)
+![图像3：RANSAC迭代次数与内殿比例之间的关系](./iteration_comparison.png)
 
 ### 精确停止准则的实现
 

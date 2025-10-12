@@ -76,7 +76,7 @@ __粗体（另一种写法）__
 这是一个带标题的链接 [Example](https://www.example.com "示例网站")[^2]。
 
 行内图片示例[^3]：  
-![lenna.jpg](./test-markdown/lenna.jpg "示例图片") 
+![lenna.jpg](./lenna.jpg "示例图片") 
 
 内部链接示例：  
 [跳转到参考文献](#参考文献)

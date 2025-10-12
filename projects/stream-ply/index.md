@@ -3,6 +3,7 @@ title: "Ply IO library"
 date: 2025-08-23
 tags: ["Ply", "point cloud", "Computer Geometry"]
 excerpt: "一个ply格式点云读写库"
+draft: false
 ---
 
 # Ply 格式点云读写库

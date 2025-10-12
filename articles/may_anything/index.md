@@ -1,8 +1,9 @@
 ---
-title: "Map Anything 学习"
+title: "MapAnything: Universal Feed-Forward Metric 3D Reconstruction 论文总结"
 date: 2025-09-19
-tags: ["Markdown", "LaTeX", "3DGS"]
+tags: ["Map Anything", "VGGT", "3d reconstruction"]
 excerpt: "MapAnything: Universal Feed-Forward Metric 3D Reconstruction 论文总结"
+draft: true
 ---
 
 

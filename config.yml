@@ -1,0 +1,32 @@
+# 博客配置文件
+site:
+  title: "huluoboge的技术博客"
+  description: "技术分享、项目经验和学习心得"
+  author: "huluoboge"
+
+navigation:
+  - name: "首页"
+    path: "/"
+    folder: "home"
+    isHome: true
+    type: "page"
+    
+  - name: "技术文章"
+    path: "/articles/"
+    folder: "articles"
+    type: "articles"
+    
+  - name: "博客"
+    path: "/blog/"
+    folder: "blog"
+    type: "blog"
+    
+  - name: "开源项目"
+    path: "/projects/"
+    folder: "projects"
+    type: "projects"
+
+homepage:
+  latest_articles_count: 3
+  show_projects: true
+  show_blog_posts: false

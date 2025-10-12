@@ -3,6 +3,7 @@ title: "BVH tree"
 date: 2025-08-27
 tags: ["BVH", "point cloud", "Computer Geometry", "Computer graphic", "mesh"]
 excerpt: "个高性能的Bounding Volume Hierarchy (BVH) 树库"
+draft: false
 ---
 
 
