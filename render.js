@@ -354,12 +354,6 @@ function generateHTML(title, content, currentPath = "") {
             color: var(--code-text);
         }
 
-        // pre code[class*="language-"] {
-        //     white-space: pre;
-        //     word-break: normal;
-        //     overflow: auto;
-        // }
-
         pre {
             background: var(--code-bg);
             border-radius: 5px;
@@ -719,9 +713,9 @@ async function processMarkdownFile(filePath) {
       }
     );
 
-    // 没有语言的 code 也加 hljs
+    // 没有语言的 code 也加 hljs - 更精确的匹配
     htmlContent = htmlContent.replace(
-      /<pre><code(?!.*hljs)/g,
+      /<pre>\s*<code(?!.*hljs)(?!.*class="[^"]*hljs[^"]*")/g,
       '<pre><code class="hljs"'
     );
 
@@ -731,6 +725,39 @@ async function processMarkdownFile(filePath) {
       (_, info, lang) => {
         const normalizedLang = lang.toLowerCase();
         return `<pre><code class="hljs language-${normalizedLang}">`;
+      }
+    );
+
+    // 🔧 修复代码块闭合标签问题 - 确保所有代码块都有正确的闭合结构
+    // 处理没有闭合 </code> 标签的代码块
+    htmlContent = htmlContent.replace(
+      /<pre><code class="hljs[^"]*">([\s\S]*?)<\/pre>/gi,
+      (match, codeContent) => {
+        // 确保代码内容被正确包裹在 code 标签内
+        return `<pre><code class="hljs">${codeContent}</code></pre>`;
+      }
+    );
+
+    // 处理带语言的代码块闭合问题
+    htmlContent = htmlContent.replace(
+      /<pre><code class="hljs language-[^"]*">([\s\S]*?)<\/pre>/gi,
+      (match, codeContent) => {
+        // 提取语言类名
+        const langMatch = match.match(/class="hljs language-([^"]*)"/);
+        const langClass = langMatch ? ` language-${langMatch[1]}` : '';
+        return `<pre><code class="hljs${langClass}">${codeContent}</code></pre>`;
+      }
+    );
+
+    // 修复 Mume 引擎可能生成的代码块闭合问题
+    htmlContent = htmlContent.replace(
+      /<pre[^>]*>([\s\S]*?)<\/pre>/gi,
+      (match, preContent) => {
+        // 如果 pre 标签内没有 code 标签，则添加 code 标签
+        if (!preContent.includes('<code') && !preContent.includes('</code>')) {
+          return `<pre><code class="hljs">${preContent}</code></pre>`;
+        }
+        return match;
       }
     );
 
