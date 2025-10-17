@@ -72,9 +72,7 @@ draft: false
 - 🧩 **Mesh 与几何重建**：点云滤波、去噪、法向估计、配准、Mesh 重建、简化、纹理映射、LOD 生成  
 - 🚀 **算法工程化**：系统架构设计、性能优化、团队培养  
 
----
-
-![](./my_radar.png)
+<img src="/home/home/my_radar.png" width="400" alt="技术雷达图">
 
 ---
 

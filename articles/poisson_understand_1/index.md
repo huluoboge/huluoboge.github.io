@@ -1,8 +1,8 @@
 ---
-title: "关于Poisson重建$\partial$符号的理解"
+title: "关于Poisson重建∂符号的理解"
 date: 2025-10-17T23:04:00+08:00 
 tags: ["Poisson reconstruction", "Surface Reconstruction","3D Reconstruction"]
-excerpt: "初次看到Poisson重建这篇文章的时候，看到他用$\partial M$ 表示表面，当时很困惑，为什么偏导数表示表面？ 这里我觉得有一个概念理解错误的问题。 作者使用$\partial M$ 表示“集合 M 的边界”，而不是“偏导数”。 具体说来，  $\partial$其实是**数学记号上的“边界符号”**（boundary operator），不是偏导数。"
+excerpt: "初次看到Poisson重建这篇文章的时候，看到他用∂M表示表面，当时很困惑，为什么偏导数表示表面？ 这里我觉得有一个概念理解错误的问题。 作者使用∂M表示“集合 M 的边界”，而不是“偏导数”。 具体说来，  ∂其实是**数学记号上的“边界符号”**（boundary operator），不是偏导数。"
 draft: false
 ---
 
