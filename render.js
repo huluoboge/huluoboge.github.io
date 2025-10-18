@@ -414,6 +414,13 @@ function generateHTML(title, content, currentPath = "") {
             font-size: 0.9em;
         }
         
+        /* 移动端返回按钮额外间距 */
+        @media (max-width: 768px) {
+            .back-button {
+                margin-top: 1.5rem; /* 在移动端增加上边距，避免被导航栏遮挡 */
+            }
+        }
+        
         .back-button:hover {
             background: var(--nav-text);
             transform: translateY(-1px);
@@ -462,15 +469,20 @@ function generateHTML(title, content, currentPath = "") {
         
         /* 移动端响应式样式 */
         @media (max-width: 768px) {
+            body {
+                padding-top: 60px !important; /* 为固定导航栏留出空间，确保与导航栏高度完全匹配 */
+            }
+            
             .hamburger {
                 display: block;
+                order: 1; /* 汉堡包菜单放在最左边 */
             }
             
             .nav-menu {
                 display: none;
                 flex-direction: column;
-                position: absolute;
-                top: 100%;
+                position: fixed;
+                top: 60px; /* 固定在导航栏下方 */
                 left: 0;
                 right: 0;
                 background: var(--nav-bg);
@@ -478,6 +490,8 @@ function generateHTML(title, content, currentPath = "") {
                 border-radius: 0 0 5px 5px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 z-index: 1000;
+                max-height: calc(100vh - 60px);
+                overflow-y: auto;
             }
             
             .nav-menu.active {
@@ -490,12 +504,42 @@ function generateHTML(title, content, currentPath = "") {
             }
             
             nav {
-                position: relative;
-                flex-wrap: wrap;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1001;
+                margin-bottom: 0;
+                border-radius: 0;
+                padding: 0.75rem 1rem; /* 减少内边距 */
+                background: var(--nav-bg);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                height: 60px; /* 固定高度 */
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
             }
             
             .theme-switch {
                 margin-left: auto;
+                order: 3; /* 主题切换按钮放在最右边 */
+                font-size: 0.9em; /* 稍微缩小字体 */
+                padding: 0.4rem 0.8rem; /* 减少内边距 */
+            }
+            
+            .nav-menu {
+                order: 2; /* 导航菜单在中间 */
+            }
+            
+            main {
+                margin-top: 0;
+                padding-top: 1rem; /* 确保main内容不会被导航栏遮挡 */
+            }
+            
+            /* 确保导航链接在移动端有足够的点击区域 */
+            nav a {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9em;
             }
             
             /* 移动端数学公式优化 */
