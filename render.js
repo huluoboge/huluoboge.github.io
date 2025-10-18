@@ -51,9 +51,16 @@ function generateNav(currentPath = "") {
         isActive =
           currentPath === "/" ||
           currentPath === "" ||
-          currentPath === "index.html";
+          currentPath === "index.html" ||
+          currentPath === "/index.html";
       } else {
-        isActive = currentPath.startsWith(item.path);
+        // 改进激活状态判断：检查当前路径是否以导航项的路径开头
+        // 例如：当前路径是 "/articles/poisson_understand_1/index.html"
+        // 应该匹配 "/articles/" 路径
+        isActive = currentPath.startsWith(item.path) || 
+                   currentPath.includes(`/${item.folder}/`) ||
+                   currentPath === `/${item.folder}/index.html` ||
+                   currentPath === `/${item.folder}/`;
       }
 
       // 使用基于根目录的相对路径（以/开头）
@@ -946,9 +953,14 @@ async function processMarkdownFile(filePath) {
     }
 
     const outputPath = filePath.replace(".md", ".html");
-    const relativePath = path.relative(path.dirname(outputPath), "");
+    
+    // 修复导航栏激活状态：计算相对于根目录的路径
+    const relativePath = "/" + path.relative(process.cwd(), path.dirname(outputPath)).replace(/\\/g, "/");
+    
+    // 对于根目录下的文件，确保路径以/开头
+    const normalizedPath = relativePath === "/." ? "/" : relativePath;
 
-    const fullHTML = generateHTML(title, finalContent, relativePath);
+    const fullHTML = generateHTML(title, finalContent, normalizedPath);
     await fs.writeFile(outputPath, fullHTML);
     console.log(`生成成功: ${outputPath}`);
 
