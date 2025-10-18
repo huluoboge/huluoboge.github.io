@@ -485,12 +485,12 @@ function generateHTML(title, content, currentPath = "") {
                 box-sizing: border-box;
             }
             
-            /* 导航栏基础样式 */
+            /* 导航栏基础样式 - 使用100%而不是100vw避免滚动条问题 */
             nav {
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 100vw;
+                width: 100%; /* 使用100%而不是100vw */
                 height: 60px;
                 background: var(--nav-bg);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -518,13 +518,13 @@ function generateHTML(title, content, currentPath = "") {
                 flex-shrink: 0;
             }
             
-            /* 导航菜单 */
+            /* 导航菜单 - 使用100%而不是100vw */
             .nav-menu {
                 display: none;
                 position: fixed;
                 top: 60px;
                 left: 0;
-                width: 100vw;
+                width: 100%; /* 使用100%而不是100vw */
                 background: var(--nav-bg);
                 padding: 15px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
