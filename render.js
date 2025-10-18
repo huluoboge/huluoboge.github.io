@@ -469,82 +469,126 @@ function generateHTML(title, content, currentPath = "") {
         
         /* 移动端响应式样式 */
         @media (max-width: 768px) {
+            /* 重置所有布局，从头开始设计 */
+            html, body {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+                margin: 0;
+                padding: 0;
+            }
+            
             body {
-                padding-top: 60px !important; /* 为固定导航栏留出空间，确保与导航栏高度完全匹配 */
+                padding-top: 60px !important; /* 为固定导航栏留出空间 */
+                padding-left: 15px;
+                padding-right: 15px;
+                box-sizing: border-box;
             }
             
-            .hamburger {
-                display: block;
-                order: 1; /* 汉堡包菜单放在最左边 */
-            }
-            
-            .nav-menu {
-                display: none;
-                flex-direction: column;
-                position: fixed;
-                top: 60px; /* 固定在导航栏下方 */
-                left: 0;
-                right: 0;
-                background: var(--nav-bg);
-                padding: 1rem;
-                border-radius: 0 0 5px 5px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                z-index: 1000;
-                max-height: calc(100vh - 60px);
-                overflow-y: auto;
-            }
-            
-            .nav-menu.active {
-                display: flex;
-            }
-            
-            nav ul {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
+            /* 导航栏基础样式 */
             nav {
                 position: fixed;
                 top: 0;
                 left: 0;
-                right: 0;
-                z-index: 1001;
-                margin-bottom: 0;
-                border-radius: 0;
-                padding: 0.75rem 1rem; /* 减少内边距 */
+                width: 100vw;
+                height: 60px;
                 background: var(--nav-bg);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                height: 60px; /* 固定高度 */
+                z-index: 1001;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                width: 100vw !important; /* 确保导航栏始终与视口宽度一致 */
+                padding: 0 15px;
+                box-sizing: border-box;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            /* 汉堡菜单 */
+            .hamburger {
+                display: block;
+                background: none;
+                border: 1px solid var(--border-color);
+                color: var(--text-color);
+                padding: 8px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 1.2rem;
+                order: 1;
+                flex-shrink: 0;
+            }
+            
+            /* 导航菜单 */
+            .nav-menu {
+                display: none;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: 100vw;
+                background: var(--nav-bg);
+                padding: 15px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 1000;
+                max-height: calc(100vh - 60px);
+                overflow-y: auto;
+                box-sizing: border-box;
+                margin: 0;
+            }
+            
+            .nav-menu.active {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .nav-menu ul {
+                flex-direction: column;
+                gap: 10px;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+            
+            .nav-menu a {
+                display: block;
+                padding: 10px 15px;
+                font-size: 0.9em;
+                width: 100%;
                 box-sizing: border-box;
             }
             
+            /* 主题切换按钮 */
             .theme-switch {
                 margin-left: auto;
-                order: 3; /* 主题切换按钮放在最右边 */
-                font-size: 0.9em; /* 稍微缩小字体 */
-                padding: 0.4rem 0.8rem; /* 减少内边距 */
+                order: 3;
+                font-size: 0.9em;
+                padding: 8px 12px;
+                flex-shrink: 0;
             }
             
-            .nav-menu {
-                order: 2; /* 导航菜单在中间 */
-            }
-            
+            /* 主内容区域 */
             main {
                 margin-top: 0;
-                padding-top: 1rem; /* 确保main内容不会被导航栏遮挡 */
+                padding-top: 20px;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
             }
             
-            /* 确保导航链接在移动端有足够的点击区域 */
-            nav a {
-                padding: 0.4rem 0.8rem;
+            /* 表格响应式 */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                max-width: 100%;
+                margin: 1rem 0;
+            }
+            
+            th, td {
+                padding: 0.5rem 0.75rem;
                 font-size: 0.9em;
             }
             
-            /* 移动端数学公式优化 */
+            /* 数学公式优化 */
             .katex {
                 font-size: 1em;
             }
@@ -552,37 +596,17 @@ function generateHTML(title, content, currentPath = "") {
             .katex-display {
                 font-size: 0.95em;
                 margin: 0.75rem 0;
-            }
-            
-            .math-block {
-                font-size: 0.95em;
-                margin: 0.75rem 0;
-            }
-            
-            /* 确保长公式可以水平滚动 */
-            .katex-display,
-            .math-block {
                 max-width: 100%;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
             
-            /* 公式滚动条样式 */
-            .katex-display::-webkit-scrollbar,
-            .math-block::-webkit-scrollbar {
-                height: 6px;
-            }
-            
-            .katex-display::-webkit-scrollbar-track,
-            .math-block::-webkit-scrollbar-track {
-                background: var(--code-bg);
-                border-radius: 3px;
-            }
-            
-            .katex-display::-webkit-scrollbar-thumb,
-            .math-block::-webkit-scrollbar-thumb {
-                background: var(--border-color);
-                border-radius: 3px;
+            .math-block {
+                font-size: 0.95em;
+                margin: 0.75rem 0;
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
         }
         
