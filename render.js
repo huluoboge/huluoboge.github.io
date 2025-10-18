@@ -508,6 +508,68 @@ function generateHTML(title, content, currentPath = "") {
             max-width: 100%;
             height: auto;
         }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--article-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        th {
+            background: var(--nav-bg);
+            color: var(--nav-text);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        tbody tr:hover {
+            background: var(--code-bg);
+        }
+        
+        tbody tr:nth-child(even) {
+            background: var(--code-bg);
+        }
+        
+        tbody tr:nth-child(even):hover {
+            background: var(--nav-bg);
+        }
+        
+        /* 响应式表格 */
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9em;
+            }
+        }
+        
+        /* 表格标题样式 */
+        table + p {
+            margin-top: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9em;
+            font-style: italic;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
