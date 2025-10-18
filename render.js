@@ -705,6 +705,13 @@ function generateHTML(title, content, currentPath = "") {
                 max-width: 100%;
                 overflow-x: hidden;
             }
+            
+            /* 确保页面内容宽度正确 */
+            html, body {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
         }
         
         /* 表格标题样式 */
