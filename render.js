@@ -624,15 +624,35 @@ function generateHTML(title, content, currentPath = "") {
         
         /* 响应式表格 */
         @media (max-width: 768px) {
+            body {
+                max-width: 100%;
+                padding: 15px;
+                overflow-x: hidden;
+            }
+            
             table {
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
+                max-width: 100%;
+                margin: 1rem 0;
             }
             
             th, td {
                 padding: 0.5rem 0.75rem;
                 font-size: 0.9em;
+            }
+            
+            /* 确保表格容器不会导致页面布局问题 */
+            main {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            /* 修复导航栏在移动端的布局 */
+            nav {
+                max-width: 100%;
+                overflow-x: hidden;
             }
         }
         
