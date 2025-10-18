@@ -518,6 +518,8 @@ function generateHTML(title, content, currentPath = "") {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
+                width: 100vw !important; /* 确保导航栏始终与视口宽度一致 */
+                box-sizing: border-box;
             }
             
             .theme-switch {
