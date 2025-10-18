@@ -336,7 +336,26 @@ function generateHTML(title, content, currentPath = "") {
             margin-bottom: 0.5rem;
         }
         
-        .katex { font-size: 1.1em; }
+        /* 数学公式响应式样式 */
+        .katex { 
+            font-size: 1.1em; 
+        }
+
+        /* 行内数学公式 */
+        .katex-display {
+            margin: 1rem 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        /* 数学公式块 */
+        .math-block {
+            text-align: center;
+            margin: 1rem 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
         
         .mermaid { 
             background: var(--code-bg); 
@@ -470,6 +489,62 @@ function generateHTML(title, content, currentPath = "") {
             
             .theme-switch {
                 margin-left: auto;
+            }
+            
+            /* 移动端数学公式优化 */
+            .katex {
+                font-size: 1em;
+            }
+            
+            .katex-display {
+                font-size: 0.95em;
+                margin: 0.75rem 0;
+            }
+            
+            .math-block {
+                font-size: 0.95em;
+                margin: 0.75rem 0;
+            }
+            
+            /* 确保长公式可以水平滚动 */
+            .katex-display,
+            .math-block {
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* 公式滚动条样式 */
+            .katex-display::-webkit-scrollbar,
+            .math-block::-webkit-scrollbar {
+                height: 6px;
+            }
+            
+            .katex-display::-webkit-scrollbar-track,
+            .math-block::-webkit-scrollbar-track {
+                background: var(--code-bg);
+                border-radius: 3px;
+            }
+            
+            .katex-display::-webkit-scrollbar-thumb,
+            .math-block::-webkit-scrollbar-thumb {
+                background: var(--border-color);
+                border-radius: 3px;
+            }
+        }
+        
+        /* 超小屏幕进一步优化 */
+        @media (max-width: 480px) {
+            .katex {
+                font-size: 0.9em;
+            }
+            
+            .katex-display {
+                font-size: 0.85em;
+            }
+            
+            .math-block {
+                font-size: 0.85em;
             }
         }
         
