@@ -485,12 +485,12 @@ function generateHTML(title, content, currentPath = "") {
                 box-sizing: border-box;
             }
             
-            /* 导航栏基础样式 - 使用100%而不是100vw避免滚动条问题 */
+            /* 导航栏基础样式 - 完全独立于页面内容 */
             nav {
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 100%; /* 使用100%而不是100vw */
+                width: 100%; /* 使用100%确保与视口一致 */
                 height: 60px;
                 background: var(--nav-bg);
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -502,6 +502,8 @@ function generateHTML(title, content, currentPath = "") {
                 box-sizing: border-box;
                 margin: 0;
                 border-radius: 0;
+                /* 确保导航栏完全独立于页面内容 */
+                overflow: hidden;
             }
             
             /* 汉堡菜单 */
@@ -516,15 +518,18 @@ function generateHTML(title, content, currentPath = "") {
                 font-size: 1.2rem;
                 order: 1;
                 flex-shrink: 0;
+                /* 确保汉堡菜单位置固定 */
+                position: relative;
+                z-index: 1002;
             }
             
-            /* 导航菜单 - 使用100%而不是100vw */
+            /* 导航菜单 - 完全独立于页面内容 */
             .nav-menu {
                 display: none;
                 position: fixed;
                 top: 60px;
                 left: 0;
-                width: 100%; /* 使用100%而不是100vw */
+                width: 100%; /* 使用100%确保与视口一致 */
                 background: var(--nav-bg);
                 padding: 15px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -533,6 +538,8 @@ function generateHTML(title, content, currentPath = "") {
                 overflow-y: auto;
                 box-sizing: border-box;
                 margin: 0;
+                /* 确保导航菜单完全独立于页面内容 */
+                overflow: hidden;
             }
             
             .nav-menu.active {
@@ -556,13 +563,16 @@ function generateHTML(title, content, currentPath = "") {
                 box-sizing: border-box;
             }
             
-            /* 主题切换按钮 */
+            /* 主题切换按钮 - 确保位置固定不受表格滚动条影响 */
             .theme-switch {
                 margin-left: auto;
                 order: 3;
                 font-size: 0.9em;
                 padding: 8px 12px;
                 flex-shrink: 0;
+                /* 确保主题切换按钮位置固定 */
+                position: relative;
+                z-index: 1002;
             }
             
             /* 主内容区域 */
@@ -572,6 +582,9 @@ function generateHTML(title, content, currentPath = "") {
                 width: 100%;
                 max-width: 100%;
                 box-sizing: border-box;
+                /* 确保main内容不会影响导航栏 */
+                position: relative;
+                z-index: 1;
             }
             
             /* 表格响应式 */
@@ -581,6 +594,9 @@ function generateHTML(title, content, currentPath = "") {
                 white-space: nowrap;
                 max-width: 100%;
                 margin: 1rem 0;
+                /* 确保表格滚动条不会影响页面布局 */
+                position: relative;
+                z-index: 1;
             }
             
             th, td {
