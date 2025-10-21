@@ -15,14 +15,14 @@ draft: false
 
 # Neural Radiance Fields 文献类型 × 年份 矩阵一览表
 
-| 类型 / 年份                 | 2019                           | 2020                              | 2021                                    | 2022                                                     | 2023                                        | 2024                                       | 2025                      |
-| :-------------------------- | :----------------------------- | :-------------------------------- | :-------------------------------------- | :------------------------------------------------------- | :------------------------------------------ | :----------------------------------------- | :------------------------ |
-| 原始 / 分析                 | Local Light Field Fusion (pre) | NeRF (Mildenhall et al.); NeRF++  | Mip-NeRF; NeRF in the Wild              | Mip-NeRF 360                                             | —                                           | Baking Neural Radiance Fields (TPAMI 2024) | HR-NeRF (highlight focus) |
-| 加速 / 实时 / 显式表征      | —                              | NSVF (Neural Sparse Voxel Fields) | PlenOctrees; KiloNeRF; FastNeRF; DONeRF | Plenoxels; DirectVoxGO; TensoRF; Point-NeRF; Instant-NGP | 3D Gaussian Splatting; Zip-NeRF; MobileNeRF | Baking / Pre-baked pipelines (TPAMI 2024)  | —                         |
-| 泛化 / Few-shot / 条件化    | —                              | —                                 | pixelNeRF; IBRNet; MVSNeRF; BARF        | Dense Depth Priors; NeXT                                 | Zip-NeRF / Mip-VoG (多尺度融合)             | Baking & ScanNeRF Benchmarks               | —                         |
-| 动态 / 时序 / 变形          | —                              | D-NeRF; Nerfies                   | TiNeuVox; NSFF                          | Block-NeRF                                               | —                                           | —                                          | —                         |
-| 语义 / 可编辑 / 风格化      | —                              | —                                 | StylizedNeRF; Ref-NeRF                  | NeRF-W; StylizedNeRF                                     | —                                           | —                                          | —                         |
-| 大场景 / 工具 / 基准 / 应用 | —                              | —                                 | ScanNeRF; Block-NeRF                    | Plenoxels; DirectVoxGO; TensoRF (工程部署)               | 3DGS; 实时显式方法                          | TPAMI Baking Paper                         | HR-NeRF (特定问题研究)    |
+| 类型 / 年份| 2019| 2020| 2021| 2022| 2023| 2024| 2025|
+|--- | --- | --- | --- | --- | --- | --- | --- |
+| 原始 / 分析| Local Light Field Fusion (pre) | NeRF (Mildenhall et al.); NeRF++  | Mip-NeRF; NeRF in the Wild| Mip-NeRF 360| —| Baking Neural Radiance Fields (TPAMI 2024) | HR-NeRF (highlight focus) |
+| 加速 / 实时 / 显式表征| —| NSVF (Neural Sparse Voxel Fields) | PlenOctrees; KiloNeRF; FastNeRF; DONeRF | Plenoxels; DirectVoxGO; TensoRF; Point-NeRF; Instant-NGP | 3D Gaussian Splatting; Zip-NeRF; MobileNeRF | Baking / Pre-baked pipelines (TPAMI 2024)  | —|
+| 泛化 / Few-shot / 条件化    | —| —| pixelNeRF; IBRNet; MVSNeRF; BARF| Dense Depth Priors; NeXT| Zip-NeRF / Mip-VoG (多尺度融合)| Baking & ScanNeRF Benchmarks| —|
+| 动态 / 时序 / 变形| —| D-NeRF; Nerfies| TiNeuVox; NSFF| Block-NeRF| —| —| —                         |
+| 语义 / 可编辑 / 风格化      | —| —| StylizedNeRF; Ref-NeRF| NeRF-W; StylizedNeRF| —| —| —|
+| 大场景 / 工具 / 基准 / 应用 | —| —| ScanNeRF; Block-NeRF| Plenoxels; DirectVoxGO; TensoRF (工程部署)| 3DGS; 实时显式方法| TPAMI Baking Paper| HR-NeRF (特定问题研究)|
 
 ---
 
