@@ -1,0 +1,39 @@
+{
+  "source": "index.md (user)",
+  "years": [2019,2020,2021,2022,2023,2024,2025],
+  "categories": {
+    "原始": {
+      "2020": ["NeRF"],
+      "2020_extra": ["NeRF++"],
+      "2021": ["Mip-NeRF"],
+      "2022": ["Mip-NeRF 360"],
+      "2024": ["Baking Neural Radiance Fields (TPAMI 2024)"],
+      "2025": ["HR-NeRF"]
+    },
+    "加速/显式": {
+      "2020": ["NSVF"],
+      "2021": ["PlenOctrees","KiloNeRF","FastNeRF","DONeRF"],
+      "2022": ["Plenoxels","DirectVoxGO","TensoRF","Point-NeRF","Instant-NGP"],
+      "2023": ["3D Gaussian Splatting","Zip-NeRF","MobileNeRF"],
+      "2024": ["Baking NeRF -> pre-baked representations"]
+    },
+    "泛化": {
+      "2021": ["pixelNeRF","IBRNet","MVSNeRF","BARF"],
+      "2022": ["Dense Depth Priors","NeXT"]
+    },
+    "动态/时序": {
+      "2021": ["D-NeRF","Nerfies"],
+      "2022": ["TiNeuVox","NSFF"],
+      "2022_2": ["Block-NeRF"]
+    },
+    "语义/编辑": {
+      "2022": ["StylizedNeRF","Ref-NeRF","NeRF-W"]
+    },
+    "大场景/基准/工具": {
+      "2022": ["ScanNeRF","Block-NeRF"],
+      "2023": ["Realtime explicit methods (3DGS)"],
+      "2024": ["TPAMI Baking paper"]
+    }
+  },
+  "note": "Derived from user-supplied index.md. Some papers without clear years placed to closest year; can refine on request. Source citation: index.md."
+}

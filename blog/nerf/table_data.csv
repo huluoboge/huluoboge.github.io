@@ -1,0 +1,41 @@
+Title,Authors,Year,Citations,References,Similarity to origin
+3D Gaussian Splatting for Real-Time Radiance Field Rendering,"Bernhard Kerbl, Georgios Kopanas, Thomas Leimkuehler, G. Drettakis",2023,4771,59,36.6
+Instant neural graphics primitives with a multiresolution hash encoding,"T. Müller, Alex Evans, Christoph Schied, A. Keller",2022,4475,56,52.2
+NeRF,"B. Mildenhall, Pratul P. Srinivasan, Matthew Tancik, J. Barron, R. Ramamoorthi, Ren Ng",2020,2552,57,40
+Mip-NeRF: A Multiscale Representation for Anti-Aliasing Neural Radiance Fields,"J. Barron, B. Mildenhall, Matthew Tancik, Peter Hedman, Ricardo Martin-Brualla, Pratul P. Srinivasan",2021,2155,52,100
+NeuS: Learning Neural Implicit Surfaces by Volume Rendering for Multi-view Reconstruction,"Peng Wang, Lingjie Liu, Yuan Liu, C. Theobalt, T. Komura, Wenping Wang",2021,1898,54,38.4
+Mip-NeRF 360: Unbounded Anti-Aliased Neural Radiance Fields,"J. Barron, B. Mildenhall, Dor Verbin, Pratul P. Srinivasan, Peter Hedman",2021,1879,53,55
+pixelNeRF: Neural Radiance Fields from One or Few Images,"Alex Yu, Vickie Ye, Matthew Tancik, Angjoo Kanazawa",2020,1854,59,44.9
+Plenoxels: Radiance Fields without Neural Networks,"Alex Yu, Sara Fridovich-Keil, Matthew Tancik, Qinhong Chen, B. Recht, Angjoo Kanazawa",2021,1777,63,52
+NeRF in the Wild: Neural Radiance Fields for Unconstrained Photo Collections,"Ricardo Martin-Brualla, Noha Radwan, Mehdi S. M. Sajjadi, J. Barron, Alexey Dosovitskiy, Daniel Duckworth",2020,1582,48,44
+D-NeRF: Neural Radiance Fields for Dynamic Scenes,"Albert Pumarola, Enric Corona, Gerard Pons-Moll, F. Moreno-Noguer",2020,1560,65,41.8
+TensoRF: Tensorial Radiance Fields,"Anpei Chen, Zexiang Xu, Andreas Geiger, Jingyi Yu, Hao Su",2022,1415,71,48
+Neural Sparse Voxel Fields,"Lingjie Liu, Jiatao Gu, Kyaw Zaw Lin, Tat-Seng Chua, C. Theobalt",2020,1323,49,39.7
+Nerfies: Deformable Neural Radiance Fields,"Keunhong Park, U. Sinha, J. Barron, Sofien Bouaziz, Dan B. Goldman, S. Seitz, Ricardo Martin-Brualla",2020,1212,80,35
+Direct Voxel Grid Optimization: Super-fast Convergence for Radiance Fields Reconstruction,"Cheng Sun, Min Sun, Hwann-Tzong Chen",2021,1151,73,54.7
+PlenOctrees for Real-time Rendering of Neural Radiance Fields,"Alex Yu, Ruilong Li, Matthew Tancik, Hao Li, Ren Ng, Angjoo Kanazawa",2021,1133,65,49.3
+Volume Rendering of Neural Implicit Surfaces,"Lior Yariv, Jiatao Gu, Yoni Kasten, Y. Lipman",2021,1125,44,34.8
+NeRF++: Analyzing and Improving Neural Radiance Fields,"Kai Zhang, Gernot Riegler, Noah Snavely, V. Koltun",2020,1087,22,45.7
+Local Light Field Fusion: Practical View Synthesis with Prescriptive Sampling Guidelines,B. Mildenhall,2019,1049,50,35.2
+Depth-supervised NeRF: Fewer Views and Faster Training for Free,"Kangle Deng, Andrew Liu, Jun-Yan Zhu, Deva Ramanan",2021,951,49,40.8
+Block-NeRF: Scalable Large Scene Neural View Synthesis,"Matthew Tancik, Vincent Casser, Xinchen Yan, Sabeek Pradhan, B. Mildenhall, Pratul P. Srinivasan, J. Barron, Henrik Kretzschmar",2022,880,81,37.7
+Neural Scene Flow Fields for Space-Time View Synthesis of Dynamic Scenes,"Zhengqi Li, Simon Niklaus, Noah Snavely, Oliver Wang",2020,869,85,30.9
+KiloNeRF: Speeding up Neural Radiance Fields with Thousands of Tiny MLPs,"Christian Reiser, Songyou Peng, Yiyi Liao, Andreas Geiger",2021,861,78,48
+MVSNeRF: Fast Generalizable Radiance Field Reconstruction from Multi-View Stereo,"Anpei Chen, Zexiang Xu, Fuqiang Zhao, Xiaoshuai Zhang, Fanbo Xiang, Jingyi Yu, Hao Su",2021,858,57,37.7
+IBRNet: Learning Multi-View Image-Based Rendering,"Qianqian Wang, Zhicheng Wang, Kyle Genova, Pratul P. Srinivasan, Howard Zhou, J. Barron, Ricardo Martin-Brualla, Noah Snavely, T. Funkhouser",2021,833,78,40.3
+BARF: Bundle-Adjusting Neural Radiance Fields,"Chen-Hsuan Lin, Wei-Chiu Ma, A. Torralba, S. Lucey",2021,765,72,32.5
+FastNeRF: High-Fidelity Neural Rendering at 200FPS,"Stephan J. Garbin, Marek Kowalski, Matthew Johnson, J. Shotton, Julien P. C. Valentin",2021,677,59,37.9
+Ref-NeRF: Structured View-Dependent Appearance for Neural Radiance Fields,"Dor Verbin, Peter Hedman, B. Mildenhall, Todd Zickler, J. Barron, Pratul P. Srinivasan",2021,639,48,46.8
+RegNeRF: Regularizing Neural Radiance Fields for View Synthesis from Sparse Inputs,"Michael Niemeyer, J. Barron, B. Mildenhall, Mehdi S. M. Sajjadi, Andreas Geiger, Noha Radwan",2021,639,64,36
+Point-NeRF: Point-based Neural Radiance Fields,"Qiangeng Xu, Zexiang Xu, J. Philip, Sai Bi, Zhixin Shu, Kalyan Sunkavalli, U. Neumann",2022,620,68,36
+Baking Neural Radiance Fields for Real-Time View Synthesis,"Peter Hedman, Pratul P. Srinivasan, B. Mildenhall, Christian Reiser, Jonathan T. Barron, Paul E. Debevec",2024,598,60,48.1
+Zip-NeRF: Anti-Aliased Grid-Based Neural Radiance Fields,"J. Barron, B. Mildenhall, Dor Verbin, Pratul P. Srinivasan, Peter Hedman",2023,580,39,35.4
+Dense Depth Priors for Neural Radiance Fields from Sparse Input Views,"Barbara Roessle, J. Barron, B. Mildenhall, Pratul P. Srinivasan, M. Nießner",2021,391,31,32.9
+MobileNeRF: Exploiting the Polygon Rasterization Pipeline for Efficient Neural Field Rendering on Mobile Architectures,"Zhiqin Chen, T. Funkhouser, Peter Hedman, A. Tagliasacchi",2022,363,59,31.5
+Fast Dynamic Radiance Fields with Time-Aware Neural Voxels,"Jiemin Fang, Taoran Yi, Xinggang Wang, Lingxi Xie, Xiaopeng Zhang, Wenyu Liu, M. Nießner, Qi Tian",2022,344,55,30.7
+DONeRF: Towards Real‐Time Rendering of Compact Neural Radiance Fields using Depth Oracle Networks,"Thomas Neff, P. Stadlbauer, Mathias Parger, A. Kurz, J. H. Mueller, C. R. A. Chaitanya, Anton Kaplanyan, M. Steinberger",2021,307,53,34.4
+StylizedNeRF: Consistent 3D Scene Stylization as Stylized NeRF via 2D-3D Mutual Learning,"Yihua Huang, Yue He, Yu-Jie Yuan, Yu-Kun Lai, Lin Gao",2022,160,63,30.5
+ScanNeRF: a Scalable Benchmark for Neural Radiance Fields,"Luca De Luigi, Damiano Bolognini, Federico Domeniconi, Daniele De Gregorio, Matteo Poggi, L. D. Stefano",2022,17,54,32.9
+Multiscale Representation for Real-Time Anti-Aliasing Neural Rendering,"Dongting Hu, Zhenkai Zhang, Tingbo Hou, Tongliang Liu, Huan Fu, Mingming Gong",2023,14,73,30.7
+NeXT: Towards High Quality Neural Radiance Fields via Multi-skip Transformer,"Yunxiao Wang, Yanjie Li, Peidong Liu, Tao Dai, Shutao Xia",2022,1,67,33.5
+HR-NeRF: advancing realism and accuracy in highlight scene representation,"Shufan Dai, Shanqin Wang",2025,0,49,31.9
