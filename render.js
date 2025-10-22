@@ -677,16 +677,19 @@ function generateHTML(title, content, currentPath = "") {
             height: auto;
         }
         
-        /* 表格样式 */
+        /* 表格样式 - 统一使用移动端响应式效果 */
         table {
-            width: 100%;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+            max-width: 100%;
+            margin: 1rem 0;
             border-collapse: collapse;
-            margin: 1.5rem 0;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             background: var(--article-bg);
             border: 1px solid var(--border-color);
+            -webkit-overflow-scrolling: touch; /* 移动端平滑滚动 */
         }
         
         th, td {
@@ -694,6 +697,8 @@ function generateHTML(title, content, currentPath = "") {
             text-align: left;
             border-bottom: 1px solid var(--border-color);
             transition: all 0.3s ease;
+            font-size: 0.95em;
+            min-width: 120px; /* 确保单元格有最小宽度 */
         }
         
         th {
@@ -701,10 +706,15 @@ function generateHTML(title, content, currentPath = "") {
             color: var(--nav-text);
             font-weight: 600;
             border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            left: 0; /* 固定表头在滚动时可见 */
+            z-index: 1;
         }
         
         tbody tr:hover {
             background: var(--code-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         tbody tr:nth-child(even) {
@@ -713,27 +723,15 @@ function generateHTML(title, content, currentPath = "") {
         
         tbody tr:nth-child(even):hover {
             background: var(--nav-bg);
+            transform: translateY(-1px);
         }
         
-        /* 响应式表格 */
+        /* 响应式表格 - 移动端额外优化 */
         @media (max-width: 768px) {
             body {
                 max-width: 100%;
                 padding: 15px;
                 overflow-x: hidden;
-            }
-            
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-                max-width: 100%;
-                margin: 1rem 0;
-            }
-            
-            th, td {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.9em;
             }
             
             /* 确保表格容器不会导致页面布局问题 */
