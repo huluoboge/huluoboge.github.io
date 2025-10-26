@@ -12,30 +12,40 @@ let navItems = [];
 
 async function loadConfig() {
   try {
-    const configContent = await fs.readFile('config.yml', 'utf8');
+    const configContent = await fs.readFile("config.yml", "utf8");
     config = yaml.parse(configContent);
     navItems = config.navigation || [];
-    console.log('配置文件加载成功');
+    console.log("配置文件加载成功");
   } catch (error) {
-    console.error('加载配置文件失败，使用默认配置:', error);
+    console.error("加载配置文件失败，使用默认配置:", error);
     // 默认配置
     config = {
       site: {
         title: "我的博客",
         description: "个人技术博客",
-        author: "作者"
+        author: "作者",
       },
       navigation: [
         { name: "首页", path: "/", folder: "home", isHome: true, type: "page" },
-        { name: "技术文章", path: "/articles/", folder: "articles", type: "articles" },
+        {
+          name: "技术文章",
+          path: "/articles/",
+          folder: "articles",
+          type: "articles",
+        },
         { name: "随笔", path: "/blog/", folder: "blog", type: "blog" },
-        { name: "开源项目", path: "/projects/", folder: "projects", type: "projects" }
+        {
+          name: "开源项目",
+          path: "/projects/",
+          folder: "projects",
+          type: "projects",
+        },
       ],
       homepage: {
         latest_articles_count: 3,
         show_projects: true,
-        show_blog_posts: false
-      }
+        show_blog_posts: false,
+      },
     };
     navItems = config.navigation;
   }
@@ -57,10 +67,11 @@ function generateNav(currentPath = "") {
         // 改进激活状态判断：检查当前路径是否以导航项的路径开头
         // 例如：当前路径是 "/articles/poisson_understand_1/index.html"
         // 应该匹配 "/articles/" 路径
-        isActive = currentPath.startsWith(item.path) || 
-                   currentPath.includes(`/${item.folder}/`) ||
-                   currentPath === `/${item.folder}/index.html` ||
-                   currentPath === `/${item.folder}/`;
+        isActive =
+          currentPath.startsWith(item.path) ||
+          currentPath.includes(`/${item.folder}/`) ||
+          currentPath === `/${item.folder}/index.html` ||
+          currentPath === `/${item.folder}/`;
       }
 
       // 使用基于根目录的相对路径（以/开头）
@@ -763,6 +774,30 @@ function generateHTML(title, content, currentPath = "") {
             font-style: italic;
             text-align: center;
         }
+
+        /* Markdown 嵌入样式 */
+        .markdown-embed {
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .markdown-embed:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+
+        /* 移动端嵌入样式优化 */
+        @media (max-width: 768px) {
+            .markdown-embed {
+                margin: 1rem 0;
+                border-radius: 6px;
+            }
+
+        }
     </style>
 </head>
 <body>
@@ -782,127 +817,6 @@ function generateHTML(title, content, currentPath = "") {
 }
 
 // 使用Mume处理单个Markdown文件
-async function processMarkdownFile_bk(filePath) {
-  try {
-    console.log(`处理文件: ${filePath}`);
-
-    // 获取Markdown文件所在目录
-    const mdFileDir = path.dirname(filePath);
-    // 读取文件内容
-    const content = await fs.readFile(filePath, "utf8");
-
-    // 解析Front Matter
-    const parsed = frontMatter(content);
-    const body = parsed.body;
-    const attributes = parsed.attributes;
-
-    let title = path.basename(filePath, ".md");
-    if (attributes.title) {
-      title = attributes.title;
-    }
-
-    // 初始化Mume引擎
-    const engine = new mume.MarkdownEngine({
-      filePath: filePath,
-      config: {
-        mathRenderingOption: "KaTeX",
-        // codeBlockTheme: "default.css",  // 使用默认主题，让highlight.js自动检测语言
-        // previewTheme: "github-dark.css",
-        codeBlockTheme: null, // 不使用Mume内置CSS
-        previewTheme: "github.css", // 页面主题
-        enableScriptExecution: false,
-        breakOnSingleNewLine: false,
-        enableTypographer: false,
-        enableEmoji: true,
-        mathInlineDelimiters: [
-          ["$", "$"],
-          ["\\(", "\\)"],
-        ],
-        mathBlockDelimiters: [
-          ["$$", "$$"],
-          ["\\[", "\\]"],
-        ],
-        mathRenderingOnServerSide: false,
-        usePandocParser: false,
-        protocolsWhiteList: "http,https,file,data",
-        mathRenderer: "KaTeX",
-      },
-    });
-
-    // 在Markdown渲染前预处理相对路径
-    // 提取所有相对路径的图像引用，避免Mume转换为绝对路径
-    const relativeImageRegex = /!\[.*?\]\(((?:\.\/)?.*?\.(jpg|png|gif|svg))\)/g;
-    const imageMatches = [];
-    let match;
-
-    while ((match = relativeImageRegex.exec(body)) !== null) {
-      imageMatches.push(match[1]);
-    }
-
-    // 渲染Markdown为HTML
-    const result = await engine.parseMD(body, {});
-    // 给代码块加上 hljs 类
-    // let htmlContent = result.html.replace(
-    //   /<pre><code class="language-(.*?)">/g,
-    //   '<pre><code class="hljs language-$1">'
-    // );
-    let htmlContent = result.html;
-
-    // 恢复原始的相对路径 - 使用通用方法处理所有图片路径
-    htmlContent = htmlContent.replace(
-      /file:\/\/\/[^"]*\.(jpg|png|gif|svg)/g,
-      (absolutePath) => {
-        // 移除file://前缀
-        const fileSystemPath = absolutePath.replace("file://", "");
-
-        // 计算相对于Markdown文件所在目录的相对路径
-        const relativePath = path.relative(mdFileDir, fileSystemPath);
-
-        return relativePath;
-      }
-    );
-
-    // 修复双引号问题
-    htmlContent = htmlContent.replace(/""/g, '"');
-
-    // 包装到我们的模板中
-    const outputPath = filePath.replace(".md", ".html");
-    const relativePath = path.relative(path.dirname(outputPath), "");
-
-    // 为文章页面添加返回按钮（不是索引页，也不是主页）
-    const folderName = path.dirname(filePath).split(path.sep).pop();
-    const isArticlePage =
-      folderName !== "." &&
-      navItems.some((item) => item.folder === folderName) &&
-      !navItems.find((item) => item.folder === folderName)?.isHome;
-
-    let finalContent = htmlContent;
-    if (isArticlePage) {
-      // 在文章内容开头添加返回按钮
-      const backButton = `<a href="index.html" class="back-button">← 返回${
-        navItems.find((item) => item.folder === folderName).name
-      }</a>`;
-      finalContent = backButton + htmlContent;
-    }
-
-    const fullHTML = generateHTML(title, finalContent, relativePath);
-
-    await fs.writeFile(outputPath, fullHTML);
-    console.log(`生成成功: ${outputPath}`);
-
-    return {
-      title,
-      date: attributes.date,
-      tags: attributes.tags,
-      excerpt: attributes.excerpt,
-      image: attributes.image, // 添加image字段
-    };
-  } catch (error) {
-    console.error(`处理文件 ${filePath} 时出错:`, error);
-    throw error;
-  }
-}
-
 async function processMarkdownFile(filePath) {
   try {
     console.log(`处理文件: ${filePath}`);
@@ -917,6 +831,20 @@ async function processMarkdownFile(filePath) {
 
     let title = path.basename(filePath, ".md");
     if (attributes.title) title = attributes.title;
+
+    // 处理 markdown 链接和嵌入 - 在 Mume 渲染之前处理
+    const { content: processedBody, filesToProcess } = await processMarkdownLinksAndEmbeds(body, mdFileDir);
+
+    // 处理所有被引用的文件
+    for (const referencedFile of filesToProcess) {
+      if (referencedFile !== filePath) { // 避免重复处理当前文件
+        try {
+          await processMarkdownFile(referencedFile);
+        } catch (error) {
+          console.warn(`处理被引用文件失败: ${referencedFile}`, error);
+        }
+      }
+    }
 
     // 初始化 Mume 引擎
     const engine = new mume.MarkdownEngine({
@@ -940,7 +868,7 @@ async function processMarkdownFile(filePath) {
     });
 
     // 渲染 Markdown
-    const result = await engine.parseMD(body, {});
+    const result = await engine.parseMD(processedBody, {});
     let htmlContent = result.html;
 
     // ⚡ 修复代码块高亮 - 处理Prism生成的代码块
@@ -999,7 +927,7 @@ async function processMarkdownFile(filePath) {
       (match, codeContent) => {
         // 提取语言类名
         const langMatch = match.match(/class="hljs language-([^"]*)"/);
-        const langClass = langMatch ? ` language-${langMatch[1]}` : '';
+        const langClass = langMatch ? ` language-${langMatch[1]}` : "";
         return `<pre><code class="hljs${langClass}">${codeContent}</code></pre>`;
       }
     );
@@ -1009,16 +937,16 @@ async function processMarkdownFile(filePath) {
       /<pre[^>]*>([\s\S]*?)<\/pre>/gi,
       (match, preContent) => {
         // 如果 pre 标签内没有 code 标签，则添加 code 标签
-        if (!preContent.includes('<code') && !preContent.includes('</code>')) {
+        if (!preContent.includes("<code") && !preContent.includes("</code>")) {
           return `<pre><code class="hljs">${preContent}</code></pre>`;
         }
         return match;
       }
     );
 
-    // 处理相对路径图片
+    // 处理相对路径，图片和文档的格式。
     htmlContent = htmlContent.replace(
-      /file:\/\/\/[^"]*\.(jpg|png|gif|svg)/g,
+      /file:\/\/\/[^"]*\.(jpg|png|gif|svg|html)/g,
       (absolutePath) => {
         const fileSystemPath = absolutePath.replace("file://", "");
         return path.relative(mdFileDir, fileSystemPath);
@@ -1027,9 +955,14 @@ async function processMarkdownFile(filePath) {
 
     htmlContent = htmlContent.replace(/""/g, '"');
 
+    // 注意：现在只在 Mume 渲染之前处理嵌入和链接，避免双重处理
+
     // 返回按钮
     const folderName = path.dirname(filePath).split(path.sep).pop();
-    const parentFolder = path.dirname(filePath).split(path.sep).slice(-2, -1)[0];
+    const parentFolder = path
+      .dirname(filePath)
+      .split(path.sep)
+      .slice(-2, -1)[0];
     const isArticlePage =
       folderName !== "." &&
       navItems.some((item) => item.folder === parentFolder) &&
@@ -1044,10 +977,14 @@ async function processMarkdownFile(filePath) {
     }
 
     const outputPath = filePath.replace(".md", ".html");
-    
+
     // 修复导航栏激活状态：计算相对于根目录的路径
-    const relativePath = "/" + path.relative(process.cwd(), path.dirname(outputPath)).replace(/\\/g, "/");
-    
+    const relativePath =
+      "/" +
+      path
+        .relative(process.cwd(), path.dirname(outputPath))
+        .replace(/\\/g, "/");
+
     // 对于根目录下的文件，确保路径以/开头
     const normalizedPath = relativePath === "/." ? "/" : relativePath;
 
@@ -1088,7 +1025,7 @@ async function generateIndexPage(folder, articles, allArticles = []) {
     }
 
     // 读取生成的 HTML 内容
-    const homeHtmlPath = homeArticle.articlePath.replace('.md', '.html');
+    const homeHtmlPath = homeArticle.articlePath.replace(".md", ".html");
     const indexContent = await fs.readFile(homeHtmlPath, "utf8");
 
     // 提取main标签内的内容
@@ -1097,22 +1034,12 @@ async function generateIndexPage(folder, articles, allArticles = []) {
       let mainContent = mainContentMatch[1];
 
       // 修复相对路径链接
-      mainContent = mainContent.replace(
-        /file:\/\/\//g,
-        "./"
-      );
-      mainContent = mainContent.replace(
-        /file:\/\/\/\//g,
-        "./"
-      );
+      mainContent = mainContent.replace(/file:\/\/\//g, "./");
+      mainContent = mainContent.replace(/file:\/\/\/\//g, "./");
 
       // 获取最新文章（只从技术文章中获取，按日期排序的前3篇），排除关于我页面
       const allArticlesSorted = allArticles
-        .filter(
-          (article) =>
-            article.date &&
-            article.folder === "articles"
-        ) // 只包含有日期的技术文章，排除关于我页面
+        .filter((article) => article.date && article.folder === "articles") // 只包含有日期的技术文章，排除关于我页面
         .sort((a, b) => new Date(b.date) - new Date(a.date)) // 按日期降序
         .slice(0, 3); // 取前3篇
 
@@ -1248,6 +1175,139 @@ async function generateIndexPage(folder, articles, allArticles = []) {
   }
 }
 
+// 处理 markdown 链接和嵌入 - 只进行文本替换，返回处理后的内容和需要处理的文件列表
+async function processMarkdownLinksAndEmbeds(content, mdFileDir) {
+  const processedFiles = new Set();
+  const filesToProcess = new Set();
+
+  // 递归处理函数
+  async function processRecursively(content, currentDir) {
+    // 处理 ![]() 嵌入语法 - 只进行文本替换
+    const embedMatches = [];
+    content.replace(
+      /!\[([^\]]*)\]\(([^)]+\.md)\)/g,
+      (match, altText, embedPath, offset) => {
+        embedMatches.push({ match, altText, embedPath, offset, isEmbed: true });
+        return match;
+      }
+    );
+
+    // 处理 []() 链接语法 - 只进行文本替换
+    const linkMatches = [];
+    content.replace(
+      /\[([^\]]+)\]\(([^)]+\.md)\)/g,
+      (match, text, linkPath, offset) => {
+        linkMatches.push({ match, text, linkPath, offset, isEmbed: false });
+        return match;
+      }
+    );
+
+    // 合并所有匹配并按位置排序
+    const allMatches = [...embedMatches, ...linkMatches].sort(
+      (a, b) => a.offset - b.offset
+    );
+
+    let result = content;
+    let offsetAdjustment = 0;
+
+    for (const {
+      match,
+      altText,
+      text,
+      embedPath,
+      linkPath,
+      isEmbed,
+    } of allMatches) {
+      const filePath = isEmbed ? embedPath : linkPath;
+
+      try {
+        // 解析相对路径
+        const resolvedPath = path.resolve(currentDir, filePath);
+
+        // 检查文件是否存在
+        if (!(await fs.pathExists(resolvedPath))) {
+          console.warn(`文件不存在: ${resolvedPath}`);
+          continue;
+        }
+
+        // 检查是否已经处理过，避免无限循环
+        if (isEmbed && processedFiles.has(resolvedPath)) {
+          console.warn(`检测到循环引用，跳过嵌入: ${resolvedPath}`);
+          continue;
+        }
+        if (isEmbed) {
+          processedFiles.add(resolvedPath);
+        }
+
+        // 添加到需要处理的文件列表
+        filesToProcess.add(resolvedPath);
+
+        if (isEmbed) {
+          // 嵌入处理：读取markdown文件内容进行文本替换
+          const embedContent = await fs.readFile(resolvedPath, "utf8");
+          const embedDir = path.dirname(resolvedPath);
+
+          // 递归处理嵌入内容中的链接和嵌入
+          const processedEmbedContent = await processRecursively(
+            embedContent,
+            embedDir
+          );
+
+          // 直接使用嵌入的markdown内容进行文本替换
+          const embedReplacement = processedEmbedContent;
+
+          // 替换嵌入内容
+          const currentOffset = result.indexOf(match, offsetAdjustment);
+          if (currentOffset !== -1) {
+            result =
+              result.slice(0, currentOffset) +
+              embedReplacement +
+              result.slice(currentOffset + match.length);
+            offsetAdjustment += embedReplacement.length - match.length;
+          }
+        } else {
+          // 链接处理：参考图片相对路径逻辑，将绝对路径转换为相对路径
+          let htmlPath;
+          if (filePath.startsWith("file://")) {
+            // 如果是绝对路径，转换为相对路径
+            const fileSystemPath = filePath.replace("file://", "");
+            htmlPath = path.relative(currentDir, fileSystemPath).replace(/\.md$/, ".html");
+          } else {
+            // 如果是相对路径，只替换后缀
+            htmlPath = filePath.replace(/\.md$/, ".html");
+          }
+
+          // 创建HTML链接
+          const linkHtml = `<a href="${htmlPath}">${text}</a>`;
+
+          // 替换链接
+          const currentOffset = result.indexOf(match, offsetAdjustment);
+          if (currentOffset !== -1) {
+            result =
+              result.slice(0, currentOffset) +
+              linkHtml +
+              result.slice(currentOffset + match.length);
+            offsetAdjustment += linkHtml.length - match.length;
+          }
+        }
+      } catch (error) {
+        console.error(`处理文件失败: ${filePath}`, error);
+        // 如果处理失败，保留原始内容
+      }
+    }
+
+    return result;
+  }
+
+  // 开始递归处理
+  const processedContent = await processRecursively(content, mdFileDir);
+  
+  return {
+    content: processedContent,
+    filesToProcess: Array.from(filesToProcess)
+  };
+}
+
 // 复制静态资源到输出目录
 async function copyStaticAssets(outputDir = ".") {
   console.log("复制静态资源...");
@@ -1271,41 +1331,41 @@ async function copyStaticAssets(outputDir = ".") {
 // 查找子目录中的 index.md 文件
 async function discoverArticles(folderPath) {
   const articles = [];
-  
+
   if (!(await fs.pathExists(folderPath))) {
     return articles;
   }
 
   const items = await fs.readdir(folderPath);
-  
+
   for (const item of items) {
     const itemPath = path.join(folderPath, item);
     const stat = await fs.stat(itemPath);
-    
+
     // 只处理子目录
     if (stat.isDirectory()) {
-      const indexPath = path.join(itemPath, 'index.md');
-      
+      const indexPath = path.join(itemPath, "index.md");
+
       if (await fs.pathExists(indexPath)) {
         try {
           // 读取文件内容解析 Front Matter
-          const content = await fs.readFile(indexPath, 'utf8');
+          const content = await fs.readFile(indexPath, "utf8");
           const parsed = frontMatter(content);
           const attributes = parsed.attributes;
-          
+
           // 检查草稿状态，默认发布（draft: false 或没有 draft 字段）
           if (attributes.draft === true) {
             console.log(`跳过草稿文章: ${item}`);
             continue;
           }
-          
+
           articles.push({
             path: indexPath,
             folder: itemPath,
             slug: item,
-            attributes: attributes
+            attributes: attributes,
           });
-          
+
           console.log(`发现文章: ${item}`);
         } catch (error) {
           console.error(`解析文章 ${item} 失败:`, error);
@@ -1313,7 +1373,7 @@ async function discoverArticles(folderPath) {
       }
     }
   }
-  
+
   return articles;
 }
 
@@ -1324,7 +1384,7 @@ async function renderAll() {
   try {
     // 加载配置文件
     await loadConfig();
-    
+
     // 初始化Mume
     console.log("初始化Mume...");
     await mume.init();
@@ -1340,7 +1400,7 @@ async function renderAll() {
 
       // 使用新的文章发现逻辑
       const discoveredArticles = await discoverArticles(folderPath);
-      
+
       console.log(
         `收集文件夹 ${folderPath}: 找到 ${discoveredArticles.length} 篇文章`
       );
@@ -1352,10 +1412,10 @@ async function renderAll() {
             allArticles.push({
               ...meta,
               slug: articleInfo.slug,
-              file: 'index.md', // 统一使用 index.md
+              file: "index.md", // 统一使用 index.md
               folder: folderPath,
               articlePath: articleInfo.path,
-              articleFolder: articleInfo.folder
+              articleFolder: articleInfo.folder,
             });
           }
         } catch (error) {
@@ -1374,9 +1434,7 @@ async function renderAll() {
         (article) => article.folder === folderPath
       );
 
-      console.log(
-        `生成文件夹 ${folderPath} 的页面: ${articles.length} 篇文章`
-      );
+      console.log(`生成文件夹 ${folderPath} 的页面: ${articles.length} 篇文章`);
 
       // 生成索引页面
       if (articles.length > 0) {
