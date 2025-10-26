@@ -145,6 +145,12 @@ const navItems = [
 
 在 `render.js` 文件的 `generateHTML` 函数中修改 CSS 样式。
 
+### markdown链接与嵌入
+
+- 支持像图片一样嵌入markdown 文档，例如![XXXX](./xxxx.md),会直接解析markdown文档并嵌入到这个为止。 
+- 支持链接的markdown文档渲染。 [链接](./xxxx.md) 也会进行渲染，从而可以使用一个index.md作为一个目录来发表渲染多个文章。 但是这种文章不会直接在文章导航栏中显示。 
+
+
 ## 部署
 
 ### GitHub Pages 部署指南
