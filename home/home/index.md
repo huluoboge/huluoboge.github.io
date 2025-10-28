@@ -4,7 +4,9 @@ date: 2024-01-01
 excerpt: "技术分享、项目经验和学习心得"
 draft: false
 ---
-<img src="/home/home/image.png" width="100%" alt="logo">
+<!-- <img src="/home/home/image.jpg" width="100%" alt="logo"> -->
+
+![logo](/home/home/image.jpg)
 
 # 👋 你好，欢迎来到我的技术博客！
 我是一个热爱技术的开发者，在这里分享我的技术学习、项目经验与思考感悟。  
@@ -72,8 +74,9 @@ draft: false
 - 🧩 **Mesh 与几何重建**：点云滤波、去噪、法向估计、配准、Mesh 重建、简化、纹理映射、LOD 生成  
 - 🚀 **算法工程化**：系统架构设计、性能优化、团队培养  
 
-<img src="/home/home/my_radar.png" width="400" alt="技术雷达图">
+<!-- <img src="/home/home/my_radar.jpg" width="400" alt="技术雷达图"> -->
 
+![技术雷达图](/home/home/my_radar.jpg)
 ---
 
 ## 💡 技术理念

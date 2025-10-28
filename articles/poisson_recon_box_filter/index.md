@@ -76,7 +76,7 @@ $$B_n(x) = \underbrace{(b * b * \cdots * b)}_{n+1 \text{ 次}}$$
    这会变成一个二次平滑的核（光滑的凸形），再往上阶就更平滑。
 
 下图是通过Box filter卷积展示的B0-B3的 B-spline 核函数的形状，可以看到3阶 B-spline 的形状已经很像一个gaussian 核函数了。 
-![alt text](image-2.png)
+![alt text](image-2.jpg)
 
 
 如果感兴趣box filter 卷积的形状推导和代码示例，可以参考 [附录 A，推导 B-spline 的分段表达式](#附录A)
@@ -478,7 +478,7 @@ plt.show()
 
 ```
 
-![alt text](image-2.png)
+![alt text](image-2.jpg)
 
 
 - `order=0` ：box filter（矩形函数）

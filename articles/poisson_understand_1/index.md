@@ -302,7 +302,7 @@ ax.set_xlabel('x')
 ax.set_ylabel('y')
 
 # Save figure
-out_path = Path('./levelset_plot.png')
+out_path = Path('./levelset_plot.jpg')
 plt.tight_layout()
 plt.savefig(out_path, dpi=150)
 plt.show()
@@ -310,6 +310,6 @@ plt.show()
 
 ```
 上面代码运行后，会生成下面的图片：
-![figure_1](./levelset_plot.png)
+![figure_1](./levelset_plot.jpg)
 
 标量场 $f(x,y)=e^{-(x^2+y^2)}$ 的填色图、若干等值线（level sets），以及梯度方向（箭头，quiver）。图中粗线对应 $f=0.5$ 的等值集——这就是一个隐式定义的“曲线/表面”（在 3D 中同理是曲面）；箭头显示梯度方向（指向函数增大的方向），也就是等值集的法向方向。

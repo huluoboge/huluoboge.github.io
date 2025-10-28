@@ -55,14 +55,14 @@ $$
 ## 效果
 作者实验了使用精确计算和近似计算的效果。 
 
-![alt text](./image1.png)
+![alt text](./image1.jpg)
 
 并且分析了pa与pe之间的相对误差关系与内点率和sample 维度K之间的关系，见下图。 
-![图像2：pa与pe之间的相对误差](./image.png)
+![图像2：pa与pe之间的相对误差](./image.jpg)
 <center>图像2：pa与pe之间的相对误差</center>
 
 作者还分析了概率估计对真正的s（RANSAC正确工作的概率）的影响
-![alt text](./image2.png)
+![alt text](./image2.jpg)
 其中
 $$
 \begin{equation}
@@ -79,7 +79,7 @@ $$
 - **参数K数量**：K越大越容易出现错误
 
 下图是我自己写的一个脚本来直观的看下近似估计和精确估计之间，对于迭代次数N的估计差异。 
-![图像3：RANSAC迭代次数与内殿比例之间的关系](./iteration_comparison.png)
+![图像3：RANSAC迭代次数与内殿比例之间的关系](./iteration_comparison.jpg)
 
 ### 精确停止准则的实现
 

@@ -16,7 +16,7 @@ arXiv:2308.04079v1  2023年8月8日
 - Thomas Leimkühler（德国马克斯·普朗克信息学研究所）
 - George Drettakis（法国蔚蓝海岸大学 Inria）
 
-![alt text](image.png)
+![alt text](image.jpg)
 
 **摘要**
 
@@ -125,9 +125,9 @@ $$
 
 我们方法的核心是优化步骤，通过优化生成密集的3D高斯体集合，准确表达场景，实现自由视角合成。除位置p、α和协方差Σ外，我们还优化每个高斯体的SH系数以表达视角相关的颜色。参数优化与高斯体密度控制交替进行，以更好地表达场景。
 
-![alt text](image-1.png)
+![alt text](image-1.jpg)
 
-![alt text](image-2.png)
+![alt text](image-2.jpg)
 
 ### 5.1 优化
 
@@ -155,7 +155,7 @@ $$
 
 优化过程中，若某些高斯体需要，则其α会被提升，同时我们会剔除α低于ε_α的高斯体。高斯体可能收缩、膨胀并与其他高斯体有较大重叠，但我们会定期移除在世界空间过大或在视图空间占据较大面积的高斯体。该策略有效控制了高斯体总数。我们的高斯体始终作为欧氏空间中的基本元存在；与其他方法不同，我们无需对远距离或大型高斯体进行空间压缩、变形或投影。
 
-![alt text](image-3.png)
+![alt text](image-3.jpg)
 
 ## 6. 快速可微高斯光栅化器
 
@@ -167,8 +167,8 @@ $$
 
 与以往不同，我们不限制可接收梯度的溅射数量，因此可适应任意深度复杂度的场景，无需特定超参数调优。反向传播时，需恢复前向过程中每像素的所有混合点序列。为避免动态内存管理开销，我们复用前向排序结果，反向遍历瓦片列表。每个点在前向过程中存储最终累积α，反向遍历时用该值除以当前点的α即可获得梯度计算所需系数。
 
-![alt text](image-4.png)
-![alt text](image-5.png)
+![alt text](image-4.jpg)
+![alt text](image-5.jpg)
 
 ## 7. 实现、结果与评估
 
@@ -180,11 +180,11 @@ $$
 
 优化细节：为保证稳定性，优化初期采用低分辨率（初始为原图1/4），在第250和500次迭代后分别上采样两次。SH系数优化对角度信息缺失较为敏感。对于典型的“NeRF风格”采集（即物体被全方位拍摄），优化效果良好。但若采集角度不全（如场景角落或“inside-out”采集），则SH零阶分量（基色/漫反射色）可能被错误优化。为此，我们先仅优化零阶分量，每1000步引入一阶，直到全部4阶SH分量参与优化。
 
-![alt text](image-6.png)
+![alt text](image-6.jpg)
 
-![alt text](image-7.png)
+![alt text](image-7.jpg)
 
-![alt text](image-8.png)
+![alt text](image-8.jpg)
 
 ### 7.2 结果与评估
 
@@ -207,18 +207,18 @@ SfM初始化：若用随机点云初始化，方法整体表现尚可，但背�
 各向异性协方差：能用更少高斯体表达复杂结构，提升模型紧凑性和质量。
 无限溅射梯度：允许任意数量高斯体接收梯度，适应任意深度复杂度场景，无需超参数调优。
 球谐函数：提升视角相关外观表达能力。
-![alt text](image-9.png)
+![alt text](image-9.jpg)
 
-![alt text](image-10.png)
-![alt text](image-11.png)
+![alt text](image-10.jpg)
+![alt text](image-11.jpg)
 
 ### 7.4 局限性
 
 我们的方法也存在一些局限。在场景观测不充分的区域会出现伪影，这也是其他方法（如Mip-NeRF360）同样难以避免的问题。虽然各向异性高斯体有诸多优点，但有时会产生拉长或“斑块状”伪影（见图12），尤其在视角相关外观区域，优化可能导致大高斯体产生“跳变”伪影。这部分原因在于光栅化器中对高斯体的简单剔除策略，更合理的剔除方法可缓解此问题。另一个原因是可见性算法较为简单，可能导致高斯体深度/混合顺序突变，可通过抗锯齿进一步改进。当前我们未对优化过程做任何正则化，未来可通过正则化缓解未观测区域和跳变伪影。对于超大场景，降低位置学习率有助于收敛。
 
 尽管与以往基于点的方法相比，我们的模型更紧凑，但内存消耗仍高于NeRF类方法。大场景训练时，GPU峰值内存可超20GB（未优化实现），但通过底层优化可大幅降低。渲染时需足够GPU内存存储完整模型（大场景数百MB），光栅化器还需额外30-500MB，具体取决于场景和分辨率。未来可借鉴点云压缩等技术进一步降低内存消耗。
-![alt text](image-12.png)
-![alt text](image-13.png)
+![alt text](image-12.jpg)
+![alt text](image-13.jpg)
 
 ## 8. 讨论与结论
 
@@ -362,9 +362,9 @@ Matthias Zwicker, Hanspeter Pfister, Jeroen van Baar, and Markus Gross. 2001b. S
 
 ## A 
 
-![alt text](image-14.png)
+![alt text](image-14.jpg)
 
-![alt text](image-15.png)
+![alt text](image-15.jpg)
 
 
 ## B
@@ -403,8 +403,8 @@ end while
 
 # C. 光栅化器细节（Algorithm 2）
 
-![alt text](image-16.png)
-![alt text](image-17.png)
+![alt text](image-16.jpg)
+![alt text](image-17.jpg)
 
 ```
 Algorithm 2 GPU software rasterization of 3D Gaussians
@@ -430,12 +430,12 @@ function Rasterize(w, h, M, S, C, A, V)
     return I
 end function
 ```
-![alt text](image-18.png)
+![alt text](image-18.jpg)
 
 ## D
-![alt text](image-19.png)
+![alt text](image-19.jpg)
 
-![alt text](image-20.png)
+![alt text](image-20.jpg)
 
-![alt text](image-21.png)
+![alt text](image-21.jpg)
 
