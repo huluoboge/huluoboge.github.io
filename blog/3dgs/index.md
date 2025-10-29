@@ -103,6 +103,8 @@ $L_{depth} = \|D_{rendered} - D_{gt}\|_1$
     
 
 * * *
+---
 
-我可以帮你写一个“**Mesh/LiDAR点云 → 3DGS初始化脚本**”的框架，兼容原3DGS pipeline（比如从PLY转到Splat格式）。  
-要不要我帮你草拟一下？
+# 可微高斯渲染器
+
+https://github.com/graphdeco-inria/diff-gaussian-rasterization
