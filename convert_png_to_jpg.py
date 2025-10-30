@@ -2,12 +2,17 @@ import os
 import re
 from PIL import Image
 import argparse
+import subprocess
+# from pathlib import Path
 
 # 设置要处理的目录和图片质量
 ARTICLES_DIR = 'articles'
 QUALITY = 50
 
+'''
+sudo apt install pngquant first
 
+'''
 
 def find_markdown_files(root_dir):
     """递归查找所有Markdown文件"""
@@ -62,7 +67,102 @@ def compress_png(png_path):
         print(f'PNG压缩完成: {png_path}')
     except Exception as e:
         print(f'PNG压缩失败: {png_path}, 错误: {e}')
+
+def compress_png_pngquant(png_path):
+    """
+    使用 pngquant 压缩 PNG 图片
+    
+    Args:
+        png_path (str): PNG 图片的路径
+    """
+    try:
+        # 检查文件是否存在
+        if not os.path.exists(png_path):
+            print(f'文件不存在: {png_path}')
+            return False
         
+        # 记录原始文件大小
+        original_size = os.path.getsize(png_path)
+        
+        # 构建 pngquant 命令
+        cmd = [
+            'pngquant',
+            '--quality=65-80',
+            '--force',
+            '--ext', '.png',  # 保持原扩展名
+            png_path
+        ]
+        
+        # 执行压缩命令
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            # 获取压缩后文件大小
+            compressed_size = os.path.getsize(png_path)
+            # 计算压缩率
+            compression_ratio = (1 - compressed_size / original_size) * 100
+            
+            print(f'PNG压缩完成: {png_path}')
+            print(f'原始大小: {original_size / 1024:.2f} KB')
+            print(f'压缩后: {compressed_size / 1024:.2f} KB')
+            print(f'压缩率: {compression_ratio:.1f}%')
+            if compression_ratio < 0.1:
+                print('压缩率过低,不再压缩')
+                return False
+            return True
+        else:
+            print(f'PNG压缩失败: {png_path}')
+            print(f'错误信息: {result.stderr}')
+            return False
+            
+    except FileNotFoundError:
+        print(f'错误: 未找到 pngquant 命令，请先安装 pngquant')
+        print('Ubuntu/Debian: sudo apt install pngquant')
+        print('macOS: brew install pngquant')
+        return False
+    except Exception as e:
+        print(f'PNG压缩失败: {png_path}, 错误: {e}')
+        return False
+
+def compress_png_with_backup(png_path, backup_suffix='.backup'):
+    """
+    使用 pngquant 压缩 PNG 图片，并创建备份文件
+    
+    Args:
+        png_path (str): PNG 图片的路径
+        backup_suffix (str): 备份文件后缀
+    """
+    try:
+        if not os.path.exists(png_path):
+            print(f'文件不存在: {png_path}')
+            return False
+        
+        # 创建备份文件
+        backup_path = f"{png_path}{backup_suffix}"
+        import shutil
+        shutil.copy2(png_path, backup_path)
+        
+        print(f'已创建备份: {backup_path}')
+        
+        # 进行压缩
+        success = compress_png_pngquant(png_path)
+        
+        if success:
+            # 压缩成功后可以选择删除备份文件，或者保留
+            # os.remove(backup_path)  # 取消注释此行以自动删除备份
+            pass
+        else:
+            # 如果压缩失败，恢复备份
+            shutil.copy2(backup_path, png_path)
+            print(f'已恢复原文件: {png_path}')
+        
+        os.remove(backup_path)
+        return success
+        
+    except Exception as e:
+        print(f'压缩过程出错: {e}')
+        return False
+            
 def update_markdown_image_refs(md_file, content, png_paths):
     """将Markdown中的PNG引用替换为JPG"""
     new_content = content
@@ -99,8 +199,9 @@ def main():
                 abs_png_path = os.path.join(os.path.dirname(md_file), png_path) if not os.path.isabs(png_path) else png_path
                 if os.path.exists(abs_png_path):
                     # compress_png(abs_png_path)
-                    convert_png_to_jpg(abs_png_path)
-            update_markdown_image_refs(md_file, content, png_paths)
+                    compress_png_with_backup(abs_png_path)
+                    # convert_png_to_jpg(abs_png_path)
+            # update_markdown_image_refs(md_file, content, png_paths)
     elif args.mode == 'jpg':
         for md_file in md_files:
             jpg_paths,content = find_jpg_images(md_file)
