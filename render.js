@@ -33,7 +33,7 @@ async function loadConfig() {
           folder: "articles",
           type: "articles",
         },
-        { name: "随笔", path: "/blog/", folder: "blog", type: "blog" },
+        { name: "博客", path: "/blog/", folder: "blog", type: "blog" },
         {
           name: "开源项目",
           path: "/projects/",

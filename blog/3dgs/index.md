@@ -2,14 +2,14 @@
 title: "3DGS 文章列表"
 date: 2025-10-28T20:51:00+08:00
 tags:
-[
-"3DGS",
-"Neural Radiance Fields",
-"NeRF",
-"Renderer",
-"Computer Vision",
-"Computer Graphics",
-]
+  [
+    "3DGS",
+    "Neural Radiance Fields",
+    "NeRF",
+    "Renderer",
+    "Computer Vision",
+    "Computer Graphics",
+  ]
 excerpt: "总结 3DGS 文章列表"
 draft: false
 ---
@@ -39,6 +39,7 @@ SuGaR: Surface‑Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction
 - 最后，我们引入了一种可选的优化策略，将高斯函数绑定到网格表面，并通过高斯撒点渲染对这些高斯函数和网格进行联合优化。这使得通过操作网格而非高斯本身，使用传统软件（Blender、Unity、Unreal Engine 等）轻松编辑、雕刻、绑定、动画或重新光照成为可能。使用我们的方法获取这样一个可编辑的用于真实渲染的网格只需几分钟，而使用基于神经 SDF 的最先进方法则需要数小时，同时在 PSNR、SSIM 和 LPIPS 上提供更好的渲染质量。
 
 > @article{guedon2023sugar,
+
         title={SuGaR: Surface-Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction and High-Quality Mesh Rendering},
         author={Gu{\'e}don, Antoine and Lepetit, Vincent},
         journal={CVPR},
@@ -53,7 +54,8 @@ SuGaR: Surface‑Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction
 
 三维高斯溅射 (3DGS) 近期彻底改变了辐射场重建，实现了高质量的新视图合成和快速的渲染速度，且无需烘焙。然而，由于三维高斯函数的多视图不一致性，3DGS 无法准确地表示表面。我们提出了二维高斯溅射 (2DGS)，这是一种从多视图图像中建模和重建几何精确辐射场的新方法。我们的核心思想是将三维体积折叠成一组二维定向平面高斯盘。与三维高斯函数不同，二维高斯函数在本质上建模表面的同时，还能提供视图一致的几何形状。为了准确地恢复薄表面并实现稳定的优化，我们引入了一种利用光线溅射相交和光栅化的透视精确二维溅射过程。此外，我们还结合了深度失真和法线一致性项，以进一步提高重建质量。我们证明，我们的可区分渲染器可以实现无噪声和详细的几何重建，同时保持具有竞争力的外观质量、快速的训练速度和实时渲染。
 
->@inproceedings{Huang2DGS2024,
+> @inproceedings{Huang2DGS2024,
+
     title={2D Gaussian Splatting for Geometrically Accurate Radiance Fields},
     author={Huang, Binbin and Yu, Zehao and Chen, Anpei and Geiger, Andreas and Gao, Shenghua},
     publisher = {Association for Computing Machinery},
@@ -61,7 +63,6 @@ SuGaR: Surface‑Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction
     year = {2024},
     doi = {10.1145/3641519.3657428}
     }
-
 
 ## PGSR: Planar-based Gaussian Splatting for Efficient and High-Fidelity Surface Reconstruction
 
@@ -75,6 +76,7 @@ SuGaR: Surface‑Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction
 ![alt text](image-3.png)
 
 > @article{chen2024pgsr,
+
         title={PGSR: Planar-based Gaussian Splatting for Efficient and High-Fidelity Surface Reconstruction},
         author={Danpeng Chen and Hai Li and Weicai Ye and Yifan Wang and Weijian Xie and Shangjin Zhai and Nan Wang and Haomin Liu and Hujun Bao and Guofeng Zhang},
           booktitle={arxiv preprint arxiv:2406.06521},
@@ -95,11 +97,13 @@ SuGaR: Surface‑Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction
 
 ![alt text](image-1.png)
 
->@inproceedings{zhang2025quadraticgaussiansplattinghigh,
+> @inproceedings{zhang2025quadraticgaussiansplattinghigh,
+
     author    = {Ziyu Zhang and Binbin Huang and Hanqing Jiang and Liyang Zhou and Xiaojun Xiang and Shunhan Shen},
     title     = {{Quadratic Gaussian Splatting: High Quality Surface Reconstruction with Second-order Geometric Primitives}},
     booktitle = {IEEE International Conference on Computer Vision (ICCV)},
     year      = {2025},
+
 }
 
 ## 3D Gaussian Splatting with Normal Information for Mesh Extraction and Improved Rendering (Krishnan et al., 2025)
@@ -118,15 +122,14 @@ https://jiepengwang.github.io/GausSurf/
 
 ## HDGS: Textured 2D Gaussian Splatting for Enhanced Scene Rendering
 
-
 ## FatesGS: Fast and Accurate Sparse-View Surface Reconstruction Using Gaussian Splatting with Depth-Feature Consistency
 
->@inproceedings{huang2025fatesgs,
-title={FatesGS: Fast and Accurate Sparse-View Surface Reconstruction Using Gaussian Splatting with Depth-Feature Consistency},
-author={Han Huang and Yulun Wu and Chao Deng and Ge Gao and Ming Gu and Yu-Shen Liu},
-booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-year={2025}
-}
+> @inproceedings{huang2025fatesgs,
+> title={FatesGS: Fast and Accurate Sparse-View Surface Reconstruction Using Gaussian Splatting with Depth-Feature Consistency},
+> author={Han Huang and Yulun Wu and Chao Deng and Ge Gao and Ming Gu and Yu-Shen Liu},
+> booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+> year={2025}
+> }
 
 **Project**：[FatesGS](https://alvin528.github.io/FatesGS/)
 
@@ -153,8 +156,7 @@ year={2025}
 **Project**：[PG-SAG](https://github.com/TFwang-9527/PG-SAG/tree/main)
 
 **Abstract**
-抽象三维高斯点溅射（3DGS）已经成为实时新颖合成领域的一种变革性方法。基于3DGS，近期的进展通过基于空间的分区策略应对大规模场景，从而减少视频内存和优化时间成本。在本工作中，我们提出了一种并行高斯点溅射方法，称为PG-SAG，该方法充分利用语义线索用于分区和高斯核优化，从而实现大规模城市区域的精细建筑表面重建，而无需降低原始图像分辨率。首先，利用跨模态模型——Language Segment Anything对建筑物进行掩膜分割。然后，根据在注册图像中的可见性检查，将分割出的建筑区域分组为子区域。这些子区域的高斯核在带掩膜像素的情况下并行优化。此外，对于掩膜检测出的边缘，法线损失被重新构建，以减轻边缘法向量的不确定性。最后，为了改善三维高斯的优化，我们引入了一种梯度约束负载平衡损失，该损失考虑了对应场景的复杂性，有效地最小化像素并行渲染阶段的线程等待时间以及重建损失。在各种城市数据集上进行了大量实验，结果表明，与几种最先进的基于3DGS的方法相比，我们的PG-SAG在建筑表面重建方面表现出优越的性能。项目网页：https://github.com/TFWang-9527/PG-SAG。
-
+抽象三维高斯点溅射（3DGS）已经成为实时新颖合成领域的一种变革性方法。基于 3DGS，近期的进展通过基于空间的分区策略应对大规模场景，从而减少视频内存和优化时间成本。在本工作中，我们提出了一种并行高斯点溅射方法，称为 PG-SAG，该方法充分利用语义线索用于分区和高斯核优化，从而实现大规模城市区域的精细建筑表面重建，而无需降低原始图像分辨率。首先，利用跨模态模型——Language Segment Anything 对建筑物进行掩膜分割。然后，根据在注册图像中的可见性检查，将分割出的建筑区域分组为子区域。这些子区域的高斯核在带掩膜像素的情况下并行优化。此外，对于掩膜检测出的边缘，法线损失被重新构建，以减轻边缘法向量的不确定性。最后，为了改善三维高斯的优化，我们引入了一种梯度约束负载平衡损失，该损失考虑了对应场景的复杂性，有效地最小化像素并行渲染阶段的线程等待时间以及重建损失。在各种城市数据集上进行了大量实验，结果表明，与几种最先进的基于 3DGS 的方法相比，我们的 PG-SAG 在建筑表面重建方面表现出优越的性能。项目网页：https://github.com/TFWang-9527/PG-SAG。
 
 ![alt text](image-4.png)
 
