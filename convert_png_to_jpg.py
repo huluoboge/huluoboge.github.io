@@ -10,7 +10,7 @@ ARTICLES_DIR = 'articles'
 QUALITY = 50
 
 '''
-sudo apt install pngquant first
+sudo apt install pngquant
 
 '''
 
