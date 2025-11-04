@@ -15,6 +15,8 @@ import json
 from config import (
     LIBRETRANSLATE_ENDPOINTS,
     GOOGLE_TRANSLATE_ENDPOINT,
+    ALIYUN_TRANSLATE_ENDPOINT,
+    ALIYUN_TRANSLATE_REGION,
     TRANSLATION_CONFIG,
     DEFAULT_SOURCE_LANG,
     DEFAULT_TARGET_LANG
@@ -216,24 +218,112 @@ class GoogleTranslate(BaseTranslator):
         return self._make_request_with_retry(request_func)
 
 
+class AliyunTranslator(BaseTranslator):
+    """阿里云机器翻译器"""
+    
+    def __init__(self, access_key_id: str, access_key_secret: str):
+        super().__init__()
+        self.access_key_id = access_key_id
+        self.access_key_secret = access_key_secret
+        
+        # 导入阿里云SDK
+        try:
+            from alibabacloud_alimt20181012.client import Client as AlimtClient
+            from alibabacloud_alimt20181012 import models as alimt_models
+            from alibabacloud_tea_openapi import models as open_api_models
+            from alibabacloud_tea_util import models as util_models
+            from alibabacloud_tea_util.client import Client as UtilClient
+            
+            self.AlimtClient = AlimtClient
+            self.alimt_models = alimt_models
+            self.open_api_models = open_api_models
+            self.util_models = util_models
+            self.UtilClient = UtilClient
+            
+        except ImportError as e:
+            raise ImportError("请安装阿里云SDK: pip install alibabacloud-alimt-20181012") from e
+    
+    def translate(self, text: str, source_lang: str = DEFAULT_SOURCE_LANG, 
+                  target_lang: str = DEFAULT_TARGET_LANG) -> str:
+        """
+        使用阿里云机器翻译翻译文本
+        
+        Args:
+            text: 要翻译的文本
+            source_lang: 源语言代码
+            target_lang: 目标语言代码
+            
+        Returns:
+            翻译后的文本
+        """
+        if not self.access_key_id or not self.access_key_secret:
+            raise TranslationError("阿里云机器翻译需要AccessKey ID和Secret")
+        
+        if not text.strip():
+            return ""
+        
+        def request_func():
+            # 创建配置对象
+            config = self.open_api_models.Config(
+                access_key_id=self.access_key_id,
+                access_key_secret=self.access_key_secret,
+                endpoint=ALIYUN_TRANSLATE_ENDPOINT,
+                region_id=ALIYUN_TRANSLATE_REGION
+            )
+            
+            # 创建客户端
+            client = self.AlimtClient(config)
+            
+            # 创建翻译请求
+            translate_request = self.alimt_models.TranslateGeneralRequest(
+                format_type="text",
+                source_language=source_lang,
+                target_language=target_lang,
+                source_text=text,
+                scene="general"
+            )
+            
+            # 执行翻译
+            runtime = self.util_models.RuntimeOptions()
+            response = client.translate_general_with_options(translate_request, runtime)
+            
+            if response.status_code == 200:
+                if hasattr(response.body, 'data') and hasattr(response.body.data, 'translated'):
+                    return response.body.data.translated
+                else:
+                    raise TranslationError(f"API响应格式错误: {response.body}")
+            else:
+                raise TranslationError(f"HTTP错误 {response.status_code}: {response.body}")
+        
+        return self._make_request_with_retry(request_func)
+
+
 class TranslationManager:
     """翻译管理器"""
     
-    def __init__(self, engine: str = "libre", google_api_key: Optional[str] = None):
+    def __init__(self, engine: str = "libre", google_api_key: Optional[str] = None,
+                 aliyun_access_key_id: Optional[str] = None, 
+                 aliyun_access_key_secret: Optional[str] = None):
         """
         初始化翻译管理器
         
         Args:
-            engine: 翻译引擎 ("libre" 或 "google")
+            engine: 翻译引擎 ("libre", "google" 或 "aliyun")
             google_api_key: Google Cloud Translation API密钥
+            aliyun_access_key_id: 阿里云AccessKey ID
+            aliyun_access_key_secret: 阿里云AccessKey Secret
         """
         self.engine = engine.lower()
         self.google_api_key = google_api_key
+        self.aliyun_access_key_id = aliyun_access_key_id
+        self.aliyun_access_key_secret = aliyun_access_key_secret
         
         if self.engine == "libre":
             self.translator = LibreTranslate()
         elif self.engine == "google":
             self.translator = GoogleTranslate(google_api_key)
+        elif self.engine == "aliyun":
+            self.translator = AliyunTranslator(aliyun_access_key_id, aliyun_access_key_secret)
         else:
             raise ValueError(f"不支持的翻译引擎: {engine}")
     
@@ -254,13 +344,21 @@ class TranslationManager:
             return self.translator.translate(text, source_lang, target_lang)
         except TranslationError as e:
             # 如果当前引擎失败，尝试切换到备用引擎
-            if self.engine == "libre" and self.google_api_key:
-                print("🔄 LibreTranslate失败，尝试切换到Google Translate...")
-                backup_translator = GoogleTranslate(self.google_api_key)
-                try:
-                    return backup_translator.translate(text, source_lang, target_lang)
-                except TranslationError:
-                    pass
+            if self.engine == "libre":
+                if self.google_api_key:
+                    print("🔄 LibreTranslate失败，尝试切换到Google Translate...")
+                    backup_translator = GoogleTranslate(self.google_api_key)
+                    try:
+                        return backup_translator.translate(text, source_lang, target_lang)
+                    except TranslationError:
+                        pass
+                elif self.aliyun_access_key_id and self.aliyun_access_key_secret:
+                    print("🔄 LibreTranslate失败，尝试切换到阿里云机器翻译...")
+                    backup_translator = AliyunTranslator(self.aliyun_access_key_id, self.aliyun_access_key_secret)
+                    try:
+                        return backup_translator.translate(text, source_lang, target_lang)
+                    except TranslationError:
+                        pass
             
             raise e
 

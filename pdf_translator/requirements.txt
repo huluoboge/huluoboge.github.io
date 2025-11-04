@@ -2,3 +2,7 @@ pdfplumber>=0.10.0
 requests>=2.28.0
 tqdm>=4.64.0
 argparse
+alibabacloud-alimt20181012>=1.1.0
+alibabacloud-tea-console>=0.0.1
+alibabacloud-tea-util>=0.3.6
+alibabacloud-credentials>=0.3.1

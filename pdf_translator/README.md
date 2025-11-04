@@ -1,16 +1,17 @@
 # PDF翻译工具
 
-一个免费的PDF翻译工具，支持将PDF文件翻译为多种语言，使用LibreTranslate和Google Cloud Translation两种翻译引擎。
+一个免费的PDF翻译工具，支持将PDF文件翻译为多种语言，使用LibreTranslate、Google Cloud Translation和阿里云机器翻译三种翻译引擎。
 
 ## 功能特点
 
 - ✅ **完全免费** - 使用LibreTranslate公共实例，无需付费
-- ✅ **多引擎支持** - 支持LibreTranslate和Google Cloud Translation
+- ✅ **多引擎支持** - 支持LibreTranslate、Google Cloud Translation和阿里云机器翻译
 - ✅ **批量处理** - 支持单个文件和批量翻译
 - ✅ **智能分段** - 自动分割长文本，避免API限制
 - ✅ **进度显示** - 实时显示翻译进度
 - ✅ **错误恢复** - 网络错误自动重试
 - ✅ **多语言支持** - 支持中、英、日、韩等多种语言
+- ✅ **国内友好** - 阿里云机器翻译国内访问稳定快速
 
 ## 安装依赖
 
@@ -38,6 +39,9 @@ python main.py --input papers/ --output translations/
 ```bash
 # 使用Google翻译引擎（需要API密钥）
 python main.py --input paper.pdf --engine google --api-key YOUR_API_KEY
+
+# 使用阿里云机器翻译（需要AccessKey）
+python main.py --input paper.pdf --engine aliyun --aliyun-access-key-id YOUR_ID --aliyun-access-key-secret YOUR_SECRET
 
 # 指定翻译语言（英译中）
 python main.py --input paper.pdf --source en --target zh
@@ -69,6 +73,11 @@ python main.py --input paper.pdf --source zh --target en
 - **超出费用**：$20/百万字符（标准版）
 - **适合场景**：需要更高翻译质量的场景
 
+### 阿里云机器翻译
+- **免费额度**：每月200万字符（通用版）
+- **超出费用**：约¥15/百万字符
+- **适合场景**：国内访问稳定，专业术语支持较好
+
 ## 项目结构
 
 ```
@@ -96,6 +105,7 @@ pdf_translator/
 ### 翻译引擎
 - **LibreTranslate**：主要引擎，完全免费
 - **Google Cloud Translation**：备用引擎，质量更高
+- **阿里云机器翻译**：国内访问稳定，专业术语支持好
 - 自动引擎切换机制
 - 错误重试和指数退避
 

@@ -16,6 +16,10 @@ LIBRETRANSLATE_ENDPOINTS = [
 # Google Cloud Translation API 配置
 GOOGLE_TRANSLATE_ENDPOINT = "https://translation.googleapis.com/language/translate/v2"
 
+# 阿里云机器翻译配置
+ALIYUN_TRANSLATE_ENDPOINT = "mt.cn-hangzhou.aliyuncs.com"
+ALIYUN_TRANSLATE_REGION = "cn-hangzhou"
+
 # 翻译参数
 TRANSLATION_CONFIG = {
     "max_chunk_size": 2000,  # 每次翻译的最大字符数

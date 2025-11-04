@@ -141,7 +141,7 @@ https://jiepengwang.github.io/GausSurf/
 
 首先，我们使用一组稀疏的输入视图，通过 COLMAP 初始化二维高斯分布，并利用 splatting 技术渲染 RGB 图像和深度图。为了增强几何学习过程，我们整合了单目深度估计的排序信息，并应用深度平滑以确保视图内深度的一致性。为了进一步优化几何形状，我们将估计的表面点投影到源图像上，从而对齐提取的多视图特征。
 
-# PlanarGS: High-Fidelity Indoor 3D Gaussian Splatting Guided by Vision-Language Planar Priors
+## PlanarGS: High-Fidelity Indoor 3D Gaussian Splatting Guided by Vision-Language Planar Priors
 
 **Project**：[PlanarGS](https://planargs.github.io/)
 **Code** [Github](https://github.com/SJTU-ViSYS-team/PlanarGS)
@@ -151,7 +151,7 @@ https://jiepengwang.github.io/GausSurf/
 
 ![alt text](image-2.png)
 
-# PG-SAG: Parallel Gaussian Splatting for Fine-Grained Large-Scale Urban Buildings Reconstruction via Semantic-Aware Grouping (2025)
+## PG-SAG: Parallel Gaussian Splatting for Fine-Grained Large-Scale Urban Buildings Reconstruction via Semantic-Aware Grouping (2025)
 
 **Project**：[PG-SAG](https://github.com/TFwang-9527/PG-SAG/tree/main)
 
@@ -160,6 +160,20 @@ https://jiepengwang.github.io/GausSurf/
 
 ![alt text](image-4.png)
 
+# Deblur
+
+## Gaussian Splatting on the Move Blur and Rolling Shutter Compensation for Natural Camera Motion
+
+
+
+> @misc{seiskari2024gaussian,
+        title={Gaussian Splatting on the Move: Blur and Rolling Shutter Compensation for Natural Camera Motion}, 
+        author={Otto Seiskari and Jerry Ylilammi and Valtteri Kaatrasalo and Pekka Rantalankila and Matias Turkulainen and Juho Kannala and Arno Solin},
+        year={2024},
+        eprint={2403.13327},
+        archivePrefix={arXiv},
+        primaryClass={cs.CV}
+  }
 # 工程／优化方向
 
 DashGaussian: Optimizing 3D Gaussian Splatting in 200 Seconds（Chen et al., 2025）聚焦于加速 3DGS 优化，但其方法同样可为 Mesh 优化场景提供更快收敛的基础。
