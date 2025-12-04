@@ -93,6 +93,9 @@ $$x_{k|k-1} = f(x_{k-1|k-1})$$ $$P_{k|k-1} = F P_{k-1|k-1} F^\top + Q$$
 
 > **找一个 x 的更新方式，使得估计误差的协方差最小。**
 
+
+$$\mathbf{y}_k = \mathbf{z}_k - h(\hat{\mathbf{x}}_{k|k-1})$$
+
 我们假设更新结构是：
 
 $$x_{k|k} = x_{k|k-1} + K (z - h(x_{k|k-1}))$$
@@ -122,4 +125,31 @@ $$K = P H^\top (H P H^\top + R)^{-1}$$
 * $R$：测量噪声
     
 * $H$：测量模型
+
+
+1. **观测残差**（Innovation）：
     
+
+
+* 记忆：**“观测减预测”**
+    
+
+2. **线性化观测**：
+    
+
+$$\mathbf{H}_k = \frac{\partial h}{\partial \mathbf{x}}\Big|_{\hat{\mathbf{x}}_{k|k-1}}$$
+
+* EKF 核心：**把非线性观测拉直线**
+    
+
+3. **卡尔曼增益**：
+    
+
+$$\mathbf{K}_k = \mathbf{P}_{k|k-1}\mathbf{H}_k^\top (\mathbf{H}_k\mathbf{P}_{k|k-1}\mathbf{H}_k^\top + \mathbf{R}_k)^{-1}$$
+
+    
+# 下面进行推导
+
+1 推导协方差矩阵P
+
+
