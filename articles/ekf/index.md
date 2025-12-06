@@ -4,6 +4,10 @@ date: 2025-12-06T17:42:00+08:00
 tags: ["KF", "EKF", "Kalman Filter​", "Extended Kalman Filter"]
 excerpt: "本文详细推导卡尔曼滤波算法"
 draft: false
+
+marp: true
+theme: default
+paginate: true
 ---
 
 [toc]

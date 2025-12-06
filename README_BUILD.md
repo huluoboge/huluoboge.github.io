@@ -79,3 +79,12 @@ npm run clean
 - ✅ **返回按钮**: 所有文章页面都有返回导航按钮
 
 所有内容都是动态生成的，无需手动维护列表。
+
+# export slides
+
+```bash
+npm install -g @marp-team/marp-cli
+
+marp your-file.md --pdf --theme default
+
+```

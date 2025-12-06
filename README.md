@@ -32,6 +32,14 @@ sudo apt-get install -y nodejs
 # 安装依赖
 npm install
 ```
+# export slides
+
+```bash
+npm install -g @marp-team/marp-cli
+
+marp your-file.md --pdf --theme default
+
+```
 
 ## 使用方法
 
