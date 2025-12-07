@@ -1,6 +1,6 @@
-# 技术博客生成器
+# 我的博客
 
-一个基于 Node.js 的静态博客生成器，专门为技术人员设计，支持 Markdown、LaTeX 数学公式和 Mermaid 流程图。
+基于 Node.js 的静态博客生成器，支持 Markdown、LaTeX 数学公式和 Mermaid 流程图。
 
 ## 特性
 
@@ -18,7 +18,7 @@
 ```bash
 # 克隆项目
 git clone <your-repo-url>
-cd tech-blog
+
 
 下载最新的nodejs
 
@@ -32,14 +32,7 @@ sudo apt-get install -y nodejs
 # 安装依赖
 npm install
 ```
-# export slides
 
-```bash
-npm install -g @marp-team/marp-cli
-
-marp your-file.md --pdf --theme default
-
-```
 
 ## 使用方法
 
@@ -58,7 +51,7 @@ npm run dev
 ## 项目结构
 
 ```
-tech-blog/
+huluoboge.github.io/
 ├── articles/          # 技术文章
 ├── blog/             # 博客文章
 ├── projects/         # 开源项目
@@ -79,11 +72,6 @@ date: 2024-01-01
 tags: ["标签1", "标签2"]
 excerpt: "文章摘要"
 ---
-
-# 文章内容
-
-这里是文章的正文内容...
-```
 
 ## 支持的特殊语法
 
@@ -338,14 +326,3 @@ npm install
 - **eslint** - 代码质量检查
 - **prettier** - 代码格式化
 
-## 许可证
-
-MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request 来改进这个项目！
-
-## 问题反馈
-
-如果您遇到任何问题，请创建 [Issue](https://github.com/yourusername/tech-blog/issues)。
