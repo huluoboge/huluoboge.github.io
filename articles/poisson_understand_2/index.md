@@ -1,10 +1,105 @@
 ---
-title: "Poisson表面重建与有限元方法（FEM）的关系"
+title: "Poisson 表面重建的核心思想以及与有限元方法（FEM）的关系"
 date: 2025-10-18T22:00:00+08:00
 tags: ["Poisson reconstruction", "Finite Element Method", "Surface Reconstruction", "3D Reconstruction"]
 excerpt: "Poisson 表面重建的本质是一种有限元离散化的 Poisson 方程求解。Kazhdan 等人使用八叉树与局部基函数形式实现了自适应的 FEM 求解，使其成为连接 PDE 与几何重建的典型案例。本篇文章详细介绍了 Poisson 表面重建与有限元方法之间的关系。"
 draft: false
 ---
+
+[toc]
+# Poisson 表面重建的核心思想
+
+## 🧩 一、问题背景
+
+在点云重建中，我们通常有：
+
+* 一组三维点：$\{p_i\}$，在物体表面上；
+    
+* 每个点的法向量：$\{n_i\}$。
+    
+
+目标是：
+
+> 从这些点和法向量重建一个连续的表面 $S$。
+
+* * *
+
+## 🧭 二、Poisson重建的核心思想
+
+Poisson Surface Reconstruction (Kazhdan et al., 2006, 2007) 的核心想法是：
+
+> 将点云的法向信息看作是某个隐函数的梯度场，然后通过求解泊松方程来恢复这个隐函数。
+
+换句话说：
+
+$$\nabla \chi = \mathbf{v}$$
+
+其中：
+
+* $\chi(\mathbf{x})$：体素网格上的一个 **隐式函数（indicator function）**；
+    
+* $\mathbf{v}(\mathbf{x})$：表示法向场的 **向量场**。
+    
+
+* * *
+
+## 🧮 三、什么是 $\chi(\mathbf{x})$？
+
+我们定义一个函数 $\chi(\mathbf{x})$ 表示物体内部外部关系：
+
+$$\chi(\mathbf{x}) =  
+\begin{cases}  
+1, & \text{if } \mathbf{x} \text{ 在物体 } M \text{ 内部}\\  
+0, & \text{if } \mathbf{x} \text{ 在物体 } M \text{ 外部}  
+\end{cases}$$
+
+这个函数叫做 **indicator function（指示函数）** 或 **characteristic function**。
+
+* * *
+
+## ⚙️ 四、从法向到泊松方程
+
+我们知道在表面上，法向量方向与 $\nabla \chi$ 一致：
+
+$$\mathbf{n} = \frac{\nabla \chi}{\|\nabla \chi\|}$$
+
+因此有：
+
+$$\nabla \chi \approx \mathbf{v}$$
+
+（$\mathbf{v}$ 是点云法向插值得到的连续向量场。）
+
+对上式取散度：
+
+$$\nabla \cdot \nabla \chi = \nabla \cdot \mathbf{v}$$
+
+这就变成 **Poisson 方程**：
+
+$$\Delta \chi = \nabla \cdot \mathbf{v}$$
+
+* * *
+
+## 🔍 五、求解与提取表面
+
+解出 $\chi(\mathbf{x})$ 后，我们取等值面（通常是 $\chi = 0.5$）：
+
+$$S = \{ \mathbf{x} \mid \chi(\mathbf{x}) = \tau \}$$
+
+这就是重建出的表面。
+
+* * *
+
+## 🧾 六、总结
+
+| 概念 | 含义 |
+| --- | --- |
+| $\chi(\mathbf{x})$ | 体素场上表示物体“内外”的隐函数 |
+| $\nabla \chi$ | 指示函数的梯度（偏导）＝ 法向方向 |
+| 表面 | $\chi$ 从 1 变为 0 的过渡区域（梯度不为零处） |
+| 泊松方程 | 从梯度场（法向）恢复 $\chi$ 的积分方程 |
+
+* * *
+
 
 # Poisson 表面重建与有限元（FEM）方法之间的关系
 
@@ -162,7 +257,7 @@ $$
 
 ---
 
-## 五、 **边界项的物理/数学含义**
+## 五、 边界项的物理/数学含义
 
 边界项 $\int_{\partial\Omega} ψ\,\frac{\partial χ}{\partial n}\,dS$ 表示“流”（或通量）穿过边界对弱等式的贡献：
 
