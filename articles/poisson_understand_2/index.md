@@ -255,9 +255,177 @@ $$
 
 其中矩阵 $A$ 对称、正定，因此可通过共轭梯度（CG）或多重网格等高效方法求解。
 
+
 ---
 
-## 五、 边界项的物理/数学含义
+
+## 五 左右两边具体如何数值计算
+
+$$\sum_j \underbrace{\left( \int_{\Omega} \nabla \phi_i \cdot \nabla \phi_j \, d\mathbf{x} \right)}_{A_{ij}} c_j  
+= \underbrace{- \int_{\Omega} \phi_i \, (\nabla \cdot \mathbf{v}) \, d\mathbf{x}}_{b_i}$$
+
+
+---
+
+### 1.前提与符号
+
+* $\{\phi_i\}$：全局基（形函数）。每个 $\phi_i$ 有局部支撑（只在若干单元/节点非零）。
+    
+* 网格 / 细分单元集合：$\mathcal{T}=\{K\}$。每个单元上可以进行局部积分。
+    
+* 目标：组装稀疏刚度矩阵 $A$（$A_{ij}=\int_\Omega \nabla\phi_i\cdot\nabla\phi_j$) 与右端向量 $b$（如前述 $b_i=-\int_\Omega \phi_i(\nabla\cdot v)$ 或等价 $\int_\Omega \nabla\phi_i\cdot v$ 的形式）。
+    
+* 最终解线性系统 $A\mathbf{c}=\mathbf{b}$。
+    
+
+通常做法（FEM 风格）：
+
+* 对每个单元 $K$ 计算局部刚度矩阵 $A^K_{ab}=\int_K \nabla\phi_a\cdot\nabla\phi_b\,dV$（这里 a,b 是单元的局部基索引）；
+    
+* 把局部矩阵加到全局 $A$（local→global mapping）；
+    
+* 对 $b$ 做同样的局部积分与装配。
+    
+
+---
+
+
+### 2.左边：如何计算 $A_{ij}=\int_\Omega \nabla\phi_i\cdot\nabla\phi_j\,d\mathbf{x}$
+
+#### 通用公式（单元分解）
+
+$$A_{ij}=\sum_{K\in\mathcal T}\int_{K} \nabla\phi_i\cdot\nabla\phi_j\,dV$$
+
+只有当 $\operatorname{supp}\phi_i$ 与 $\operatorname{supp}\phi_j$ 在某个单元 $K$ 重叠时该单元才贡献非零，导致 $A$ 稀疏。这个在有原论文中使用basic 样条函数，n=3,支持域是1.5，所以一个Voxel最多有124个neighbor来求积分。 
+
+---
+
+#### 常见情形 1 — 线性单元（tet/tri / 八叉树 piecewise linear）
+
+* 对于一个线性三角形/四面体单元，形函数在单元内是一阶多项式，梯度是常数。
+    
+* 因此局部矩阵很简单：
+    
+    $$A^K_{ab} = (\nabla\phi_a|_K)\cdot(\nabla\phi_b|_K) \cdot |K|$$
+    
+    其中 $|K|$ 是单元体积（或面积），$\nabla\phi_a|_K$ 是常数矢量（可由单元顶点坐标直接算出）。
+    
+
+**如何算梯度（四面体例子）**：
+
+* 在四面体上，若局部基是“节点为1其余为0”的 hat 函数，梯度可由单元逆雅可比计算（标准 FEM 教材）。
+    
+* 计算完每个单元的 $A^K$ 后，把它加到全局矩阵的对应 (global_i, global_j)。
+    
+
+#### 常见情形 2 — 八叉树 / B-spline / higher-order bases
+
+* 若 $\phi$ 是 B-spline/box spline，$\nabla\phi$ 在每个支撑子域可能不是常数，但通常有封闭表达或可以按单元用高斯积分求出：
+    
+    $$A^K_{ab}\approx \sum_{q} w_q \, (\nabla\phi_a(x_q)\cdot\nabla\phi_b(x_q))$$
+    
+    $x_q$ 为 Gauss 点，$w_q$ 含雅可比权重。
+    
+
+* * *
+
+
+### 3、右边，如何计算 $b_i = -\int_\Omega \phi_i(\nabla\!\cdot\!v)\,dV$（两种等价实现）
+
+如前面所述，有两种常用做法（更稳定的是第二种）：
+
+#### 方案 A（直接）：先在网格上构建 $ \nabla\cdot v$，再积分
+
+1. 在每个单元（或节点）上评估/近似散度 $\nabla\cdot v$（差分或在单元上插值后解析求散度）。
+    
+2. 做单元高斯积分（或把散度视作单元常数）：
+    
+    $$b_i \approx -\sum_{K}\sum_{q} w_q \, \phi_i(x_q) \, (\nabla\cdot v)(x_q)$$
+3. 装配进全局 $b$。
+    
+
+**缺点**：若 $v$ 是由稀疏点云插值得到且噪声较大，直接求散度不稳定。
+
+#### 方案 B（推荐，等价但数值更好）：使用散度的分部积分，把散度移到基函数上
+
+利用恒等式（把散度换成 $\nabla\phi_i\cdot v$ 加边界项）：
+
+$$-\int_\Omega \phi_i(\nabla\cdot v)\,dV = \int_\Omega \nabla\phi_i\cdot v\,dV \;-\; \int_{\partial\Omega} \phi_i(v\cdot n)\,dS.$$
+
+通常边界项可忽略或单独处理（域足够大或设边界为零）。于是
+
+$$b_i \approx \int_\Omega \nabla\phi_i\cdot v \,dV.$$
+
+这一步非常实用：你只需能在给定点评估 $v(x)$（通过 splatting/RBF/插值），而不必先计算其散度。
+
+**局部积分：**
+
+$$b_i = \sum_{K}\int_K \nabla\phi_i(x)\cdot v(x)\,dV  
+\approx \sum_{K}\sum_{q} w_q \,\nabla\phi_i(x_q)\cdot v(x_q)$$
+
+---
+
+## 六、原文的理解
+
+
+### 1️⃣ 指示函数与梯度
+
+* 指示函数（indicator function）本身梯度在表面是无限大，无法直接使用。
+    
+* 解决方法是用一个 **平滑核（如 Gaussian）去卷积指示函数**，得到一个光滑的标量场 $F(\mathbf{x})$。
+    
+* 根据数学原理，卷积后梯度可以近似由 **点云的法向量分布**来表示：
+    
+    $$\nabla F(\mathbf{x}) \approx \text{某种基于法向量的向量场}$$
+
+* * *
+
+### 2️⃣ 八叉树表示
+
+* 八叉树的作用是 **自适应空间分辨率**：点云密度高的地方用更多的节点。
+    
+* 每个节点（顶点）对应一个未知系数 $c_i$，表示该位置的函数值。
+    
+* 八叉树内部是用基函数的三线性（trilinear）表示，从而可以方便插值， 基函数用 **B-spline** 表示
+
+* * *
+
+### 3️⃣ 构造梯度场
+
+* 因为真实表面未知，需要在每个八叉树节点附近 **splat 点云 patch**：
+    
+    * 每个点云点（带法向量）会对邻近的节点产生影响，形成 **离散向量场**。
+        
+* 数学上，用 **B-spline 基函数的梯度**和法向量的内积积分来得到每个节点的贡献：
+    
+    $$\mathbf{v}_o = \sum_{p} (\mathbf{n}_p \cdot \nabla B_o(\mathbf{x}_p))$$
+* 这就是构造右手边 $b$ 的过程。
+    
+
+* * *
+
+### 4️⃣ 刚度矩阵 $A$
+
+* 刚度矩阵 $A$ 来自 **拉普拉斯算子作用在 B-spline 基函数上**：
+    
+    $$A_{oo'} = \langle \nabla B_o, \nabla B_{o'} \rangle$$
+* 本质上是 **Poisson 方程的离散化**：
+    
+    $$\Delta F = \nabla \cdot \mathbf{V} \quad \Rightarrow \quad A \mathbf{c} = \mathbf{b}$$
+
+* * *
+
+### 5️⃣ 求解系数
+
+* 最终解线性系统 $A c = b$，得到每个节点的系数 $c_i$。
+    
+* 解出的 $c_i$ 表示 **光滑函数的值**，然后可以用 **marching cubes** 或等值面提取得到表面。
+    
+
+---
+
+# 其他说明
+## 一、边界项的物理/数学含义
 
 边界项 $\int_{\partial\Omega} ψ\,\frac{\partial χ}{\partial n}\,dS$ 表示“流”（或通量）穿过边界对弱等式的贡献：
 
@@ -266,7 +434,7 @@ $$
 - 在 Poisson 重建常见做法：把域设大并把 χ 在边界置 0（或用自然边界），实际计算中通常能安全忽略或处理该项。
 ---
 
-## 六、Poisson Surface Reconstruction 的有限元实现
+## 二、Poisson Surface Reconstruction 的有限元实现
 
 在 Kazhdan 等人的方法（2006, 2007）中：
 
@@ -282,7 +450,7 @@ $$
 
 ---
 
-## 七、与有限差分法的对比
+## 三、与有限差分法的对比
 
 | 比较项 | 有限差分 (FDM) | 有限元 (FEM) |
 | ------- | ---------------- | -------------- |
@@ -297,7 +465,7 @@ $$
 
 ---
 
-## 八、Poisson 图像融合的关系
+## 四、Poisson 图像融合的关系
 
 Poisson 图像融合（Poisson Image Editing）同样解的是 Poisson 方程：
 
@@ -311,7 +479,7 @@ Poisson Surface Reconstruction 则是在 **三维体素域** 上进行相同的�
 
 ---
 
-## 九、直观理解与总结
+## 五、直观理解与总结
 
 你可以把 FEM 想象成：
 
@@ -328,7 +496,7 @@ Poisson Surface Reconstruction 则是在 **三维体素域** 上进行相同的�
 
 ---
 
-## 十、小结
+## 六、小结
 
 > 有限元方法（FEM）通过基函数近似、弱形式求解，使得连续 Poisson 方程可在离散网格上高效求解。  
 > Poisson Surface Reconstruction 正是利用 FEM 思想在三维空间上重建连续隐函数，从而生成高质量的表面。
