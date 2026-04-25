@@ -85,9 +85,9 @@ function generateNav(currentPath = "") {
 
 // 生成HTML页面模板
 function generateHTML(title, content, currentPath = "") {
-  return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+    return `<!DOCTYPE html>
+  <html lang="zh-CN">
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
@@ -97,160 +97,16 @@ function generateHTML(title, content, currentPath = "") {
     <script src="/static/js/highlight.min.js"></script>
     <link rel="stylesheet" href="/static/css/katex.min.css">
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 初始化Mermaid - 根据主题设置不同的配置
-            function initMermaid() {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                mermaid.initialize({ 
-                    startOnLoad: true, 
-                    theme: isDark ? 'dark' : 'default',
-                    securityLevel: 'loose',
-                    flowchart: { useMaxWidth: false },
-                    themeVariables: isDark ? {
-                        primaryColor: '#4a5568',
-                        primaryTextColor: '#e6e6e6',
-                        primaryBorderColor: '#4a5568',
-                        lineColor: '#e6e6e6',
-                        tertiaryColor: '#2d3748',
-                        tertiaryBorderColor: '#4a5568'
-                    } : {}
-                });
-            }
-            
-            // 初始化和主题变化时重新初始化Mermaid
-            initMermaid();
-            
-            // 处理静态资源链接
-            const links = document.querySelectorAll('a[href$=".md"]');
-            links.forEach(link => {
-                link.href = link.href.replace('.md', '.html');
-            });
-            
-            // 延迟执行Mermaid渲染，确保DOM完全加载
-            setTimeout(function() {
-                try {
-                    mermaid.init(undefined, '.mermaid');
-                } catch (error) {
-                    console.error('Mermaid渲染错误:', error);
-                }
-            }, 500);
-            
-            // 主题切换功能
-            window.toggleTheme = function() {
-                const html = document.documentElement;
-                const currentTheme = html.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                // 防止闪烁：先设置过渡属性
-                html.style.transition = 'none';
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                
-                // 重新初始化Mermaid以适应新主题
-                initMermaid();
-                
-                // 重新渲染Mermaid图表
-                setTimeout(function() {
-                    try {
-                        mermaid.init(undefined, '.mermaid');
-                    } catch (error) {
-                        console.error('Mermaid渲染错误:', error);
-                    }
-                    // 恢复过渡效果
-                    html.style.transition = '';
-                }, 100);
-            }
-            
-            // 初始化主题
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            // 汉堡菜单功能
-            window.toggleMenu = function() {
-                const navMenu = document.querySelector('.nav-menu');
-                navMenu.classList.toggle('active');
-            }
-            
-            // 点击页面其他区域关闭菜单
-            document.addEventListener('click', function(event) {
-                const navMenu = document.querySelector('.nav-menu');
-                const hamburger = document.querySelector('.hamburger');
-                
-                if (navMenu.classList.contains('active') && 
-                    !navMenu.contains(event.target) && 
-                    !hamburger.contains(event.target)) {
-                    navMenu.classList.remove('active');
-                }
-            });
-            
-            // 点击导航链接后关闭菜单
-            const navLinks = document.querySelectorAll('.nav-menu a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    const navMenu = document.querySelector('.nav-menu');
-                    navMenu.classList.remove('active');
-                });
-            });
-            
-            // document.querySelectorAll('pre code.hljs').forEach(block => {
-            //     hljs.highlightElement(block);
-            // });
-            // if (typeof hljs !== 'undefined') {
-            //     hljs.highlightAll(); // 自动高亮所有代码块
-            // } else {
-            //     console.error('highlight.js 未加载');
-            // }
-            // 初始化代码高亮
-            function initHighlight() {
-                if (typeof hljs !== 'undefined') {
-                    // 高亮所有代码块
-                    // document.querySelectorAll('pre code').forEach((block) => {
-                    //     hljs.highlightElement(block);
-                    // });
-                    hljs.highlightAll(); // 自动高亮所有代码块
-                } else {
-                    console.error('highlight.js not loaded');
-                }
-            }
-            
-            // 立即执行代码高亮
-            initHighlight();
-            
-            // 延迟执行代码高亮，确保DOM完全加载
-            setTimeout(initHighlight, 1000);
-            
-            // 主题切换时重新高亮代码
-            const originalToggleTheme = window.toggleTheme;
-            window.toggleTheme = function() {
-                originalToggleTheme();
-                setTimeout(initHighlight, 200);
-            };
-            
-            // // 初始化KaTeX数学公式渲染
-            // function renderMath() {
-            //     renderMathInElement(document.body, {
-            //         delimiters: [
-            //             {left: '$$', right: '$$', display: true},
-            //             {left: '$', right: '$', display: false},
-            //             {left: '\\(', right: '\\)', display: false},
-            //             {left: '\\[', right: '\\]', display: true}
-            //         ],
-            //         throwOnError: false
-            //     });
-            // }
-            
-            // // 延迟渲染数学公式，确保DOM完全加载
-            // setTimeout(renderMath, 100);
-            
-            // // 主题切换时重新渲染数学公式
-            // const originalToggleTheme = window.toggleTheme;
-            // window.toggleTheme = function() {
-            //     originalToggleTheme();
-            //     setTimeout(renderMath, 200);
-            // };
-        });
+      document.addEventListener('DOMContentLoaded', function() {
+        // ...existing code...
+      });
     </script>
     <style>
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
         :root {
             --bg-color: #ffffff;
             --text-color: #333333;
@@ -278,14 +134,13 @@ function generateHTML(title, content, currentPath = "") {
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          margin: 0;
+          padding: 20px 0;
+          line-height: 1.6;
+          background-color: var(--bg-color);
+          color: var(--text-color);
+          transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         nav {
@@ -799,19 +654,20 @@ function generateHTML(title, content, currentPath = "") {
 
         }
     </style>
-</head>
+  </head>
 <body>
+  <div class="container">
     <nav>
-        <button class="hamburger" onclick="toggleMenu()">☰</button>
-        <ul class="nav-menu">
-            ${generateNav(currentPath)}
-        </ul>
-        <button class="theme-switch" onclick="toggleTheme()"> 切换主题</button>
+      <button class="hamburger" onclick="toggleMenu()">☰</button>
+      <ul class="nav-menu">
+        ${generateNav(currentPath)}
+      </ul>
+      <button class="theme-switch" onclick="toggleTheme()"> 切换主题</button>
     </nav>
-    
     <main>
-        ${content}
+      ${content}
     </main>
+  </div>
 </body>
 </html>`;
 }
