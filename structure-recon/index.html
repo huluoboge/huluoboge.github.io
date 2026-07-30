@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on recovering indoor structural information from meshes.">
+ <title>Indoor Structured Reconstruction - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Recovering structural information from indoor meshes.</p>
+ <h2>Indoor Structured Reconstruction</h2>
+ <p class="case-summary">A geometry-first pipeline that takes an indoor mesh as input, infers room-level structural information, and reconstructs a regularized structural mesh for downstream floorplan, measurement, and visualization workflows.</p>
+ <div class="case-meta"><span>Indoor Mesh</span><span>Cell Complex</span><span>Visibility</span><span>Graph Cut</span><span>Door Recognition</span></div>
+ </section>
+
+ <section id="problem" class="case-section">
+ <h3>Problem</h3>
+ <p>Given a reconstructed indoor mesh, the goal is not only to clean geometry but to recover the underlying structural information: rooms, walls, openings, doors, and the inside/outside relationship of space. Raw indoor reconstruction meshes often contain layered walls, floating fragments, holes near corners, and furniture fused into structural surfaces; these artifacts make wall lines ambiguous and break downstream measurement, floorplan, editing, and visualization workflows.</p>
+ </section>
+
+ <section id="approach" class="case-section">
+ <h3>Approach</h3>
+ <ul class="case-points">
+ <li>Extract candidate structural surfaces from the input mesh and use them to partition the indoor space into a cell complex.</li>
+ <li>Use visibility evidence from the reconstructed mesh and scan observations to reason about free space, occupied space, and unknown regions.</li>
+ <li>Formulate inside/outside labeling as a graph-cut optimization problem over cells, then reconstruct the structural mesh from the optimized cell labels.</li>
+ <li>Recover higher-level structure such as room partitions and door openings from the resulting topology and geometric evidence.</li>
+ </ul>
+ </section>
+
+ <section id="contribution" class="case-section">
+        <h3>My Contribution</h3>
+        <p>I designed the complete algorithm framework and independently implemented the full system from scratch. The core idea is to convert an input mesh into a spatial cell complex, then solve the structural inside/outside labeling problem with visibility constraints and graph-cut optimization.</p>
+        <p>My main contributions included:</p>
+        <ul class="case-points">
+          <li>End-to-end framework design for mesh-to-structure reconstruction</li>
+          <li>Complex geometry implementation for cell-complex construction and maintenance</li>
+          <li>Visibility-based inside/outside reasoning and graph-cut formulation</li>
+          <li>Room partitioning and structural topology recovery</li>
+          <li>Door recognition and opening extraction from geometric/topological cues</li>
+          <li>Regularized structural mesh reconstruction from optimized cell labels</li>
+        </ul>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>Starting from an indoor mesh, the system successfully reconstructs structural information and outputs a regularized structural mesh, making the result more suitable for floorplan generation, measurement, editing, and VR visualization.</p>
+ <div class="case-figures">
+ <figure><img src="figures/fig1_overview.png" alt="Indoor reconstruction pipeline overview"><figcaption>Pipeline overview from raw mesh to structured indoor model.</figcaption></figure>
+ <figure><img src="figures/fig8_results.png" alt="Structured reconstruction results"><figcaption>Representative structured model outputs.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>

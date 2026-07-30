@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="English resume of Hu Yang">
+  <title>Hu Yang - Resume</title>
+  <style>
+    :root {
+      --ink: #111;
+      --text: #333;
+      --muted: #666;
+      --line: #d8d8d8;
+      --accent: #07898d;
+      --soft: #f4f8f8;
+      --sans: Arial, "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: #ececec; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 11.4px;
+      line-height: 1.52;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .resume {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 24px auto;
+      background: #fff;
+      box-shadow: 0 8px 30px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+
+    .hero {
+      position: relative;
+      padding: 22mm 16mm 9mm;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      left: -8mm;
+      right: -8mm;
+      top: -35mm;
+      height: 57mm;
+      background: var(--accent);
+      border-radius: 0 0 50% 50% / 0 0 18% 18%;
+      z-index: 0;
+    }
+    .avatar {
+      position: relative;
+      z-index: 1;
+      width: 24mm;
+      height: 24mm;
+      margin: 0 auto 5.5mm;
+      border-radius: 50%;
+      border: 1.5mm solid #fff;
+      background: #eee;
+      object-fit: cover;
+      display: block;
+    }
+    h1 {
+      margin: 0 0 4mm;
+      color: var(--ink);
+      font-size: 27px;
+      line-height: 1;
+      letter-spacing: .02em;
+    }
+    .contact, .summary-line {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4mm;
+      margin: 0;
+      color: #444;
+      font-size: 12px;
+    }
+    .summary-line { margin-top: 2mm; }
+
+    main { padding: 0 15mm 12mm; }
+    section { margin-top: 7mm; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 6mm;
+      margin: 0 0 3mm;
+      color: var(--ink);
+      font-size: 19px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+    .section-title::after {
+      content: "";
+      flex: 1;
+      border-top: 1px solid var(--line);
+    }
+
+    p { margin: 0 0 2.2mm; }
+    ol {
+      margin: 0 0 2.2mm;
+      padding-left: 5mm;
+    }
+    li { margin: 0 0 .5mm; }
+
+    .entry { margin-top: 4.1mm; }
+    .entry-head {
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr auto;
+      gap: 5mm;
+      align-items: baseline;
+      margin-bottom: 1.8mm;
+    }
+    .entry-title {
+      color: var(--ink);
+      font-size: 13.6px;
+      font-weight: 800;
+    }
+    .entry-role {
+      color: #222;
+      font-weight: 600;
+    }
+    .entry-time {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .label {
+      margin: 1.3mm 0 .9mm;
+      color: var(--ink);
+      font-weight: 800;
+    }
+    .advantage {
+      font-size: 11.8px;
+      line-height: 1.72;
+    }
+    .project-note {
+      margin-bottom: 2.3mm;
+      color: var(--text);
+    }
+    .education .entry-head {
+      grid-template-columns: 1fr auto auto;
+      padding: 2mm 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .education .entry { margin-top: 1mm; }
+
+    .screen-actions {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      display: flex;
+      gap: 8px;
+    }
+    .screen-actions a,
+    .screen-actions button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 7px 11px;
+      border-radius: 4px;
+      font: 12px var(--sans);
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    }
+
+    @media (max-width: 860px) {
+      html { background: #fff; }
+      .resume { width: 100%; margin: 0; box-shadow: none; }
+      .entry-head { grid-template-columns: 1fr; gap: 1mm; }
+      .screen-actions { display: none; }
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    @media print {
+      html, body { background: #fff; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .resume {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        box-shadow: none;
+      }
+      .screen-actions { display: none; }
+      .entry-head { grid-template-columns: 1.1fr 1.1fr auto; gap: 5mm; }
+      .education .entry-head { grid-template-columns: 1fr auto auto; }
+      .entry-head, .section-title { break-after: avoid; page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <article class="resume">
+    <header class="hero">
+      <img class="avatar" src="../../assets/hu-yang.jpg?v=1" alt="Hu Yang">
+      <h1>Hu Yang</h1>
+      <p class="contact"><span>Male | 41</span><span>13146929520</span><span>huyang0909@gmail.com</span></p>
+      <p class="summary-line"><span>15 years in 3D reconstruction engineering</span><span>SfM / MVS / Point Clouds / Mesh / Texture Mapping</span><span>Large-scale production reconstruction systems</span></p>
+    </header>
+
+    <main>
+      <section>
+        <h2 class="section-title">Profile</h2>
+        <p class="advantage">Full-stack 3D reconstruction algorithm engineer with 15 years of experience in R&amp;D and production delivery. Deep expertise across SfM, MVS, point-cloud processing, mesh reconstruction, and texture mapping. Led large-scale 3D reconstruction for 55M+ real spaces at Beike Realsee, with algorithm-system stability reaching 99.99%. Strong ability to build technical architecture from zero to one, lead core projects, optimize CUDA and distributed cloud reconstruction systems, and deliver commercial value across indoor large-scene reconstruction, hardware calibration, LiDAR SLAM, oblique photogrammetry, and LiDAR point-cloud processing. Six consecutive years of top-tier performance ratings in a core business line.</p>
+      </section>
+
+      <section>
+        <h2 class="section-title">Work Experience</h2>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Beike Realsee</div><div class="entry-role">3D Reconstruction Algorithm Architect</div><div class="entry-time">2019.01-Present</div></div>
+          <p class="label">Responsibilities:</p>
+          <ol>
+            <li>Owned the overall technical architecture and core module development for Beike VR house-tour 3D reconstruction.</li>
+            <li>Led technical design and delivery for large-scene reconstruction, LOD rendering, hardware calibration, and cloud LiDAR SLAM frameworks.</li>
+            <li>Led algorithm-team work on end-to-end efficiency optimization, performance acceleration, and production stability.</li>
+            <li>Implemented core algorithm code, handled critical technical problems, and evaluated new-business technical directions.</li>
+            <li>Worked with engineering and product teams to align technical roadmap with business goals.</li>
+            <li>Managed code quality, engineering standards, and reusable technical assets across the team.</li>
+          </ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Built the foundational 3D reconstruction capability for Beike VR house tours, including overall design and core code.</li>
+            <li>Built an indoor large-scene reconstruction system from zero to one, contributing over 70% of core code and commercializing LOD viewing capability.</li>
+            <li>Designed the full hardware-calibration framework and implemented core calibration code, improving calibration accuracy for next-generation VR scanning devices.</li>
+            <li>Optimized the full algorithm chain with CUDA and other techniques, reducing 24K image ISP time from 900s to 6.5s and one VR reconstruction from 20min to 8.5min.</li>
+            <li>Completed the cloud LiDAR SLAM framework design and core implementation, expanding the company's multi-sensor reconstruction system.</li>
+            <li>Received performance rating 4 or above for six consecutive years.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Feima Robotics, Beijing</div><div class="entry-role">3D Reconstruction Algorithm Engineer</div><div class="entry-time">2017.10-2019.01</div></div>
+          <p class="label">Responsibilities:</p>
+          <ol>
+            <li>Developed UAV aerial-image 3D reconstruction algorithms, focusing on multi-view dense matching and DSM generation.</li>
+            <li>Developed very-large-scale image loading, browsing, and LOD display engines.</li>
+            <li>Designed and implemented rendering algorithms for mosaic-editing software.</li>
+          </ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Independently developed an efficient tSGM multi-view dense matching algorithm, the company's first core 3D reconstruction algorithm.</li>
+            <li>Designed and implemented a large-scale image loading and browsing engine, then delivered mosaic editing and rendering workflows on top of it.</li>
+            <li>Solved aerial triangulation reconstruction under GNSS-only control without ground control points, improving practical UAV surveying accuracy.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Infinite3D / Jingzhi 3D, Beijing</div><div class="entry-role">Co-founder, Technical Executive Director</div><div class="entry-time">2014.10-2017.10</div></div>
+          <p class="label">Responsibilities:</p>
+          <ol>
+            <li>Led R&amp;D and iteration of full-process oblique photogrammetry 3D reconstruction software.</li>
+            <li>Managed code standards, code quality, engineering optimization, and performance tuning.</li>
+            <li>Led development and debugging of large-scale image SfM algorithms for aerial-scene reconstruction.</li>
+            <li>Led high-precision small-object 3D reconstruction algorithm development and adaptation.</li>
+            <li>Designed and implemented dedicated reconstruction software for array-camera hardware.</li>
+          </ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Core contributor to Infinite3D-Real Scenes, one of China's first domestic oblique photogrammetry reconstruction software systems.</li>
+            <li>Led overall technical architecture and core module implementation, establishing a complete and practical reconstruction pipeline.</li>
+            <li>Completed full-process reconstruction software for array-camera data, expanding hardware support.</li>
+            <li>Improved software efficiency and large-scale imagery processing through algorithm engineering and code-quality control.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Glodon</div><div class="entry-role">Senior C++ R&amp;D Engineer</div><div class="entry-time">2014.04-2014.10</div></div>
+          <p class="label">Responsibilities:</p>
+          <ol>
+            <li>Developed, maintained, and iterated foundational C++ SDKs supporting engineering software modules.</li>
+            <li>Designed and optimized base display components for construction-management software.</li>
+            <li>Owned dedicated SDK development tasks, including implementation, debugging, quality control, and delivery.</li>
+          </ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Delivered a construction-report display SDK with stable rendering performance and accuracy.</li>
+            <li>Independently developed a PDF signature SDK supporting signing, verification, and permission control.</li>
+            <li>Strengthened low-level C++ SDK capability and improved integration with upper-layer engineering software.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">China Coal Aerial Surveying and Remote Sensing Bureau</div><div class="entry-role">3D Reconstruction Algorithm Engineer</div><div class="entry-time">2011.07-2014.04</div></div>
+          <p class="label">Responsibilities:</p>
+          <ol>
+            <li>Developed core LiDAR point-cloud algorithms, mainly ground/non-ground classification.</li>
+            <li>Designed and implemented LiDAR point-cloud vectorization modeling algorithms and supporting software.</li>
+            <li>Designed and solved core real-time stereo-pair rendering problems for aerial imagery.</li>
+          </ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Developed a progressive TIN densification LiDAR filtering algorithm comparable to Terrasolid TerraScan in efficiency and quality.</li>
+            <li>Led algorithm design for LiDAR point-cloud vectorization modeling software, a core part of an award-winning aerial-image and LiDAR reconstruction system.</li>
+            <li>Solved a real-time aerial stereo rendering bottleneck in three days after it had blocked the image lab for two months, matching Inpho-level visual quality.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Heilongjiang Bureau of Surveying, Mapping and Geoinformation</div><div class="entry-role">Web GIS Developer</div><div class="entry-time">2010.07-2011.07</div></div>
+          <p class="label">Responsibilities:</p>
+          <ol><li>Developed frontend and backend components for online electronic maps.</li></ol>
+          <p class="label">Achievements:</p>
+          <ol><li>Completed map development for the Heilongjiang geographic information sharing service platform.</li></ol>
+        </article>
+      </section>
+
+      <section>
+        <h2 class="section-title">Project Experience</h2>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Beike Realsee VR House-Tour 3D Reconstruction</div><div class="entry-role">Technical Lead</div><div class="entry-time">2019.01-Present</div></div>
+          <p class="label">Description:</p>
+          <p class="project-note">Core technical foundation for Beike VR house tours, providing high-precision, high-efficiency, high-stability indoor real-estate reconstruction for massive online viewing and 55M+ modeled real spaces.</p>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>As overall 3D reconstruction lead, built the full technical architecture from zero to one and independently implemented core code for pose stitching and optimization, point-cloud processing, mesh reconstruction and processing, texture mapping, and LOD.</li>
+            <li>Reached 99.99% algorithm-system stability and supported stable reconstruction of very large indoor scenes with 3000+ scan stations.</li>
+            <li>Reduced 24K image ISP time from 900s to 6.5s and one VR reconstruction from 20min to 8.5min through end-to-end optimization.</li>
+            <li>Built the complete cloud LiDAR SLAM framework supporting large-scale commercial deployment of Beike VR house tours.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Galois P4 Calibration</div><div class="entry-role">Technical Solution Design</div><div class="entry-time">2024.01-2025.06</div></div>
+          <p class="label">Description:</p>
+          <p class="project-note">Calibration project for the next-generation 24K VR scanning device Galois P4, solving point-cloud distortion and insufficient point-cloud/image pose accuracy for commercial scanning and reconstruction.</p>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Led the team in building a system-error evaluation framework, designing targeted hardware calibration solutions, and implementing core calibration code.</li>
+            <li>Completed the calibration target, controlling point-cloud/image reprojection error within 4 pixels at original image resolution and resolving long-standing device-accuracy issues.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Indoor Large-Scene Reconstruction</div><div class="entry-role">Technical Lead</div><div class="entry-time">2023.01-Present</div></div>
+          <p class="label">Description:</p>
+          <ol><li>Extended 3D reconstruction from Beike VR house tours to libraries, museums, shopping malls, hotels, and other large commercial spaces.</li></ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Designed the overall large-scene reconstruction architecture and built a cloud block-and-merge reconstruction system to solve memory and efficiency bottlenecks.</li>
+            <li>Enabled stable reconstruction of 3000-station indoor scenes, supporting commercial 3D reconstruction across multiple industries.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Cloud Post-Processing for LiDAR SLAM</div><div class="entry-role">Technical Lead</div><div class="entry-time">2023.01-Present</div></div>
+          <p class="label">Description:</p>
+          <p class="project-note">Developed a cloud SLAM post-processing algorithm system for a handheld scanner, delivering high-precision and high-fidelity reconstruction and visualization.</p>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Built the overall algorithm pipeline from zero to one and contributed most core code, with a focus on large-scale point-cloud colorization.</li>
+            <li>Completed SLAM pose optimization, point-cloud processing, colorization, LOD generation, and mesh reconstruction, improving the company's handheld-scanning reconstruction system.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">tSGM-Based Multi-View Dense Matching</div><div class="entry-role">Algorithm Engineer</div><div class="entry-time">2017.10-2018.06</div></div>
+          <p class="label">Description:</p>
+          <ol><li>Developed a UAV aerial-image multi-view dense matching algorithm for high-speed, low-memory DSM/DEM generation and orthophoto mosaicking.</li></ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Independently implemented the full tSGM multi-view dense matching algorithm from zero to one using CUDA parallel computing.</li>
+            <li>Delivered the algorithm into DSM/DEM generation, orthophoto mosaicking, UAV variable-height flight, and other products.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Oblique Photogrammetry Software</div><div class="entry-role">Software Lead</div><div class="entry-time">2014.10-2016.10</div></div>
+          <p class="label">Description:</p>
+          <ol><li>Developed domestic oblique photogrammetry software covering aerial triangulation, dense matching, mesh reconstruction, texture mapping, and LOD generation.</li></ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Led software development and aerial-triangulation algorithms, including feature extraction, image retrieval, feature matching, SfM, control-point BA, and GNSS-constrained BA.</li>
+            <li>Delivered Infinite3D-Real Scenes, a domestic oblique photogrammetry reconstruction system for high-precision and high-efficiency large-scene aerial reconstruction.</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Airborne LiDAR Point-Cloud Processing Software</div><div class="entry-role">Technical Lead</div><div class="entry-time">2013.01-2013.12</div></div>
+          <p class="label">Description:</p>
+          <ol><li>Developed full-process airborne LiDAR point-cloud software for strip adjustment, filtering, vectorized reconstruction, and related processing.</li></ol>
+          <p class="label">Achievements:</p>
+          <ol>
+            <li>Completed airborne LiDAR ground filtering with progressive TIN densification, achieving performance and effect comparable to TerraScan.</li>
+            <li>Developed LiDAR building vectorization algorithms and delivered a leading domestic 3D vectorized reconstruction software system.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section class="education">
+        <h2 class="section-title">Education</h2>
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Wuhan University</div><div class="entry-role">M.S. Cartography and Geographic Information Systems</div><div class="entry-time">2008-2010</div></div>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">Northeast Petroleum University</div><div class="entry-role">B.S. Resource Environment and Urban-Rural Planning</div><div class="entry-time">2003-2007</div></div>
+        </article>
+      </section>
+    </main>
+  </article>
+
+  <div class="screen-actions" aria-hidden="true">
+    <a href="../../assets/huyang-cv-en.pdf" download>Download PDF</a>
+    <a href="../">中文</a>
+    <button type="button" onclick="window.print()">Print / Export</button>
+  </div>
+</body>
+</html>

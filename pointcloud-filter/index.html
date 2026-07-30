@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on block-parallel point-cloud filtering and geometric refinement for handheld LiDAR scanning.">
+ <title>Handheld LiDAR Point-Cloud Processing - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Block-parallel filtering and geometric refinement for handheld LiDAR scans.</p>
+ <h2>Handheld LiDAR Point-Cloud Processing</h2>
+ <p class="case-summary">A production point-cloud filtering pipeline for handheld laser scanning, using sparse voxel grids, keyframe trajectory priors, block-level parallelism, dynamic-object removal, robust normal orientation, bilateral geometric refinement, and density homogenization.</p>
+ <div class="case-meta"><span>Handheld LiDAR</span><span>Sparse Voxels</span><span>Dynamic Removal</span><span>Normal Propagation</span><span>Parallel Blocks</span></div>
+ </section>
+
+ <section id="background" class="case-section">
+ <h3>Background</h3>
+ <p>Handheld laser scanners produce dense keyframe point clouds while moving through indoor and outdoor scenes. The raw data contains range noise, dynamic people or vehicles, uneven sampling density, self-occlusion around the scanner, reflective artifacts, and repeated surfaces caused by dense trajectory coverage.</p>
+ <p>For production reconstruction, the raw cloud must be filtered and refined before mesh reconstruction, colorization, or delivery. The pipeline also has to handle very large scenes under bounded memory, so the algorithm is organized around streaming spatial partitioning and block-level parallel processing.</p>
+ </section>
+
+ <section id="approach" class="case-section">
+ <h3>Approach</h3>
+ <ul class="case-points">
+ <li>Use a sparse voxel grid as the shared spatial index for streaming block construction, neighbor topology, ray traversal, local neighborhoods, and final block ownership.</li>
+ <li>Partition keyframe point clouds into non-overlapping spatial blocks, record up to 26 neighboring blocks, and prepare block tasks for parallel execution.</li>
+ <li>Remove dynamic points by combining sparse-voxel visibility traversal with temporal consistency: a voxel crossed by rays from nearby timestamps may be glass, a porous object such as a wire mesh, or a voxel-boundary approximation, while repeated crossings across separated time intervals indicate that an object occupied different positions over time.</li>
+ <li>Refine geometry with jet smoothing, robust viewpoint-driven normal orientation, normal-distance bilateral filtering, and minimum-spanning-tree normal propagation.</li>
+ <li>Optionally homogenize large planar regions through clustering, Poisson-disk thinning, ball-pivoting local triangulation, Monte Carlo surface resampling, and nearest-sample validation.</li>
+ <li>Finish with post-voxel regularization, sparse outlier cleanup, strict attribute validation, block-boundary ownership checks, and streaming global merge.</li>
+ </ul>
+ </section>
+
+ <section id="contribution" class="case-section">
+ <h3>My Contribution</h3>
+ <p>I designed and implemented the filtering and geometric refinement pipeline as a production post-processing system for handheld LiDAR reconstruction. The core design uses sparse voxel grids, keyframe trajectory priors, and temporal evidence to make visibility reasoning, local geometry refinement, density control, and block-parallel scalability work in one consistent coordinate system.</p>
+ <p>My main contributions included:</p>
+ <ul class="case-points">
+ <li>Four-stage production pipeline: streaming block construction, task preparation, block-parallel filtering, and streaming result merge</li>
+ <li>Dynamic-object removal that combines visibility traversal with keyframe time spans, separating true moving objects from glass, porous structures, and boundary artifacts caused by voxelized visibility approximation</li>
+ <li>Robust normal estimation and orientation based on averaged viewpoint direction and global MST propagation</li>
+ <li>Normal-distance anisotropic bilateral filtering that smooths surfaces while preserving sharp structural edges</li>
+ <li>Plane-cluster-driven density homogenization for large floors, walls, and other broad planar structures</li>
+ <li>Block-boundary ownership and neighbor-merge logic that avoids duplicate output and boundary discontinuities</li>
+ </ul>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>The completed pipeline converts raw handheld LiDAR keyframe clouds into clean, uncolored global point clouds suitable for downstream reconstruction, visualization, and colorization workflows. It covers distance filtering, time-aware dynamic removal, centroiding, smoothing, normal refinement, density regularization, outlier cleanup, boundary-safe block output, and global merge.</p>
+ <p>The system is structured for production deployment: serial streaming stages handle data preparation and final merge, while the core block-level filtering stage is stateless and naturally parallel across workers.</p>
+ <div class="case-figures">
+ <figure><img src="figures/fig1_pipeline.png" alt="Handheld LiDAR point-cloud processing four-stage pipeline"><figcaption>Four-stage pipeline from keyframe clouds and trajectory to filtered global point cloud.</figcaption></figure>
+ <figure><img src="figures/fig6_homogenization.png" alt="Plane-cluster-driven density homogenization"><figcaption>Plane-cluster-driven density homogenization for uneven handheld scan density.</figcaption></figure>
+ </div>
+ <div class="case-figures">
+ <figure><img src="figures/fig3_visibility.png" alt="Time-aware ray-consistency dynamic point removal"><figcaption>Dynamic point removal combines sparse-voxel ray traversal with keyframe timing to avoid confusing moving objects with glass, porous geometry, or boundary approximation artifacts.</figcaption></figure>
+ <figure><img src="figures/fig7_block_boundary.png" alt="Block boundary and neighbor merge strategy"><figcaption>Neighbor topology and block ownership logic for seamless non-duplicated output.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>

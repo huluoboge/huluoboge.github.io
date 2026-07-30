@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on indoor large-scene reconstruction from station-based scans.">
+ <title>Indoor Large-Scale Reconstruction - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Indoor large-scene reconstruction from station-based scanning.</p>
+ <h2>Indoor Large-Scale Reconstruction</h2>
+ <p class="case-summary">A cloud-oriented reconstruction system for VR house tours, museums, and station-scanned venues, designed to process very large indoor scenes through tiled parallel algorithms instead of a single global reconstruction job.</p>
+ <div class="case-meta"><span>Indoor Scenes</span><span>Parallel Tiling</span><span>Mesh Topology</span><span>LOD</span><span>Docker Cluster</span></div>
+ </section>
+
+ <section id="background" class="case-section">
+ <h3>Background</h3>
+ <p>For Realsee VR house tours, museums, and other station-scanned venues, reconstruction has to support large indoor spaces with many scan stations, occlusions, multiple floors, and interactive browser viewing. The data scale can exceed single-machine memory, so the full algorithm chain must support block-level parallel processing while still producing one coherent model.</p>
+ </section>
+
+ <section id="key-work" class="case-section">
+ <h3>Key Work</h3>
+ <ul class="case-points">
+ <li>Designed a tiled parallel reconstruction framework so the full pipeline can run under bounded memory and scale across cloud workers.</li>
+ <li>Solved topology consistency issues introduced by block reconstruction, including seam conflicts between neighboring mesh blocks.</li>
+ <li>Built robust mesh hole filling for occluded regions and incomplete observations.</li>
+ <li>Developed multi-floor segmentation for complex indoor layouts, including irregular floor shapes.</li>
+ <li>Implemented automatic ceiling and top-surface hiding during browsing to improve VR navigation and visual experience.</li>
+ <li>Built large-scene global color balancing with a semi-global optimization formulation that supports parallel execution.</li>
+ <li>Implemented textured mesh simplification that preserves seamless block merging while simplifying geometry and naturally downsampling texture attributes.</li>
+ <li>Designed the complete LOD generation pipeline and delivery strategy for large interactive scenes.</li>
+ </ul>
+ </section>
+
+ <section id="contribution" class="case-section">
+        <h3>My Contribution</h3>
+        <p>I designed and implemented the overall algorithm framework and parallel execution framework, including the tiled data organization, task decomposition, module contracts, and cloud execution path.</p>
+        <p>I also designed and implemented the major reconstruction modules:</p>
+        <ul class="case-points">
+          <li>Block-parallel reconstruction and topology-consistent mesh merging</li>
+          <li>Robust mesh hole filling for occlusion-heavy indoor scans</li>
+          <li>Multi-floor segmentation for regular and irregular floor structures</li>
+          <li>Automatic ceiling/top hiding for interactive VR browsing</li>
+          <li>Semi-global texture color balancing for large scenes</li>
+          <li>Textured mesh simplification and seamless block merging</li>
+          <li>LOD generation algorithms, LOD strategy, and 3D Tiles-style delivery</li>
+        </ul>
+        <p>I led the deployment of the pipeline onto a cloud Docker cluster so large scenes could be processed through distributed production jobs.</p>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>The system turns station-based indoor scans into large, browser-ready 3D scenes with bounded memory use, parallel cloud execution, consistent mesh topology, robust floor handling, global texture consistency, and LOD-based interactive delivery.</p>
+ <p>For public examples of Realsee VR spaces and interactive scene browsing, see the official <a href="https://www.realsee.com/discovery">Realsee discovery page</a>.</p>
+ <div class="case-figures">
+ <figure><img src="figures/fig1_overview.png" alt="Large-scale reconstruction pipeline overview"><figcaption>Pipeline overview across tiling, mesh, texture, and LOD stages.</figcaption></figure>
+ <figure><img src="figures/fig7_lod_pipeline.png" alt="LOD 3D Tiles generation flow"><figcaption>LOD generation and delivery flow.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>

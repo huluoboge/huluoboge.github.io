@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on parsing CAD drawings into structured floorplan JSON.">
+ <title>CAD-to-Floorplan Parsing - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Turning non-standard CAD floorplans into unified structured data.</p>
+ <h2>CAD-to-Floorplan Parsing</h2>
+ <p class="case-summary">An automatic DXF/DWG parsing pipeline that uses existing manually drawn CAD floorplans, resolves inconsistent drawing conventions, and generates a unified floorplan data representation.</p>
+ <div class="case-meta"><span>DXF/DWG</span><span>Legacy CAD</span><span>Room Partitioning</span><span>Door &amp; Window Recognition</span><span>Floorplan JSON</span></div>
+ </section>
+
+ <section id="problem" class="case-section">
+ <h3>Problem</h3>
+ <p>Many existing CAD floorplans were manually drawn without a unified standard. Different files use different layer structures, drawing conventions, line types, block definitions, units, and wall/door/window representations. To make use of this accumulated data, the system needs to parse DXF/DWG drawings automatically and convert them into a consistent floorplan format.</p>
+ </section>
+
+ <section id="approach" class="case-section">
+ <h3>Approach</h3>
+ <ul class="case-points">
+ <li>Automatically parse DXF/DWG geometry, layers, linework, blocks, and units into a normalized geometric representation.</li>
+ <li>Separate indoor and outdoor regions, recover the exterior boundary, and partition the floorplan into room-level regions.</li>
+ <li>Recognize walls, windows, doors, door blocks, and furniture/noise using geometry, topology, layer cues, and rule-based inference.</li>
+ <li>Generate a unified floorplan data structure suitable for downstream reconstruction, measurement, editing, and product workflows.</li>
+ </ul>
+ </section>
+
+ <section class="case-section">
+        <h3>My Contribution</h3>
+        <p>I personally designed the complete algorithm framework and implemented the full CAD-to-floorplan parsing system from scratch.</p>
+        <p>The main modules I built include:</p>
+        <ul class="case-points">
+          <li>DXF/DWG parsing and normalization across inconsistent CAD conventions</li>
+          <li>Automatic layer parsing and geometry cleanup</li>
+          <li>Indoor/outdoor classification and room partitioning</li>
+          <li>Door, window, and door-block recognition</li>
+          <li>Furniture recognition/filtering to reduce drafting noise</li>
+          <li>Unified floorplan JSON generation</li>
+        </ul>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>The parser converts inconsistent manually drawn CAD floorplans into unified structured floorplan data without requiring manual layer cleanup or a single fixed drafting standard.</p>
+ <div class="case-figures">
+ <figure><img src="figures/fig1_pipeline.png" alt="CAD-to-floorplan parsing pipeline"><figcaption>Parsing pipeline from DXF to structured floorplan data.</figcaption></figure>
+ <figure><img src="figures/fig4_region_graph.png" alt="Floorplan region graph"><figcaption>Region graph used for structural inference.</figcaption></figure>
+ <figure><img src="figures/1.png" alt="CAD-to-floorplan result for compact rectangular apartment"><figcaption>End-to-end result on a compact rectangular floorplan.</figcaption></figure>
+ <figure><img src="figures/3.png" alt="CAD-to-floorplan result for multi-room apartment with curved balcony"><figcaption>Multi-room example with curved balcony geometry.</figcaption></figure>
+ <figure><img src="figures/4.png" alt="CAD-to-floorplan result for three-room layout with multiple doors"><figcaption>Three-room layout with multiple door openings.</figcaption></figure>
+ <figure><img src="figures/7.png" alt="CAD-to-floorplan result for non-orthogonal exterior walls"><figcaption>Non-orthogonal exterior boundary and angled wall example.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>

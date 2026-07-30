@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Case study on progressive TIN densification filtering for airborne LiDAR data.">
+  <title>Free PTD - Hu Yang</title>
+  <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+  <div class="page">
+    <main class="content">
+      <a class="case-back" href="../#software">Back to software</a>
+      <section class="case-hero section">
+        <p class="kicker">Free command-line tool for airborne LiDAR ground filtering.</p>
+        <h2>Free PTD — Progressive TIN Densification Filter</h2>
+        <p class="case-summary">A free, CPU-parallel implementation of the progressive TIN densification algorithm for classifying ground and non-ground points in airborne LiDAR data, with automatic block-based processing for large datasets.</p>
+        <div class="case-meta"><span>LiDAR</span><span>Ground Filtering</span><span>TIN</span><span>C++</span></div>
+      </section>
+
+      <section id="problem" class="case-section">
+        <h3>Problem</h3>
+        <p>Airborne LiDAR point clouds contain both ground and non-ground returns. Ground filtering is the essential first step for DEM generation, building extraction, and vegetation analysis. Existing commercial solutions are expensive; existing open-source alternatives are often slow or struggle with complex terrain.</p>
+      </section>
+
+      <section id="approach" class="case-section">
+        <h3>Approach</h3>
+        <ul class="case-points">
+          <li>Implement the progressive TIN densification algorithm, iteratively adding ground points to a triangulated irregular network based on distance and angle thresholds.</li>
+          <li>Use CPU parallel processing to accelerate the iterative densification loop for large point clouds.</li>
+          <li>Adopt an automatic block-based strategy that partitions data by spatial tiles, enabling processing of arbitrarily large datasets within constrained memory.</li>
+        </ul>
+      </section>
+
+      <section class="case-section">
+        <h3>My Contribution</h3>
+        <p>I independently designed and implemented the complete software from scratch, including the core algorithm, multi-threaded parallelization, block-based memory management, and command-line interface.</p>
+        <p>The software is released as freeware for non-commercial use and has been adopted by users in the photogrammetry community.</p>
+      </section>
+
+      <section id="outcome" class="case-section">
+        <h3>Outcome</h3>
+        <p>The filter reliably separates ground and non-ground points across diverse terrain types including urban, forested, and mountainous areas. Block-based processing allows handling datasets exceeding hundreds of millions of points without excessive memory usage.</p>
+        <p class="project-links"><strong>Download:</strong> <a href="https://pan.baidu.com/s/1FF1tFajDHVsCB0G85xSX1w">Baidu Cloud</a> (password: vezv)</p>
+                       <div class="case-figures">
+                          <figure><img src="figures/fig1.png" alt="Free PTD filtering result"><figcaption>Filtering result: ground points classified and separated from non-ground returns.</figcaption></figure>
+                       </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

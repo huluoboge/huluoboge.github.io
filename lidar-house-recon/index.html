@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on automated LiDAR-based building 3D reconstruction with roof segmentation and topology-driven roof modeling.">
+ <title>LiDAR Building 3D Reconstruction - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Automated building reconstruction from airborne LiDAR point clouds.</p>
+ <h2>LiDAR Building 3D Reconstruction</h2>
+ <p class="case-summary">An early-career system for reconstructing vectorized building models from airborne LiDAR, with roof plane segmentation, topology-driven roof modeling, and optional aerial-image refinement for textured outputs.</p>
+ <div class="case-meta"><span>Airborne LiDAR</span><span>Roof Segmentation</span><span>Topology Modeling</span><span>Vector Buildings</span><span>Texture Mapping</span></div>
+ </section>
+
+ <section id="problem" class="case-section">
+ <h3>Problem</h3>
+ <p>Airborne LiDAR surveys provide dense 3D observations over urban areas, but turning raw point clouds into usable building models is difficult. Roofs are often complex assemblies of intersecting planes, and simple height-based extrusion cannot recover realistic roof structure. The goal was to automate building reconstruction end to end: separate buildings from terrain, segment roof geometry, infer roof topology, and generate watertight vector models suitable for visualization and downstream GIS/CAD workflows.</p>
+ </section>
+
+ <section id="approach" class="case-section">
+ <h3>Approach</h3>
+ <ul class="case-points">
+ <li>Filter and classify airborne LiDAR data to extract ground and building points, then segment individual building instances.</li>
+ <li>Extract structural roof planes from each building point cloud and regularize plane boundaries.</li>
+ <li>Define custom topological relationships between roof planes to describe complex roof assemblies, then reconstruct roof structure under these constraints.</li>
+ <li>Combine roof geometry with ground height information to generate complete building vector models automatically.</li>
+ <li>Optionally refine segmentation with registered aerial imagery and apply texture mapping to produce roof-textured building models.</li>
+ </ul>
+ <div class="case-figures">
+ <figure><img src="figures/fig1_pipeline.png" alt="LiDAR building reconstruction pipeline"><figcaption>End-to-end pipeline from airborne LiDAR and aerial imagery to textured building models.</figcaption></figure>
+ </div>
+ </section>
+
+ <section id="contribution" class="case-section">
+ <h3>My Contribution</h3>
+ <p>I developed this building reconstruction system around 2012–2013, focusing on the geometric core that turns classified building point clouds into structured 3D models.</p>
+ <p>My main contributions included:</p>
+ <ul class="case-points">
+ <li>Roof plane segmentation and boundary extraction from building point clouds</li>
+ <li>Topology-driven roof modeling with custom planar relationship definitions for complex roof structures</li>
+ <li>Automated roof reconstruction and building vector model generation</li>
+ <li>Integration with aerial-image registration and texture mapping for textured outputs</li>
+ </ul>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>The system converts airborne LiDAR building observations into vectorized 3D building models with reconstructed roof structure, supporting both geometry-only outputs and textured models when aerial imagery is available.</p>
+ <div class="case-figures">
+ <figure><img src="figures/fig2_vector_models.png" alt="Vectorized building models over a residential area"><figcaption>Vectorized building models reconstructed over a residential area.</figcaption></figure>
+ <figure><img src="figures/fig3_roof_details.png" alt="Reconstructed roof structure details"><figcaption>Reconstructed roof structure on complex building footprints.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>

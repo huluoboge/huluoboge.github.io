@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hu Yang, Lead of 3D Reconstruction at Realsee (realsee.com).">
+  <meta name="theme-color" content="#ffffff">
+  <title>Hu Yang — Lead of 3D Reconstruction, Realsee</title>
+  <link rel="stylesheet" href="styles.css?v=20260729-1">
+</head>
+<body>
+  <div class="page">
+    <aside class="sidebar">
+      <a class="portrait" href="#about" aria-label="Back to introduction">
+        <img src="assets/hu-yang.jpg?v=1" alt="Hu Yang">
+      </a>
+
+      <div class="identity">
+        <h1>Hu Yang</h1>
+        <p class="name-cn">胡洋</p>
+        <p class="role">Lead of 3D<br>Reconstruction</p>
+        <p class="affiliation"><a href="https://www.realsee.com/">realsee.com</a><br>Beijing, China</p>
+      </div>
+
+      <nav class="side-nav" aria-label="Section navigation">
+        <a href="#about">About</a>
+        <a href="#focus">Focus</a>
+        <a href="#projects">Projects</a>
+        <a href="#software">Software</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="profile-links">
+        <a href="mailto:huyang0909@gmail.com">Email</a>
+        <a href="https://github.com/huluoboge">GitHub</a>
+        <a href="cv/index.html">CV 中文</a>
+        <a href="cv/en/index.html">CV English</a>
+        <a href="assets/huyang-cv.pdf" download>下载中文 CV</a>
+        <a href="assets/huyang-cv-en.pdf" download>Download English CV</a>
+      </div>
+
+    </aside>
+
+    <main class="content">
+      <section id="about" class="intro section">
+        <p class="kicker">Lead of 3D Reconstruction at Realsee.</p>
+        <h2>About Me</h2>
+        <div class="intro-grid">
+          <div>
+            <p>I am Lead of 3D Reconstruction at <a href="https://www.realsee.com/">Realsee</a> (realsee.com), working across <strong>photogrammetry</strong>, <strong>multi-view geometry</strong>, point clouds, meshes, and production reconstruction systems.</p>
+            <p>My work combines algorithm design, C++/CUDA implementation, validation, and performance optimization, with an emphasis on large real-world scenes and reliable engineering delivery.</p>
+          </div>
+          <div class="intro-cn" lang="zh-CN">
+            <p>我目前就职于如视（<a href="https://www.realsee.com/">realsee.com</a>），负责三维重建方向，长期从事 SfM/MVS、SLAM、点云、网格、纹理与大规模重建系统研发。</p>
+            <p>工作覆盖算法设计、工程实现、性能优化和质量验证，关注真实业务场景中的精度、效率、稳定性与可交付性。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="focus" class="section">
+        <h2>Focus Areas</h2>
+        <div class="interest-list">
+          <article>
+            <h3>Reconstruction</h3>
+            <p>SfM, MVS, SLAM, bundle adjustment, panoramic geometry, aerial and indoor reconstruction.</p>
+          </article>
+          <article>
+            <h3>Geometry Processing</h3>
+            <p>Point-cloud filtering, registration, mesh reconstruction, structural modeling, and texture mapping.</p>
+          </article>
+          <article>
+            <h3>Production Systems</h3>
+            <p>Large-scene tiling, parallel pipelines, memory-bounded processing, LOD, and browser delivery.</p>
+          </article>
+          <article>
+            <h3>Engineering Practice</h3>
+            <p>C++/CUDA implementation, numerical validation, performance profiling, and reconstruction quality evaluation.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="projects" class="section projects">
+        <div class="section-title-row">
+          <h2>Selected Projects</h2>
+          <p>Project scope, contribution, and technical stack</p>
+        </div>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="assets/projects/large-scale-reconstruction.png" alt="Large-scale reconstruction pipeline screenshot">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>Indoor Large-Scale Reconstruction</h3>
+              <p class="project-meta">Indoor large scenes · Station-based scanning · Cloud reconstruction</p>
+            </header>
+            <p>Built the indoor large-scene reconstruction system behind station-scanned spaces such as Realsee VR house tours, museums, and large venue digitization.</p>
+            <ul class="contribution-list">
+              <li>Designed the full tiled parallel algorithm framework so reconstruction, mesh processing, texturing, simplification, and LOD generation can run beyond single-machine memory limits.</li>
+              <li>Implemented topology-consistent block mesh merging, robust hole filling, irregular multi-floor segmentation, automatic ceiling hiding, semi-global color balancing, textured simplification, LOD strategy, and cloud Docker deployment.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> C++, point clouds, mesh reconstruction, topology repair, texture optimization, LOD, Docker</p>
+            <p class="project-links"><a href="lod-recon/">Read case study</a><a href="https://www.realsee.com/discovery">Realsee examples</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="pointcloud-colorization/figures/projection_visibility.svg" alt="Point-cloud colorization visibility and projection diagram">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>Large-Scene Point Cloud Colorization</h3>
+              <p class="project-meta">Sparse point clouds · Multi-view projection · Semi-global color consistency</p>
+            </header>
+            <p>Developed a direct colorization pipeline for large sparse point clouds, mapping calibrated multi-view images onto LiDAR geometry while controlling visibility, view selection, and color seams.</p>
+            <ul class="contribution-list">
+              <li>Built a block-based voxel visibility framework that uses neighboring blocks as occlusion context, Top-K candidate views, point-level projection checks, normal filtering, masks, and rolling-shutter row poses.</li>
+              <li>Designed a distance-driven main-view selection strategy that forms spatially coherent view regions, then applies boundary multi-view consensus and sparse correction-field optimization for semi-global color harmonization.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> C++, OpenVDB, point clouds, ray visibility, multi-view projection, Delaunay graph, conjugate gradient</p>
+            <p class="project-links"><a href="pointcloud-colorization/">Read case study</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="pointcloud-filter/figures/fig1_pipeline.png" alt="Handheld LiDAR point-cloud processing pipeline diagram">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>Handheld LiDAR Point-Cloud Processing</h3>
+              <p class="project-meta">Handheld LiDAR · Point-cloud filtering · Block-parallel refinement</p>
+            </header>
+            <p>Built a production point-cloud filtering and geometric refinement pipeline for handheld laser scanning, turning raw keyframe clouds into clean global point clouds for downstream reconstruction.</p>
+            <ul class="contribution-list">
+              <li>Designed a sparse-voxel, block-parallel processing framework with streaming partitioning, neighbor topology, boundary-safe ownership, and global result merging.</li>
+              <li>Implemented time-aware dynamic-object removal, sub-voxel centroiding, robust normal orientation, anisotropic bilateral filtering, MST normal propagation, planar density homogenization, and sparse outlier cleanup.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> C++, OpenVDB, handheld LiDAR, ray traversal, normal estimation, bilateral filtering, Poisson-disk sampling</p>
+            <p class="project-links"><a href="pointcloud-filter/">Read case study</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="lidar-calibration/figures/fig3_error_simulation.png" alt="LiDAR calibration error-distribution simulation">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>Station-Based and Handheld LiDAR Calibration</h3>
+              <p class="project-meta">Station-based scanning · Mobile handheld scanning · Camera-LiDAR extrinsics</p>
+            </header>
+            <p>Designed a calibration workflow for station-based scanning and mobile handheld laser scanners, focusing on practical error sources and the path from diagnosis to validation.</p>
+            <ul class="contribution-list">
+              <li>Formulated the main calibration problems: coupled sensor and mechanical errors, degraded planar geometry, repeatability risks, and camera-to-LiDAR alignment in production data capture.</li>
+              <li>Used simulation to analyze error distributions, designed optimization and validation schemes, and added a high-precision calibration-field workflow that completes joint camera-LiDAR extrinsic calibration from a single data capture.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> LiDAR calibration, camera-LiDAR extrinsics, error simulation, nonlinear optimization, calibration-field design</p>
+            <p class="project-links"><a href="lidar-calibration/">Read case study</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="assets/projects/indoor-structured-reconstruction.png" alt="Indoor structured reconstruction result screenshot">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>Indoor Structured Reconstruction</h3>
+              <p class="project-meta">Indoor mesh · Structural information · Regularized mesh</p>
+            </header>
+            <p>Designed a geometry pipeline that recovers room structure from a given indoor mesh and reconstructs a regularized structural mesh.</p>
+            <ul class="contribution-list">
+              <li>Built the full framework from scratch: space partitioning into a cell complex, visibility-based inside/outside reasoning, and graph-cut optimization.</li>
+              <li>Independently implemented the complex cell-complex geometry algorithms, room partitioning, door recognition, and structure reconstruction modules.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> C++, mesh processing, cell complex, visibility, graph cut, structural reconstruction</p>
+            <p class="project-links"><a href="structure-recon/">Read case study</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="assets/projects/monocular-depth-refinement.png" alt="Monocular depth refinement before and after screenshot">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>Monocular Depth Refinement</h3>
+              <p class="project-meta">Monocular depth estimation · Production geometry cleanup</p>
+            </header>
+            <p>Refined monocular depth estimation outputs from panoramic imagery into more stable point-cloud and mesh geometry for downstream reconstruction pipelines.</p>
+            <ul class="contribution-list">
+              <li>Added pose consistency checks, outlier filtering, point-cloud fusion, and mesh cleanup.</li>
+              <li>Bridged learned monocular depth predictions with production geometry quality requirements.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> monocular depth estimation, pose BA, point-cloud fusion, mesh cleanup</p>
+            <p class="project-links"><a href="monocular-depth-refinement/">Read case study</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="assets/projects/cad-to-floorplan.png" alt="CAD-to-floorplan region graph screenshot">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>CAD-to-Floorplan Parsing</h3>
+              <p class="project-meta">DXF/DWG parsing · Floorplan standardization · Legacy CAD data</p>
+            </header>
+            <p>Designed an automatic DXF/DWG parser to convert non-standard manually drawn CAD floorplans into a unified structured floorplan representation.</p>
+            <ul class="contribution-list">
+              <li>Handled inconsistent layers, drawing styles, line types, units, blocks, and geometry conventions across legacy CAD files.</li>
+              <li>Independently designed and implemented algorithms for layer parsing, inside/outside classification, room partitioning, door/window recognition, door block recognition, furniture filtering, and floorplan data generation.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> DXF/DWG, computational geometry, triangulation, region graph, door/window recognition, floorplan JSON</p>
+            <p class="project-links"><a href="cad2fp/">Read case study</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="assets/projects/panoramic-geometry-preprocessing.png" alt="Panoramic geometry preprocessing screenshot">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>Panoramic Geometry Preprocessing</h3>
+              <p class="project-meta">Single panorama · Spherical image geometry</p>
+            </header>
+            <p>Developed panorama preprocessing modules for gravity alignment and Manhattan direction estimation before reconstruction and spatial understanding.</p>
+            <ul class="contribution-list">
+              <li>Implemented cube projection, spherical line reasoning, RANSAC, vanishing-point voting, and fast Manhattan scoring.</li>
+              <li>Packaged geometric priors as reusable preprocessing steps for panorama-based workflows.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> equirectangular panoramas, spherical LUT, vanishing points, gravity rectification, RANSAC</p>
+            <p class="project-links"><a href="pano-rectify/">Gravity rectification</a><a href="pano-vanish-point/">Vanishing points</a></p>
+          </div>
+        </article>
+
+        <article class="project">
+          <figure class="project-figure">
+            <img src="assets/projects/lidar-building-reconstruction.png" alt="LiDAR-based building 3D reconstruction result">
+          </figure>
+          <div class="project-body">
+            <header>
+              <h3>LiDAR Building 3D Reconstruction</h3>
+              <p class="project-meta">Airborne LiDAR · Roof segmentation · Topology-driven modeling</p>
+            </header>
+            <p>Built an automated building reconstruction pipeline from airborne LiDAR point clouds, turning classified building observations into vectorized 3D models with reconstructed roof structure.</p>
+            <ul class="contribution-list">
+              <li>Segmented roof planes from building point clouds and defined custom topological relationships to describe complex roof assemblies.</li>
+              <li>Reconstructed roof geometry under planar constraints and generated complete building vector models with optional aerial-image texture mapping.</li>
+            </ul>
+            <p class="tech"><strong>Tech:</strong> airborne LiDAR, point-cloud classification, roof segmentation, topology modeling, vector reconstruction, texture mapping</p>
+            <p class="project-links"><a href="lidar-house-recon/">Read case study</a></p>
+          </div>
+        </article>
+      </section>
+
+      <section id="software" class="section">
+        <div class="section-title-row">
+          <h2>Software</h2>
+          <p>Open tools and engineering outputs</p>
+        </div>
+        <div class="software-list">
+          <article>
+            <h3><a href="https://github.com/huluoboge/InsightAT">InsightAT</a></h3>
+            <p>Command-line SfM pipeline for aerial triangulation and practical reconstruction workflows.</p>
+            <span>C++ · SfM · MVS</span>
+            <a class="row-link" href="https://github.com/huluoboge/InsightAT">Code / Documentation</a>
+          </article>
+          <article>
+            <h3><a href="https://fastmvs.github.io/">FastMVS</a></h3>
+            <p>High-speed dense matching software focused on MVS performance and reconstruction quality.</p>
+            <span>C++ · CUDA · MVS</span>
+            <a class="row-link" href="https://fastmvs.github.io/">Project / Documentation</a>
+          </article>
+          <article>
+            <h3><a href="freeptd/">Free PTD</a></h3>
+            <p>Airborne LiDAR ground filtering tool using progressive TIN densification and block processing.</p>
+            <span>C++ · LiDAR · TIN</span>
+            <a class="row-link" href="freeptd/">Project / Documentation</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="experience" class="section experience">
+        <h2>Experience &amp; Education</h2>
+        <div class="timeline">
+          <div><time>2019–Present</time><p><strong>Lead of 3D Reconstruction</strong><br><span><a href="https://www.realsee.com/">realsee.com</a> · Beijing</span></p></div>
+          <div><time>2017–2019</time><p><strong>3D Reconstruction Algorithm Engineer</strong><br><span>Feima Robotics (飞马机器人) · Beijing</span></p></div>
+          <div><time>2014–2017</time><p><strong>Co-founder · 技术总监</strong><br><span>Infinite3D (北京无限界/景致三维) · Beijing</span></p></div>
+          <div><time>2011–2014</time><p><strong>3D Reconstruction Team Lead</strong><br><span>Xi'an Meihang Technology Development Research Institute (西安煤航技术发展研究院) · Xi'an</span></p></div>
+          <div><time>2010–2011</time><p><strong>WebGIS Engineer</strong><br><span>Heilongjiang Bureau of Surveying, Mapping &amp; Geoinformation (黑龙江省测绘与地理信息局) · Harbin</span></p></div>
+          <div><time>2008–2010</time><p><strong>M.S. Geographic Information Systems</strong><br><span>Wuhan University (武汉大学) · Hubei</span></p></div>
+          <div><time>2003–2007</time><p><strong>B.S. Resource Environment &amp; Urban-Rural Planning</strong><br><span>Northeast Petroleum University (东北石油大学) · Heilongjiang</span></p></div>
+        </div>
+      </section>
+
+      <section id="contact" class="section contact">
+        <h2>Contact</h2>
+        <p>For technical discussions, open-source collaboration, or reconstruction engineering work, please contact me by email.</p>
+        <p><a href="mailto:huyang0909@gmail.com">huyang0909@gmail.com</a> · <a href="https://github.com/huluoboge">github.com/huluoboge</a></p>
+      </section>
+
+      <footer>
+        <p>© 2026 Hu Yang. Built as a lightweight static page.</p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

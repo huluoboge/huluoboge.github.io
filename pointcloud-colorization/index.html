@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on direct colorization and semi-global color harmonization for large sparse point clouds.">
+ <title>Large-Scene Point Cloud Colorization - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Direct multi-view colorization for large sparse point clouds.</p>
+ <h2>Large-Scene Point Cloud Colorization</h2>
+ <p class="case-summary">A scalable offline pipeline that assigns stable image colors to large LiDAR point clouds by combining block-based voxel visibility, coherent main-view selection, boundary color consensus, and semi-global correction-field optimization.</p>
+ <div class="case-meta"><span>Point Clouds</span><span>Multi-View Images</span><span>Voxel Visibility</span><span>View Selection</span><span>Color Harmonization</span></div>
+ </section>
+
+ <section id="background" class="case-section">
+ <h3>Background</h3>
+ <p>Large mobile-mapping scenes often combine LiDAR and image sensors with different sampling rates, timestamps, fields of view, and occlusion patterns. A point scanned by the laser is not necessarily visible in the nearest image, and image-to-image exposure or white-balance differences can create obvious color seams when neighboring points switch source views.</p>
+ <p>Mesh texturing can solve some appearance problems through surface parameterization, but sparse or very large point clouds need a direct point-to-image strategy that remains memory-bounded and avoids blurring edges through naive multi-view averaging.</p>
+ </section>
+
+ <section id="approach" class="case-section">
+ <h3>Approach</h3>
+ <ul class="case-points">
+ <li>Split the scene into spatial blocks, then load neighboring blocks as occlusion context while keeping output restricted to the target block.</li>
+ <li>Build a sparse voxel hierarchy for visibility testing so ray checks can reject occluded views without rendering full per-image depth maps for every point.</li>
+ <li>Keep only Top-K visible candidate views per voxel, then run point-level projection, mask, normal, semantic, and coarse-depth checks before sampling image colors.</li>
+ <li>Select each point's main view with a distance-dominant geometric cost, using local label voting to suppress isolated view switches and form coherent view regions.</li>
+ <li>Estimate multi-view color consensus near region boundaries, then solve a sparse correction field inside each region so seams are reduced while single-view texture detail is preserved.</li>
+ </ul>
+ </section>
+
+ <section id="contribution" class="case-section">
+ <h3>My Contribution</h3>
+ <p>I designed the method as a large-scene direct point-cloud colorization system rather than a mesh texturing or timestamp-nearest-image workflow. The core idea is to make geometric visibility reliable first, then use the spatial continuity of the view-selection cost to reduce the global color problem into boundary-coupled regional optimizations.</p>
+ <p>My main contributions included:</p>
+ <ul class="case-points">
+ <li>Block-based processing model with cross-block occlusion context for large scenes</li>
+ <li>Voxel-level visibility acceleration and finite candidate-view storage</li>
+ <li>Point-level projection validation, including row-pose projection for motion capture</li>
+ <li>Distance-driven main-view selection with local view-region regularization</li>
+ <li>Boundary multi-view sampling for estimating shared color targets between regions</li>
+ <li>Sparse per-region correction-field optimization using boundary data terms and spatial smoothness</li>
+ </ul>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>The resulting pipeline forms a complete information path from visibility-aware image selection to color-consistent point-cloud output. It is designed for bounded-memory processing of large sparse scenes, while avoiding the common failure modes of nearest-timestamp coloring, full multi-view averaging, and fully global color optimization.</p>
+ <p>The project has been completed as an engineering pipeline, with the core visibility, view-selection, direct color sampling, and semi-global color harmonization modules implemented for large-scene point-cloud production workflows.</p>
+ <div class="case-figures">
+ <figure><img src="figures/projection_visibility.svg" alt="Voxel visibility and cross-block occlusion context"><figcaption>Voxel visibility testing with target and neighboring blocks as occlusion context.</figcaption></figure>
+ <figure><img src="figures/color_adjustment.svg" alt="Boundary consensus and semi-global color adjustment"><figcaption>Boundary consensus and sparse correction-field propagation inside view regions.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>

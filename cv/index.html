@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="胡洋中文简历">
+  <title>胡洋 - 中文简历</title>
+  <style>
+    :root {
+      --ink: #111;
+      --text: #333;
+      --muted: #666;
+      --line: #d8d8d8;
+      --accent: #07898d;
+      --soft: #f4f8f8;
+      --sans: Arial, "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: #ececec; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 12px;
+      line-height: 1.62;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .resume {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 24px auto;
+      background: #fff;
+      box-shadow: 0 8px 30px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+
+    .hero {
+      position: relative;
+      padding: 22mm 16mm 9mm;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      left: -8mm;
+      right: -8mm;
+      top: -35mm;
+      height: 57mm;
+      background: var(--accent);
+      border-radius: 0 0 50% 50% / 0 0 18% 18%;
+      z-index: 0;
+    }
+    .avatar {
+      position: relative;
+      z-index: 1;
+      width: 24mm;
+      height: 24mm;
+      margin: 0 auto 5.5mm;
+      border-radius: 50%;
+      border: 1.5mm solid #fff;
+      background: #eee;
+      object-fit: cover;
+      display: block;
+    }
+    h1 {
+      margin: 0 0 4mm;
+      color: var(--ink);
+      font-size: 27px;
+      line-height: 1;
+      letter-spacing: .06em;
+    }
+    .contact, .summary-line {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4mm;
+      margin: 0;
+      color: #444;
+      font-size: 12.5px;
+    }
+    .summary-line { margin-top: 2mm; }
+
+    main { padding: 0 15mm 12mm; }
+    section { margin-top: 7mm; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 6mm;
+      margin: 0 0 3mm;
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+    .section-title::after {
+      content: "";
+      flex: 1;
+      border-top: 1px solid var(--line);
+    }
+
+    p { margin: 0 0 2.4mm; }
+    ol {
+      margin: 0 0 2.4mm;
+      padding-left: 5mm;
+    }
+    li { margin: 0 0 .6mm; }
+
+    .entry { margin-top: 4.5mm; }
+    .entry-head {
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr auto;
+      gap: 5mm;
+      align-items: baseline;
+      margin-bottom: 2mm;
+    }
+    .entry-title {
+      color: var(--ink);
+      font-size: 14.5px;
+      font-weight: 800;
+    }
+    .entry-role {
+      color: #222;
+      font-weight: 600;
+    }
+    .entry-time {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .label {
+      margin: 1.5mm 0 1mm;
+      color: var(--ink);
+      font-weight: 800;
+    }
+    .advantage {
+      font-size: 12.4px;
+      line-height: 1.8;
+    }
+    .project-note {
+      margin-bottom: 2.5mm;
+      color: var(--text);
+    }
+    .education .entry-head {
+      grid-template-columns: 1fr auto auto;
+      padding: 2mm 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .education .entry { margin-top: 1mm; }
+
+    .screen-actions {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      display: flex;
+      gap: 8px;
+    }
+    .screen-actions a,
+    .screen-actions button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 7px 11px;
+      border-radius: 4px;
+      font: 12px var(--sans);
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    }
+
+    @media (max-width: 860px) {
+      html { background: #fff; }
+      .resume { width: 100%; margin: 0; box-shadow: none; }
+      .entry-head { grid-template-columns: 1fr; gap: 1mm; }
+      .screen-actions { display: none; }
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    @media print {
+      html, body { background: #fff; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .resume {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        box-shadow: none;
+      }
+      .screen-actions { display: none; }
+      .entry-head { grid-template-columns: 1.1fr 1.1fr auto; gap: 5mm; }
+      .education .entry-head { grid-template-columns: 1fr auto auto; }
+      .entry-head, .section-title { break-after: avoid; page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <article class="resume">
+    <header class="hero">
+      <img class="avatar" src="../assets/hu-yang.jpg?v=1" alt="胡洋">
+      <h1>胡洋</h1>
+      <p class="contact"><span>男</span><span>13146929520</span><span>huyang0909@gmail.com</span></p>
+      <p class="summary-line"><span>15年三维重建算法研发与工程化经验</span><span>SfM / MVS / 点云 / Mesh / 纹理映射</span><span>大规模重建系统与生产落地</span></p>
+    </header>
+
+    <main>
+      <section>
+        <h2 class="section-title">个人优势</h2>
+        <p class="advantage">15 年三维重建领域全栈算法研发与工程化落地经验，精通 SfM、MVS、点云处理、Mesh 重建、纹理映射全流程核心技术；主导贝壳如视 5500 万 + 真实空间大规模三维重建，算法系统稳定性达 99.99%，具备从 0 到 1 搭建技术架构、统筹核心项目的能力。擅长大场景 / 室内高精度重建、CUDA 性能优化、云端分布式重建系统搭建，深耕硬件标定、激光 SLAM、倾斜摄影、LiDAR 点云处理等细分领域；拥有跨团队协同、技术路线制定、代码质量管控的丰富经验，连续 6 年斩获核心业务线顶级绩效，兼具算法研发深度与商业落地能力。</p>
+      </section>
+
+      <section>
+        <h2 class="section-title">工作经历</h2>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">贝壳-如视</div><div class="entry-role">三维重建算法架构师</div><div class="entry-time">2019.01-至今</div></div>
+          <p class="label">内容：</p>
+          <ol>
+            <li>全面负责贝壳 VR 看房三维重建业务整体技术架构设计与核心模块研发，主导全流程技术能力搭建与迭代；</li>
+            <li>牵头大场景三维重建、LOD 渲染、硬件标定、激光 SLAM 云端框架等核心技术方案的设计与落地实现；</li>
+            <li>带领算法团队开展全链路效率优化、性能提速、系统稳定性建设，保障大规模商业化场景的稳定运行；</li>
+            <li>负责核心算法代码实现、技术攻关与新业务方案选型，推动技术成果转化为实际业务价值；</li>
+            <li>协同工程、产品团队制定技术发展路线，确保技术方向与业务目标高度统一；</li>
+            <li>统筹团队代码管理、质量规范制定与技术沉淀，提升团队研发效率与成果复用性。</li>
+          </ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>搭建贝壳 VR 看房三维重建基础能力体系，完成整体技术设计与核心代码实现，成为业务核心技术底座；</li>
+            <li>从 0 到 1 构建室内大场景三维重建系统，个人贡献 70% 以上核心代码，推动 LOD 展示能力商业化落地，形成国内领先的室内大场景重建商业化技术能力；</li>
+            <li>设计硬件标定全流程框架与整体方案，实现核心标定代码研发，带领团队显著提升新一代 VR 扫描设备的标定精度；</li>
+            <li>主导全流程算法效率优化，通过 CUDA 加速等技术手段，将 24K 图像 ISP 处理耗时从 900 秒优化至 6.5 秒，单套 VR 场景重建耗时从 20 分钟压缩至 8.5 分钟，大幅提升业务处理效率；</li>
+            <li>完成激光 SLAM 算法云端框架设计与核心代码开发，丰富公司多传感器融合重建技术体系，拓展三维重建应用场景；</li>
+            <li>技术研发与业务贡献突出，连续 6 年绩效评级 4 及以上。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">飞马机器人（北京）</div><div class="entry-role">三维重建算法工程师</div><div class="entry-time">2017.10-2019.01</div></div>
+          <p class="label">内容：</p>
+          <ol>
+            <li>负责无人机航摄图像三维重建算法研发，聚焦多视图密集匹配、DSM 生成等核心模块；</li>
+            <li>研发超大规模图像加载与浏览引擎、LOD 显示引擎，提升海量影像数据处理能力；</li>
+            <li>负责镶嵌编辑软件渲染算法的设计与实现，优化软件可视化效果与处理性能。</li>
+          </ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>独立研发并实现高效 tSGM 多视图密集匹配算法，成为公司首个核心三维重建算法，成功支撑正射影像生成与飞机变高飞行方案落地；</li>
+            <li>独立设计并实现超大规模图像加载与浏览引擎，在此基础上完成图像镶嵌编辑与渲染方案落地，大幅提升大规模影像处理与可视化效率；</li>
+            <li>攻克无地面控制点、仅依靠 GNSS 控制的空三重建技术难题，显著提升无人机航测场景的重建精度与实际实用性。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">北京无限界/景致三维（北京）</div><div class="entry-role">联合创始人，技术执行总监</div><div class="entry-time">2014.10-2017.10</div></div>
+          <p class="label">内容：</p>
+          <ol>
+            <li>全面负责倾斜摄影三维重建全流程软件的研发与迭代工作，把控整体研发方向与技术落地；</li>
+            <li>负责团队代码规范化管理、代码质量把控，以及核心算法的工程化优化与性能调优；</li>
+            <li>主导大规模图像空三（SfM）算法的研发、调试与迭代，保障大场景航摄数据重建精度；</li>
+            <li>牵头小物体高精度三维重建算法的研发与适配，拓展三维重建多场景应用能力；</li>
+            <li>负责阵列相机专属重建软件的研发、模块设计与核心代码实现。</li>
+          </ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>作为核心主要贡献者，全程参与并完成国内第一套国产倾斜摄影三维重建软件 Infinite3D-Real Scenes 的完整研发与落地，打破同类软件国外技术垄断，填补国内相关技术空白；</li>
+            <li>主导该款国产重建软件的整体技术架构设计与核心模块实现，搭建软件全流程技术体系，保障软件稳定性、兼容性与实用性；</li>
+            <li>完成阵列相机重建软件的全流程研发，适配专用硬件采集数据的三维重建需求，丰富多硬件适配的重建技术方案；</li>
+            <li>通过算法工程化优化与代码管控，提升软件运行效率与大规模影像处理能力，助力国产倾斜摄影重建软件商业化落地。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">广联达科技股份有限公司</div><div class="entry-role">C++高级研发工程师</div><div class="entry-time">2014.04-2014.10</div></div>
+          <p class="label">内容：</p>
+          <ol>
+            <li>负责广联达基础 C++ SDK 的研发、迭代与维护工作，保障 SDK 的稳定性、兼容性与复用性，支撑上层工程类软件业务模块运行。</li>
+            <li>负责工程施工管理软件基础显示组件的设计、开发与优化，对接工程施工业务场景需求，完善可视化组件功能体系。</li>
+            <li>独立承接专项 SDK 开发任务，严格把控代码质量与开发进度，完成指定业务模块的全流程研发与调试。</li>
+          </ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>高效完成工程施工报表显示 SDK 的开发与落地，适配工程施工管理场景的报表可视化需求，保障报表渲染效率与展示精度，支撑施工管理业务数据快速呈现。</li>
+            <li>独立完成 PDF 签章组件 SDK 的开发工作，实现 PDF 文件签章、验签、权限管控等核心功能，满足工程施工领域文档合规签章需求，提升工程文档管理的规范性与安全性。</li>
+            <li>夯实底层 C++ SDK 基础能力，优化组件运行性能，保障相关组件与上层施工管理软件无缝对接，助力工程软件整体功能落地与用户体验提升。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">中煤航测遥感局-技术发展研究院</div><div class="entry-role">三维重建算法工程师</div><div class="entry-time">2011.07-2014.04</div></div>
+          <p class="label">内容：</p>
+          <ol>
+            <li>负责 LiDAR 点云核心算法研发，主攻地面点与非地面点分类模块；</li>
+            <li>负责 LiDAR 点云矢量化建模算法及配套软件研发，负责整体方案设计、核心算法落地与模块集成；</li>
+            <li>航空影像立体像对实时渲染核心技术方案设计与攻坚，解决实时渲染核心技术瓶颈，对标国际顶尖软件优化性能与效果。</li>
+          </ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>自主研发渐进三角网加密 LiDAR 点云滤波算法，算法效率与处理效果完全对标同期国际顶尖软件 Terrasolid（TerraScan），成为国内首家实现同等效率和效果的同类算法，打破国外技术垄断，填补国内该领域技术空白；</li>
+            <li>作为核心设计与算法主力，带领团队完成 LiDAR 点云矢量化建模算法及软件全流程研发，该软件是融合 LiDAR 点云与航空影像三维重建软件（测绘科技进步一等奖）的核心组成部分，成功实现点云到矢量模型的高效转化；</li>
+            <li>极致技术攻坚，仅用 3 天解决困扰图像实验室长达 2 个月的航空影像立体像对实时构建核心难题，处理效果对标国际顶尖软件 Inpho，打造同期国内渲染速度最快的同类软件，保证了立体测图项目的推进速度。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">黑龙江测绘地理信息局-基础地理信息中心</div><div class="entry-role">网络 GIS 开发工程师</div><div class="entry-time">2010.07-2011.07</div></div>
+          <p class="label">内容：</p>
+          <ol><li>负责网络电子地图的前后端开发。</li></ol>
+          <p class="label">业绩：</p>
+          <ol><li>高效完成了黑龙江省地理信息共享服务平台地图部分的开发工作。</li></ol>
+        </article>
+      </section>
+
+      <section>
+        <h2 class="section-title">项目经历</h2>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">贝壳如视 VR 看房三维重建</div><div class="entry-role">技术负责人</div><div class="entry-time">2019.01-至今</div></div>
+          <p class="label">内容：</p>
+          <p class="project-note">贝壳核心 VR 看房业务技术底座，打造室内房产高精度、高效率、高稳定三维重建体系，支撑亿级用户线上看房与 5500 万 + 真实空间建模，为行业标杆级商业化项目。</p>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>作为三维重建技术总负责人，从 0 到 1 搭建全流程技术架构，独立完成位姿拼接和优化、点云处理、Mesh 重建和处理、纹理映射、LOD 全流程核心代码编写；主导标定体系搭建、云端重建系统稳定性保障、全链路算法性能优化。</li>
+            <li>实现算法系统稳定性达 99.99%，支持单次 3000 + 采集点位的超大室内场景稳定重建；</li>
+            <li>通过全链路优化，将 24K 图像 ISP 处理耗时从 900s 降至 6.5s，单套 VR 重建耗时从 20min 压缩至 8.5min；</li>
+            <li>搭建完整激光 SLAM 云端框架，支撑贝壳 VR 看房业务大规模商业化落地，个人连续 6 年绩效评级 4 及以上。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">伽罗华 P4 标定</div><div class="entry-role">方案技术设计</div><div class="entry-time">2024.01-2025.06</div></div>
+          <p class="label">内容：</p>
+          <p class="project-note">针对新一代 24K 画质 VR 扫描设备伽罗华 P4 的标定技术攻关，解决设备点云畸变、点云与图像位姿精度不足等核心问题，满足商业级扫描重建需求。</p>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>带领团队构建系统误差评价体系，制定针对性硬件标定方案，贡献核心标定代码，攻克点云分层扭曲、图像拼缝大等系列问题。</li>
+            <li>圆满完成标定目标，在原图分辨率下，点云与图像重投影误差控制在 4 个像素内，彻底解决设备长期存在的误差过大问题，提升设备扫描重建精度。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">室内大场景重建</div><div class="entry-role">技术负责人</div><div class="entry-time">2023.01-至今</div></div>
+          <p class="label">内容：</p>
+          <ol><li>拓展三维重建技术应用边界，从贝壳 VR 看房延伸至图书馆、博物馆、商超、酒旅等大空间商业化场景，打造通用型室内大场景重建能力。</li></ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>设计大场景重建整体技术架构，在云端搭建分块 - 合并式重建系统，研发全链路自适应场景大小的算法体系，解决大场景重建的内存瓶颈与效率问题。</li>
+            <li>实现 3000 采集点位的大规模室内场景稳定重建，为三维重建技术在多行业商业化落地提供核心技术支撑。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">激光 SLAM 云端后处理算法</div><div class="entry-role">技术负责人</div><div class="entry-time">2023.01-至今</div></div>
+          <p class="label">内容：</p>
+          <p class="project-note">针对手持扫描设备庞加莱，研发全套云端 SLAM 后处理算法体系，实现扫描数据的高精度、高保真重建与展示。</p>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>从 0 到 1 搭建整体算法处理流，贡献大部分核心代码；重点攻克大规模点云着色难题，构建整套着色优化方案。</li>
+            <li>完成 SLAM 位姿优化、点云处理、着色、LOD 生成、Mesh 重建全流程算法开发，实现大规模点云的高保真效果展示，完善公司手持扫描重建技术体系。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">基于 tSGM 的多视图密集匹配算法</div><div class="entry-role">算法工程师</div><div class="entry-time">2017.10-2018.06</div></div>
+          <p class="label">内容：</p>
+          <ol><li>研发无人机航摄图像专用多视图密集匹配算法，满足 DSM、DEM 生成及正射影像镶嵌的高速、低内存需求。</li></ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>基于 CUDA 并行计算技术，独立从 0 到 1 完成 tSGM 多视图密集匹配算法的全部代码研发。</li>
+            <li>算法成功落地应用于 DSM、DEM 生成，正射影像镶嵌，无人机变高飞行等多款产品，成为公司无人机航测三维重建的核心算法。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">倾斜摄影测量软件</div><div class="entry-role">软件负责人</div><div class="entry-time">2014.10-2016.10</div></div>
+          <p class="label">内容：</p>
+          <ol><li>研发国内首套自主知识产权的倾斜摄影测量软件，覆盖空三、密集匹配、网格重建、纹理映射、LOD 生成全流程，打破国外技术垄断。</li></ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>主要负责软件整体开发与空三算法研发，实现数千张航空影像的空三处理全流程，包括特征提取、图像检索、特征匹配、SfM、控制点 BA、GNSS 约束 BA 等模块。</li>
+            <li>成功研发国内第一套自主知识产权的倾斜摄影测量软件 Infinie3d-Real Scenes，实现大场景航空影像的高精度、高效率重建，填补国内该领域技术空白。</li>
+          </ol>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">机载 LiDAR 点云处理软件</div><div class="entry-role">技术负责人</div><div class="entry-time">2013.01-2013.12</div></div>
+          <p class="label">内容：</p>
+          <ol><li>研发机载 LiDAR 点云全流程处理软件，实现点云航带拼接、滤波、矢量化重建等核心功能，对标国际顶尖软件。</li></ol>
+          <p class="label">业绩：</p>
+          <ol>
+            <li>研发完成机载 LiDAR 点云地面点滤波 - 渐进三角网加密算法，实现地面点与非地面点自动分类，性能效果与同期国际顶尖软件 TerraScan 相当；</li>
+            <li>完成 LiDAR 点云建筑物自动矢量化算法研发，打造当时国内领先的三维矢量化重建软件。</li>
+          </ol>
+        </article>
+      </section>
+
+      <section class="education">
+        <h2 class="section-title">教育经历</h2>
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">武汉大学</div><div class="entry-role">硕士 · 地图学与地理信息系统</div><div class="entry-time">2008-2010</div></div>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><div class="entry-title">东北石油大学</div><div class="entry-role">本科 · 资源环境与城乡规划管理</div><div class="entry-time">2003-2007</div></div>
+        </article>
+      </section>
+    </main>
+  </article>
+
+  <div class="screen-actions" aria-hidden="true">
+    <a href="../assets/huyang-cv.pdf" download>下载 PDF</a>
+    <a href="en/">English</a>
+    <button type="button" onclick="window.print()">打印 / 导出</button>
+  </div>
+</body>
+</html>

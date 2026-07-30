@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="740" viewBox="0 0 1240 740">
+<title>边界共识驱动的半全局颜色一致化</title>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#60758A"/></marker></defs>
+<rect width="1240" height="740" fill="white"/>
+<text x="620" y="42" text-anchor="middle" font-family="DejaVu Sans" font-size="27" font-weight="bold" fill="#243447">Boundary Consensus Color Correction</text>
+<rect x="90" y="105" width="500" height="400" rx="28" fill="#EEF5FB" stroke="#2F5D8C" stroke-width="3"/>
+<rect x="650" y="105" width="500" height="400" rx="28" fill="#FFF4EC" stroke="#D98941" stroke-width="3"/>
+<text x="340" y="140" text-anchor="middle" font-family="DejaVu Sans" font-size="19" font-weight="bold" fill="#2F5D8C">View Region A</text>
+<text x="900" y="140" text-anchor="middle" font-family="DejaVu Sans" font-size="19" font-weight="bold" fill="#D98941">View Region B</text>
+<circle cx="180" cy="220" r="17" fill="white" stroke="#2F5D8C" stroke-width="3"/>
+<circle cx="330" cy="190" r="17" fill="white" stroke="#2F5D8C" stroke-width="3"/>
+<circle cx="480" cy="230" r="17" fill="white" stroke="#2F5D8C" stroke-width="3"/>
+<circle cx="210" cy="360" r="17" fill="white" stroke="#2F5D8C" stroke-width="3"/>
+<circle cx="370" cy="330" r="17" fill="white" stroke="#2F5D8C" stroke-width="3"/>
+<circle cx="510" cy="390" r="17" fill="white" stroke="#2F5D8C" stroke-width="3"/>
+<circle cx="730" cy="220" r="17" fill="white" stroke="#D98941" stroke-width="3"/>
+<circle cx="880" cy="190" r="17" fill="white" stroke="#D98941" stroke-width="3"/>
+<circle cx="1030" cy="230" r="17" fill="white" stroke="#D98941" stroke-width="3"/>
+<circle cx="700" cy="390" r="17" fill="white" stroke="#D98941" stroke-width="3"/>
+<circle cx="870" cy="330" r="17" fill="white" stroke="#D98941" stroke-width="3"/>
+<circle cx="1020" cy="390" r="17" fill="white" stroke="#D98941" stroke-width="3"/>
+<line x1="180" y1="220" x2="330" y2="190" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="330" y1="190" x2="480" y2="230" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="180" y1="220" x2="210" y2="360" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="330" y1="190" x2="370" y2="330" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="480" y1="230" x2="510" y2="390" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="210" y1="360" x2="370" y2="330" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="370" y1="330" x2="510" y2="390" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="730" y1="220" x2="880" y2="190" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="880" y1="190" x2="1030" y2="230" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="730" y1="220" x2="700" y2="390" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="880" y1="190" x2="870" y2="330" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="1030" y1="230" x2="1020" y2="390" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="700" y1="390" x2="870" y2="330" stroke="#A7B5C3" stroke-width="2"/>
+<line x1="870" y1="330" x2="1020" y2="390" stroke="#A7B5C3" stroke-width="2"/>
+<circle cx="560" cy="250" r="21" fill="white" stroke="#B64B4B" stroke-width="4"/>
+<circle cx="570" cy="370" r="21" fill="white" stroke="#B64B4B" stroke-width="4"/>
+<circle cx="680" cy="250" r="21" fill="white" stroke="#B64B4B" stroke-width="4"/>
+<circle cx="670" cy="370" r="21" fill="white" stroke="#B64B4B" stroke-width="4"/>
+<text x="620" y="305" text-anchor="middle" font-family="DejaVu Sans" font-size="16" font-weight="bold" fill="#B64B4B">Boundary</text>
+<text x="620" y="328" text-anchor="middle" font-family="DejaVu Sans" font-size="16" font-weight="bold" fill="#B64B4B">Consensus</text>
+<rect x="80" y="565" width="320" height="92" rx="12" fill="#F4F7FA" stroke="#B64B4B" stroke-width="2.4"/>
+<text x="240.0" y="596" text-anchor="middle" font-family="DejaVu Sans" font-size="18" font-weight="bold" fill="#B64B4B">Boundary Data</text>
+<text x="240.0" y="623" text-anchor="middle" font-family="DejaVu Sans" font-size="14" font-weight="normal" fill="#243447">match consensus colors</text>
+<rect x="460" y="565" width="320" height="92" rx="12" fill="#F4F7FA" stroke="#2F5D8C" stroke-width="2.4"/>
+<text x="620.0" y="596" text-anchor="middle" font-family="DejaVu Sans" font-size="18" font-weight="bold" fill="#2F5D8C">Smooth Field</text>
+<text x="620.0" y="623" text-anchor="middle" font-family="DejaVu Sans" font-size="14" font-weight="normal" fill="#243447">propagate low-frequency offsets</text>
+<rect x="840" y="565" width="320" height="92" rx="12" fill="#F4F7FA" stroke="#4E8A67" stroke-width="2.4"/>
+<text x="1000.0" y="596" text-anchor="middle" font-family="DejaVu Sans" font-size="18" font-weight="bold" fill="#4E8A67">Zero-Bias Prior</text>
+<text x="1000.0" y="623" text-anchor="middle" font-family="DejaVu Sans" font-size="14" font-weight="normal" fill="#243447">avoid unsupported color drift</text>
+<line x1="400" y1="611" x2="460" y2="611" stroke="#60758A" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="780" y1="611" x2="840" y2="611" stroke="#60758A" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="620" y="705" text-anchor="middle" font-family="DejaVu Sans" font-size="15" font-weight="normal" fill="#667788">Correction is optimized per region while boundary observations connect neighboring views.</text>
+</svg>

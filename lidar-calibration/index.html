@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on station-based scanning, handheld laser scanner calibration, and joint camera-LiDAR extrinsic calibration.">
+ <title>Station-Based and Handheld LiDAR Calibration - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Calibration design for station-based scanning, mobile handheld laser scanning, and camera-LiDAR alignment.</p>
+ <h2>Station-Based and Handheld LiDAR Calibration</h2>
+ <p class="case-summary">A practical calibration workflow that diagnoses coupled scanner errors, simulates how those errors appear in point-cloud geometry, designs optimization and validation schemes, and supports one-capture joint camera-LiDAR extrinsic calibration in a high-precision calibration field.</p>
+ <div class="case-meta"><span>LiDAR Calibration</span><span>Error Simulation</span><span>Optimization Design</span><span>Calibration Field</span><span>Camera-LiDAR Extrinsics</span></div>
+ </section>
+
+ <section id="background" class="case-section">
+ <h3>Background</h3>
+ <p>Station-based scanning and mobile handheld laser scanning both depend on stable geometric calibration. In practice, small sensor, mechanical, and alignment errors can combine into visible point-cloud defects: planar surfaces split into layers, walls or floors appear wavy, and repeated scans become difficult to register consistently.</p>
+ <p>The project goal was to present and solve the calibration problem at the system level: identify the observable failure modes, design a calibration plan that can be executed reliably, and produce a validation path that engineering teams can use without relying on fragile manual adjustment.</p>
+ </section>
+
+ <section id="problem" class="case-section">
+ <h3>Problem</h3>
+ <ul class="case-points">
+ <li>Different error sources can produce similar surface defects, so the calibration plan must separate sensor error, mechanical-axis error, and capture alignment error.</li>
+ <li>Station-based scanning needs stable plane quality after calibration, especially for walls, floors, ceilings, and other large structures used by downstream reconstruction.</li>
+ <li>Mobile handheld laser scanning needs a repeatable field workflow that keeps sensor alignment consistent across capture sessions.</li>
+ <li>Camera and LiDAR must be calibrated together so image observations and point-cloud geometry remain in one reliable coordinate relationship.</li>
+ <li>The calibration scheme needed to stay explainable at the system level: problem diagnosis, data acquisition, optimization, validation, and acceptance criteria.</li>
+ </ul>
+ </section>
+
+ <section id="approach" class="case-section">
+ <h3>Approach</h3>
+ <ul class="case-points">
+ <li>Model the major error families at a system level, then use simulation to observe how each one changes the spatial distribution of point-cloud residuals.</li>
+ <li>Use the simulated error distributions to guide parameter separation, optimization design, and the choice of validation signals.</li>
+ <li>Design a calibration procedure around high-quality planar and geometric observations, so scanner calibration can be checked through residual concentration and cross-scan consistency.</li>
+ <li>Add a high-precision calibration-field workflow for joint camera-LiDAR extrinsic calibration: the device captures the field once, and the shared observations are used to solve the camera-to-LiDAR relationship in the same calibration session.</li>
+ <li>Define acceptance checks from residual statistics, visualized residual maps, and repeated-scan consistency rather than relying only on a single fitted value.</li>
+ </ul>
+ </section>
+
+ <section id="contribution" class="case-section">
+ <h3>My Contribution</h3>
+ <p>I led the problem formulation and calibration-scheme design, connecting observed point-cloud defects to the underlying scanner and sensor-alignment errors. The work focused on a practical engineering path: simulate the error behavior, design the data acquisition plan, choose optimization constraints, and define how the result should be accepted or rejected.</p>
+ <p>My main contributions included:</p>
+ <ul class="case-points">
+ <li>Identifying the calibration failure modes for station-based scanning and mobile handheld laser scanning</li>
+ <li>Designing error-distribution simulations to separate coupled error sources at the system level</li>
+ <li>Defining the optimization and validation strategy for scanner calibration</li>
+ <li>Designing the high-precision calibration-field workflow for one-capture joint camera-LiDAR extrinsic calibration</li>
+ <li>Organizing residual-based diagnostics so calibration quality can be reviewed visually and statistically</li>
+ </ul>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>The completed scheme provides a calibration workflow for station-based scanning and mobile handheld laser scanners, covering problem diagnosis, data capture design, error simulation, optimization planning, and validation. It gives engineering teams a clear path from observed geometric defects to a calibrated scanner setup.</p>
+ <p>The joint camera-LiDAR calibration component closes an important gap: using a high-precision calibration field, one data capture is sufficient to estimate the shared extrinsic relationship and keep image and point-cloud observations aligned for downstream reconstruction workflows.</p>
+ <div class="case-figures">
+ <figure><img src="figures/fig1_system_geometry.png" alt="Scanner calibration system geometry"><figcaption>System-level view of scanner geometry and the main error relationships considered during calibration.</figcaption></figure>
+ <figure><img src="figures/fig2_pipeline.png" alt="Scanner calibration workflow"><figcaption>Calibration workflow from problem diagnosis and data capture to optimization and validation.</figcaption></figure>
+ </div>
+ <div class="case-figures">
+ <figure><img src="figures/fig3_error_simulation.png" alt="Simulated LiDAR calibration error distributions"><figcaption>Simulated error distributions used to separate coupled scanner error sources.</figcaption></figure>
+ <figure><img src="figures/fig4_residual_histogram.png" alt="Residual histogram before and after calibration"><figcaption>Residual distribution checks help verify that calibration has reduced systematic geometric error.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>

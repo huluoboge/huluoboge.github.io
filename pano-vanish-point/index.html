@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Case study on vanishing point estimation in panoramic images.">
+ <title>Panorama Vanishing Point Estimation - Hu Yang</title>
+ <link rel="stylesheet" href="../styles.css?v=20260729-1">
+</head>
+<body class="case-page">
+ <div class="page">
+ <main class="content">
+ <a class="case-back" href="../#projects">Back to projects</a>
+ <section class="case-hero section">
+ <p class="kicker">Robust Manhattan directions for panoramic images.</p>
+ <h2>Panorama Vanishing Point Estimation</h2>
+ <p class="case-summary">A spherical vanishing-point estimator for equirectangular panoramas, using cube-face line detection, weighted lookup tables, and Manhattan triplet fitting.</p>
+ <div class="case-meta"><span>Vanishing Points</span><span>Panorama</span><span>Spherical LUT</span><span>RANSAC</span></div>
+ </section>
+
+ <section id="problem" class="case-section">
+ <h3>Problem</h3>
+ <p>Classic pinhole vanishing-point methods do not transfer directly to panoramas because image lines bend in equirectangular space and global spherical evidence is expensive to evaluate repeatedly.</p>
+ </section>
+
+ <section id="approach" class="case-section">
+ <h3>Approach</h3>
+ <ul class="case-points">
+ <li>Detect local perspective line segments after cube projection to avoid equirectangular line distortion.</li>
+ <li>Map line evidence onto a spherical parameter space and accumulate support in a lookup table.</li>
+ <li>Sample and score Manhattan direction triplets efficiently with constant-time candidate evaluation.</li>
+ </ul>
+ </section>
+
+ <section class="case-section">
+        <h3>My Contribution</h3>
+        <p>I independently designed and implemented the complete panoramic vanishing point estimation module, from algorithm to C++ implementation and evaluation.</p>
+        <p>On the algorithm side, I built the core modules:</p>
+        <ul class="case-points">
+          <li>Cube-face projection and line segment detection for distortion-free line extraction</li>
+          <li>Spherical weighted lookup table construction enabling constant-time RANSAC candidate evaluation</li>
+          <li>Manhattan triplet fitting under orthogonal constraints with brute-force sampling</li>
+        </ul>
+ </section>
+
+ <section id="outcome" class="case-section">
+ <h3>Outcome</h3>
+ <p>The module provides stable room orientation cues for downstream rectification, plane reasoning, and indoor reconstruction initialization.</p>
+ <div class="case-figures">
+ <figure><img src="figures/fig1_pipeline.png" alt="Panorama vanishing point pipeline"><figcaption>Vanishing-point estimation pipeline.</figcaption></figure>
+ <figure><img src="figures/fig4_sphere_lut.png" alt="Spherical lookup table evidence"><figcaption>Spherical evidence used for fast candidate scoring.</figcaption></figure>
+ </div>
+ </section>
+ </main>
+ </div>
+</body>
+</html>
