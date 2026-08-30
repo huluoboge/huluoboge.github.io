@@ -38,11 +38,14 @@ function normalizeDate(raw) {
   return `${m[4]}-${months[m[2]]}-${m[3]}`;
 }
 
-/** 从分类索引页 HTML 提取文章条目 [{title, href, date, tags}] */
+/**
+ * 从博客首页/索引页 HTML 提取文章条目 [{title, href, date, tags}]
+ * 支持两种结构：
+ *   - 分类索引页: <h3><a href="slug/index.html">title</a></h3>
+ *   - 博客首页完整列表: <h3><a href="articles/slug/index.html">title</a></h3>
+ */
 function extractArticles(html) {
   const items = [];
-  // 索引页结构: <div class="article-item"> ... <h3><a href="slug/index.html">title</a></h3>
-  //              <div class="article-meta">发布于: DATE | 标签: a, b</div> ... </div>
   const itemRe = /<div class="article-item[^"]*">([\s\S]*?)<\/div>\s*<\/div>/g;
   let m;
   while ((m = itemRe.exec(html)) !== null) {
@@ -50,8 +53,10 @@ function extractArticles(html) {
     const linkRe = /<a href="([^"]+)">([^<]+)<\/a>/;
     const l = block.match(linkRe);
     if (!l) continue;
-    const href = l[1];
+    let href = l[1];
     const title = l[2].trim();
+    // 首页完整列表的 href 带 articles/ 前缀，去掉前缀得到相对路径
+    if (href.startsWith("articles/")) href = href.slice("articles/".length);
     const metaRe = /发布于:\s*([^<|]+)/;
     const meta = block.match(metaRe);
     const tagsRe = /标签:\s*([^<]+)/;
@@ -81,7 +86,11 @@ function buildListHTML(items) {
 
 function main() {
   const opts = parseArgs(process.argv.slice(2));
-  const blogIndex = path.join(REPO_ROOT, opts.blogDir, "articles", "index.html");
+  // 文章列表来源：优先博客首页（含完整列表 all-articles-placeholder），
+  // 回退分类索引页（旧结构，导航含 articles 分类时存在）
+  const blogHome = path.join(REPO_ROOT, opts.blogDir, "index.html");
+  const legacyIndex = path.join(REPO_ROOT, opts.blogDir, "articles", "index.html");
+  const blogIndex = fs.existsSync(blogHome) ? blogHome : legacyIndex;
   const homePath = path.join(REPO_ROOT, opts.home);
 
   if (!fs.existsSync(blogIndex)) {
