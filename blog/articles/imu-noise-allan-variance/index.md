@@ -389,11 +389,11 @@ $$
 
 把不同 $\tau$ 算出来的 $\sigma(\tau)$ 画在双对数坐标上（横轴 $\tau$，纵轴 $\sigma(\tau)$），得到经典的 Allan 曲线：
 
-![Allan Deviation 曲线（真实模型合成：白噪声 + 零偏不稳定性 + 随机游走）](allan-deviation.png)
-
-*图中黑色实线为按白噪声 $\sigma(\tau)=N/\sqrt{\tau}$、零偏不稳定性（常数项）与随机游走 $\sigma(\tau)=K\sqrt{\tau/3}$ 合成的 Allan 曲线（$N=0.01$，$K=0.0008$），蓝色虚线为 $-1/2$ 斜率参考，红色虚线为 $+1/2$ 斜率参考，绿点为谷底。*
-
 实际曲线大致长这样：
+
+![Allan deviation curve (synthesized from white noise + bias instability + random walk)](allan-deviation.png)
+
+<em>黑色实线为按白噪声 $\sigma(\tau)=N/\sqrt{\tau}$、零偏不稳定性（常数项）与随机游走 $\sigma(\tau)=K\sqrt{\tau/3}$ 三个模型叠加合成的 Allan 曲线（$N=0.01$，$B=0.0015$，$K=0.0008$）。蓝色虚线为 $-1/2$ 斜率参考（白噪声段），红色虚线为 $+1/2$ 斜率参考（随机游走段），绿点为谷底（零偏不稳定性），蓝色方块为 $\tau=1$ s 处读数</em>
 
 ```
 log σ(τ)
