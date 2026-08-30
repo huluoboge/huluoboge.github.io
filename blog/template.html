@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}} — Hu Yang</title>
+  <!-- 站点部署在域名根（CNAME huluoboge.top），用绝对路径 -->
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/blog/static/css/katex.min.css">
+  <link rel="stylesheet" href="/blog/static/css/highlight.min.css">
+  <script src="/blog/static/js/mermaid.min.js"></script>
+  <script src="/blog/static/js/highlight.min.js"></script>
+</head>
+<body>
+  <div class="page">
+    <aside class="sidebar">
+      <a class="portrait" href="/index.html#about" aria-label="Back to homepage">
+        <img src="/assets/hu-yang.jpg" alt="Hu Yang">
+      </a>
+
+      <div class="identity">
+        <h1>Hu Yang</h1>
+        <p class="name-cn">胡洋</p>
+        <p class="role">Lead of 3D<br>Reconstruction</p>
+        <p class="affiliation"><a href="https://www.realsee.com/">realsee.com</a><br>Beijing, China</p>
+      </div>
+
+      <nav class="side-nav" aria-label="Section navigation">
+        <a href="/index.html#about">About</a>
+        <a href="/index.html#focus">Focus</a>
+        <a href="/index.html#projects">Projects</a>
+        <a href="/index.html#software">Software</a>
+        <a href="/index.html#experience">Experience</a>
+        <a href="/index.html#contact">Contact</a>
+        <a href="/blog/index.html" class="active">Blog</a>
+      </nav>
+
+      <div class="profile-links">
+        <a href="mailto:huyang0909@gmail.com">Email</a>
+        <a href="https://github.com/huluoboge">GitHub</a>
+        <a href="/cv/index.html">CV 中文</a>
+        <a href="/cv/en/index.html">CV English</a>
+        <a href="/assets/huyang-cv.pdf" download>下载中文 CV</a>
+        <a href="/assets/huyang-cv-en.pdf" download>Download English CV</a>
+      </div>
+
+    </aside>
+
+    <main class="content">
+      <div class="blog-content">
+        {{CONTENT}}
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 代码高亮
+      document.querySelectorAll('pre code').forEach(function(block) {
+        if (window.hljs) hljs.highlightElement(block);
+      });
+      // Mermaid 图表
+      if (window.mermaid && document.querySelector('.mermaid')) {
+        mermaid.initialize({ startOnLoad: true });
+        mermaid.run();
+      }
+    });
+  </script>
+</body>
+</html>

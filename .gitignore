@@ -1,5 +1,6 @@
-# 构建产物（CI 生成，不提交）
+# 构建产物（CI 生成，不提交）；模板文件保留
 blog/**/*.html
+!blog/template.html
 blog/home/home/index.html
 
 # 渲染器依赖（submodule 内）
