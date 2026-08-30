@@ -106,4 +106,9 @@ function main() {
   console.log(`[inject] 主页注入 ${items.length} 篇最新文章`);
 }
 
-main();
+// CLI 入口：仅作为主模块执行时运行（require 导入不触发）
+if (require.main === module) {
+  main();
+}
+
+module.exports = { extractArticles, buildListHTML, normalizeDate };
