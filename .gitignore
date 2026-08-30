@@ -1,0 +1,10 @@
+# 构建产物（CI 生成，不提交）
+blog/**/*.html
+blog/home/home/index.html
+
+# 渲染器依赖（submodule 内）
+tools/blog-renderer/node_modules/
+tools/blog-renderer/coverage/
+
+# 系统
+.DS_Store

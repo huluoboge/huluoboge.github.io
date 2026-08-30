@@ -1,0 +1,25 @@
+# 博客配置（部署在 huluoboge.top/blog/ 子目录）
+site:
+  title: "胡洋的博客"
+  description: "三维重建、SfM/MVS、SLAM、点云与工程实践"
+  author: "胡洋"
+
+# 部署前缀：站点位于域名子目录 /blog/
+basePath: "/blog"
+
+navigation:
+  - name: "首页"
+    path: "/"
+    folder: "home"
+    isHome: true
+    type: "page"
+
+  - name: "技术文章"
+    path: "/articles/"
+    folder: "articles"
+    type: "articles"
+
+homepage:
+  latest_articles_count: 5
+  show_projects: false
+  show_blog_posts: false

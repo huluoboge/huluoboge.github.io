@@ -1,0 +1,3 @@
+[submodule "tools/blog-renderer"]
+	path = tools/blog-renderer
+	url = ../../huluoboge/blog-renderer.git

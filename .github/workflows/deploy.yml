@@ -21,8 +21,23 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
+      - name: Checkout (with submodule)
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install blog-renderer dependencies
+        run: npm ci
+        working-directory: tools/blog-renderer
+
+      - name: Build blog (markdown -> html)
+        run: node tools/blog-renderer/src/cli.js build --cwd blog
+        working-directory: ${{ github.workspace }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
