@@ -8,6 +8,32 @@
   <link rel="stylesheet" href="/blog/static/css/highlight.min.css?v=1">
   <script src="/blog/static/js/mermaid.min.js"></script>
   <script src="/blog/static/js/highlight.min.js"></script>
+  <script>
+    // file:// 直接打开时，绝对路径 /blog/... 会解析到磁盘根目录导致资源 404
+    // （公式显示为原始 LaTeX 源码）。检测到 file:// 时把资源重写为相对路径。
+    // 以 pathname 中 /blog/ 为站点根：之后的目录数决定回退层级。
+    (function () {
+      if (location.protocol !== "file:") return;
+      var parts = location.pathname.split("/blog/");
+      if (parts.length < 2) return; // pathname 不含 /blog/，保持原样
+      var dirs = parts[1].split("/");
+      var depth = dirs.length - 1; // 页面在 /blog/ 下的目录深度（index.html 不算）
+      var prefix = depth > 0 ? new Array(depth + 1).join("../") : "./";
+      // link：改 href 会重新加载
+      document.querySelectorAll('link[href^="/"]').forEach(function (el) {
+        var abs = el.getAttribute("href"); // 原始属性值（el.href 是解析后的绝对 URL）
+        el.setAttribute("href", prefix + abs.replace(/^\/blog\//, ""));
+      });
+      // script：已失败的脚本不会重试，需要移除重建
+      document.querySelectorAll('script[src^="/"]').forEach(function (el) {
+        var abs = el.getAttribute("src");
+        var rel = prefix + abs.replace(/^\/blog\//, "");
+        var neu = document.createElement("script");
+        neu.src = rel;
+        el.parentNode.replaceChild(neu, el);
+      });
+    })();
+  </script>
   <style>
     /* ===== 设计变量（与主页同语言）===== */
     :root {
