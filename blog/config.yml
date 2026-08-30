@@ -7,6 +7,9 @@ site:
 # 部署前缀：站点位于域名子目录 /blog/
 basePath: "/blog"
 
+# 外部页面模板：渲染器只提供内容，页面外壳（侧栏/导航/styles.css）由主页模板决定
+templateFile: template.html
+
 navigation:
   - name: "首页"
     path: "/"
