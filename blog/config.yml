@@ -7,10 +7,11 @@ site:
 # 部署前缀：站点位于域名子目录 /blog/
 basePath: "/blog"
 
-# 外部页面模板：渲染器只提供内容，页面外壳（侧栏/导航/styles.css）由主页模板决定
+# 外部页面模板：渲染器只提供内容，页面外壳由该模板决定
 templateFile: template.html
 
-# 博客首页即完整文章列表（all-articles-placeholder），单一入口
+# 文章自动发现：articles/ 下每个子目录的 index.md 自动渲染；
+# front-matter 标 draft: true 的跳过。写文章 = 建目录 + 写 index.md，无需改配置。
 navigation:
   - name: "博客"
     path: "/"
