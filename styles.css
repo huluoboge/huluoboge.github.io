@@ -103,6 +103,13 @@ a:hover { color: #001f55; text-decoration: underline; }
 .case-list time { color: var(--blue); font-weight: bold; letter-spacing: .05em; text-transform: uppercase; }
 .case-tags { color: var(--faint) !important; font-size: 10px !important; letter-spacing: .02em; text-transform: uppercase; }
 
+/* 主页最近文章（CI 注入，样式同 note-list） */
+.blog-posts li { grid-template-columns: 84px 1fr 60px; }
+.blog-posts time { color: var(--muted); font-size: 10px; }
+.blog-posts a { font: bold 16px var(--serif); }
+.blog-posts a:hover { text-decoration: none; color: var(--blue); }
+.blog-posts span { color: var(--faint); font-size: 10px; letter-spacing: .02em; text-transform: uppercase; }
+
 .case-page .page { max-width: 900px; grid-template-columns: minmax(0, 1fr); gap: 0; }
 .case-page .content { padding-top: 54px; }
 .case-back { color: var(--muted); font-size: 12px; }
