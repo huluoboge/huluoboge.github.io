@@ -389,17 +389,9 @@ $$
 
 把不同 $\tau$ 算出来的 $\sigma(\tau)$ 画在双对数坐标上（横轴 $\tau$，纵轴 $\sigma(\tau)$），得到经典的 Allan 曲线：
 
-```mermaid
----
-config:
-  theme: neutral
----
-xychart-beta
-    title "Allan Deviation (示意)"
-    x-axis "τ (s)" [0.01, 0.1, 1, 10, 100, 1000]
-    y-axis "σ(τ)"
-    line [100, 31.6, 10, 3.16, 1.5, 2.5]
-```
+![Allan Deviation 曲线（真实模型合成：白噪声 + 零偏不稳定性 + 随机游走）](allan-deviation.png)
+
+*图中黑色实线为按白噪声 $\sigma(\tau)=N/\sqrt{\tau}$、零偏不稳定性（常数项）与随机游走 $\sigma(\tau)=K\sqrt{\tau/3}$ 合成的 Allan 曲线（$N=0.01$，$K=0.0008$），蓝色虚线为 $-1/2$ 斜率参考，红色虚线为 $+1/2$ 斜率参考，绿点为谷底。*
 
 实际曲线大致长这样：
 
