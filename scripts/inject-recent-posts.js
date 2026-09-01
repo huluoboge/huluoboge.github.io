@@ -77,7 +77,7 @@ function buildListHTML(items) {
     .map(
       (item) => `<li>
         <time>${item.date}</time>
-        <a href="blog/${item.href}">${item.title}</a>
+        <a href="blog/articles/${item.href}">${item.title}</a>
         ${item.tags ? `<span>${item.tags.split(",")[0].trim()}</span>` : ""}
       </li>`
     )
