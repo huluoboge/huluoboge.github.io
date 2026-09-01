@@ -3,7 +3,7 @@ title: "3D Gaussian Splatting for Real-Time Radiance Field Rendering"
 date: 2025-10-27T21:32:00+08:00
 tags: ["3DGS", "Volume Rendering"]
 excerpt: "3D 高斯溅射：实时辐射场渲染方法文章翻译"
-draft: false
+draft: true
 ---
 
 # 3D 高斯溅射：实时辐射场渲染方法

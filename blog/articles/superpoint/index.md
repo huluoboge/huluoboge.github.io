@@ -3,7 +3,7 @@ title: "SuperPoint: 自监督兴趣点检测与描述文章翻译"
 date: 2025-12-28T12:47:00+08:00
 tags: ["Feature detect", "SuperPoint", "Sift​", "ORB"]
 excerpt: "本文提出了一种自监督框架，用于训练适用于计算机视觉中多视角几何问题的兴趣点检测器和描述符。与基于图像块的神经网络不同，我们的全卷积模型在全尺寸图像上运行，并在一次前向传播中联合计算像素级兴趣点位置及相关描述符。我们引入了**单应性适应**（Homographic Adaptation），一种多尺度、多单应性方法，用于提升兴趣点检测的可重复性并实现跨领域适应（例如，从合成到真实）。我们的模型在 MS-COCO 通用图像数据集上使用单应性适应进行训练后，能够比初始未适应的深度模型及任何其他传统角点检测器更丰富地重复检测兴趣点。最终系统在 HPatches 数据集上的单应性估计结果优于 LIFT、SIFT 和 ORB。"
-draft: false
+draft: true
 
 marp: true
 theme: default

@@ -3,7 +3,7 @@ title: "Poisson 表面重建文章翻译"
 date: 2025-10-12
 tags: ["Poisson reconstruction", "Surface Reconstruction","3D Reconstruction"]
 excerpt: "本文翻译了经典的Poisson表面重建文章：Poisson Surface Reconstruction"
-draft: false
+draft: true
 ---
 
 # Poisson 表面重建

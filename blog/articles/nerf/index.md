@@ -11,7 +11,7 @@ tags:
     3D deep learning",
   ]
 excerpt: "NeRF: Representing Scenes as  Neural Radiance Fields for View Synthesis 经典论文翻译"
-draft: false
+draft: true
 ---
 
 # NeRF：将场景表示为用于视图合成的神经辐射场
