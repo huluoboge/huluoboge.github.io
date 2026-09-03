@@ -1,563 +1,1021 @@
 ---
-title: "IMU 零偏估计：静止平均与运动可观测性"
+title: "IMU 角速度零偏与加速度零偏：从观测耦合到联合估计"
 date: 2026-09-01
 tags: [IMU, Bias, Gyroscope, Accelerometer, Observability, Gravity Alignment, SLAM]
 excerpt: "静止时陀螺仪零偏可以直接平均，加速度计零偏却与重力投影耦合，姿态误差会等量转化为虚假零偏；运动时陀螺仪需要独立的旋转参考，加速度计需要姿态激励。文章推导两条线的可观测条件与误差量级。"
 ---
 
-# IMU 零偏估计：静止平均与运动可观测性
+## 摘要
 
-做 SLAM 和 VIO 的人都会遇到零偏问题。陀螺仪明明没有转动，输出却不是零；加速度计静止放在水平桌上，测到的比力也不指向重力方向。零偏不估计、不补偿，姿态积分会漂移，重力方向会对不齐，轨迹随之变形。问题的答案分静止与运动两种情形，陀螺仪与加速度计的回答又不一样。这篇文章把两条线放在一起推导：零偏在什么条件下可观测、误差有多大，以及静止平均这条最朴素的路为什么对陀螺仪成立、对加速度计不成立。
+IMU 零偏是惯性估计中最容易被低估、却最难靠单一传感器解决的一类误差。陀螺仪零偏会被积分为姿态漂移；姿态一旦漂移，重力方向就会被错误解释，进一步影响速度、位置和高度。加速度计零偏则与重力投影直接叠加：在静止或弱激励条件下，姿态倾斜和加速度计零偏可以产生几乎相同的观测，导致重力对齐过程把倾斜吸收到一个虚假的零偏中。
 
-## 1. 测量模型与记号
+本文从统一的 IMU 测量模型出发，分别讨论角速度零偏和加速度零偏的可观性。对于陀螺仪，静止条件给出了真实角速度为零的独立参考，因此零偏可以通过平均直接估计；运动条件下，陀螺仪测量只包含“真实角速度加零偏”，仅凭陀螺仪不存在区分二者的依据，必须引入视觉、LiDAR、回环或其他独立旋转参考。对于加速度计，重力本身提供了绝对方向，但其投影与零偏处在同一个测量通道中；静止时单一姿态无法分离二者，预积分时则通过“机体系固定零偏”和“随姿态变化的重力投影”之间的差异实现分离。
 
-世界系 $W$ 取 $+Z$ 向上、与重力对齐；机体系 $B$ 固定在载体上。姿态用机体系到世界系的旋转 $R$ 表示，即 $x_W = R\,x_B$。记 $g_W = (0,0,-g)^{\top}$ 为重力加速度，$u_W = (0,0,g)^{\top}$ 为竖直向上的比力方向，$g = 9.81\ \mathrm{m/s^2}$。
+文章进一步推导：共同 yaw 是重力与相对约束共同保留的规范自由度；陀螺仪零偏误差如何累积为姿态误差；加速度计零偏与世界重力倾斜如何形成秩亏；姿态激励如何决定联合估计的条件数；时变随机游走零偏为何会吸收缓慢变化的倾斜。最后给出一套不依赖实验特例的求解方法：以静止段初始化陀螺仪零偏，以外部相对姿态约束陀螺仪，以完整 IMU 预积分因子图联合估计位姿、速度、陀螺仪零偏、加速度计零偏、重力方向和必要的尺度参数，并通过各向异性先验处理不可观方向。
 
-陀螺仪与加速度计的测量模型分别是
+**关键词：** IMU 零偏；陀螺仪零偏；加速度计零偏；重力对齐；预积分；可观性；因子图
 
-$$
-\tilde\omega = \omega + b_g + n_g,
-\qquad
-\tilde a = R^{\top}(a_W - g_W) + b_a + n_a
-= R^{\top}a_W + R^{\top}u_W + b_a + n_a
-$$
+## 1. 问题与基本判断
 
-其中 $\omega$ 是真实角速度，$b_g$ 是陀螺仪零偏；$a_W$ 是世界系加速度，$b_a$ 是加速度计零偏；$n_g$、$n_a$ 是零均值噪声。噪声按各向同性的白噪声处理，标准差记为 $\sigma_g$、$\sigma_a$；在单个估计窗口内 $b_g$、$b_a$ 视为常数，时变问题到 3.5 节和 4.5 节再处理。
+在 SLAM、VIO 和 LIO 中，IMU 常被用来连接相邻时刻的姿态、速度和位置。传感器频率高、短时间内积分稳定，但零偏会把一个很小的恒定误差变成长期漂移。两种零偏的表现不同：
 
-加速度计模型里 $R^{\top}a_W$ 与 $R^{\top}u_W$ 必须分开看：前者是运动加速度在机体系下的投影，平均为零；后者是竖直方向在机体系下的投影，静止时是常数，且与姿态绑定。测量把「运动加速度、重力投影、零偏」三个量叠在同一个通道里，陀螺仪则没有这种叠加——只有 $\omega$ 和 $b_g$。这个差别是后面所有分析的起点。
+- **角速度零偏** $\mathbf b_g$ 进入姿态积分。若误差近似恒定，经过时间 $T$ 后会产生约 $T\lVert\delta\mathbf b_g\rVert$ 的旋转误差。
+- **加速度零偏** $\mathbf b_a$ 进入速度和位置积分，并且会改变对重力方向的判断。倾斜角误差 $\delta\theta$ 在水平距离 $h$ 上产生约 $h\tan\delta\theta\approx h\delta\theta$ 的高度误差。
 
-对零加速度片段（静止或匀速运动，$a_W \approx 0$），加速度计测量的均值为
+因此，轨迹出现高度隆起时，原因未必是平移估计本身出错，也可能是 roll/pitch 漂移；而 roll/pitch 漂移又可能源自陀螺仪零偏，也可能来自加速度计零偏与重力方向的错误分配。
 
-$$
-\bar a \approx R^{\top}u_W + b_a
-$$
+两种零偏的核心差别可以先概括如下：
 
-这是惯导里最常用的重力锚：加速度计在机体系内直接测到了竖直方向，但读数被零偏平移了 $b_a$。
-
-推导中会用到 $\mathrm{SO}(3)$ 的小量记号：$[\phi]_\times$ 是 $\phi$ 的反对称矩阵，$\operatorname{Exp}(\phi) = \exp([\phi]_\times)$ 是指数映射，$\operatorname{Log}(\cdot)$ 是主值对数。小角度下 $\operatorname{Exp}(\delta\theta) \approx I + [\delta\theta]_\times$，并有恒等式 $[x]_\times y = -[y]_\times x$。正文只保留衔接结论所需的推导，完整展开放在文末附录 A。IMU 预积分的传播式到 4.2 节用到时再引入，样本间隔与关键帧区间时长的记号也到那时再区分。
-
-## 2. 静止：平均能做什么
-
-### 2.1 陀螺仪零偏：静止时直接平均
-
-静止时真实角速度已知为零，$\omega = 0$，测量序列
-
-$$
-\tilde\omega_k = b_g + n_{g,k}, \qquad k = 1, \ldots, N
-$$
-
-是一串「常数加噪声」。样本均值
-
-$$
-\hat b_g = \frac{1}{N}\sum_{k=1}^{N}\tilde\omega_k = b_g + \bar n_g
-$$
-
-是 $b_g$ 的无偏估计，$\mathbb{E}[\hat b_g] = b_g$。白噪声各样本不相关时，均值噪声的方差按 $\operatorname{Var}(\bar n_g) = \frac{1}{N^2}\sum_k \sigma_g^2 = \sigma_g^2 / N$ 下降，即每个轴的标准差为 $\sigma_g / \sqrt{N}$。静止 10 秒、100 Hz 采样是 $N = 1000$ 个样本，噪声压到单样本的约 $1/32$。
-
-这个估计不需要知道姿态。整个推导只用了 $\omega = 0$ 这一条，而 $\omega = 0$ 在载体任何朝向下都成立，因此估计与姿态无关，三个轴也互不牵连。陀螺仪之所以能这么做，是因为测量里没有需要扣除的未知真值——真实角速度为零是静止条件本身给出的参考，平均把噪声滤掉，剩下的就是 $b_g$。前提是静止必须是真的（支架无振动，否则微旋转作为额外误差进入均值）、窗口内 $b_g$ 确实为常数、噪声接近白噪声；噪声一旦有相关性（闪烁噪声、随机游走），平均的收益不再按 $\sqrt{N}$ 增长，那是 Allan 方差要处理的问题。
-
-### 2.2 加速度计零偏：均值里不只有零偏
-
-静止时 $a_W = 0$，对测量取平均得到
-
-$$
-\bar a = R^{\top}u_W + b_a + \bar n_a
-$$
-
-形式与陀螺仪完全平行，只是多了一项 $R^{\top}u_W$。平均能滤掉噪声，滤不掉这项常数。若姿态 $R$ 由外部精确给出（转台、高精度水平基准或视觉真值），估计
-
-$$
-\hat b_a = \bar a - R^{\top}u_W
-$$
-
-同样无偏、同样以 $\sigma_a / \sqrt{N}$ 收敛——与陀螺仪的唯一差别是减去的不是 $0$ 而是 $R^{\top}u_W$。差别全在 $R$ 从哪来。静止数据自身能提供的姿态信息很有限：绕世界竖直轴的姿态变化不改变 $R^{\top}u_W$（$u_W$ 在旋转轴上），所以静止测量对 yaw 给不出任何信息；对 roll/pitch，$R^{\top}u_W$ 的变化方向又恰好与零偏的水平分量同向。把姿态扰动 $\delta\theta$ 与零偏扰动 $\delta b_a$ 一起对静止观测线性化（$R \leftarrow R\operatorname{Exp}(\delta\theta)$）：
-
-$$
-\delta\bar a \approx [R^{\top}u_W]_\times\,\delta\theta + \delta b_a
-$$
-
-$[R^{\top}u_W]_\times$ 的秩为 2，值域是 $R^{\top}u_W$ 的正交平面；这一步只是对 $f(R) = R^{\top}u_W$ 做一阶 Taylor 展开，细节见 A.2。于是单次静止观测下：
-
-- 沿 $R^{\top}u_W$ 方向（机体系里的「上」）的零偏分量不与姿态耦合，可以直接测出，前提是重力大小 $g$ 已知；若把 $g$ 也当未知量，该方向与重力模长混淆。
-- 水平面内只有 2 个观测方程，却有 4 个未知量（水平零偏 2 个加 roll/pitch 姿态 2 个），秩亏 2。单个姿态下，水平零偏与姿态的 roll/pitch 完全不可分。
-
-「静止平均得不到 $b_a$」因此不是噪声不够小的问题，而是未知数比方程多：静止数据在水平面内测到的永远是零偏与倾斜的某个组合，不是零偏本身。
-
-### 2.3 姿态误差如何变成虚假零偏
-
-实际计算零偏过程中姿态不是完美已知的，而是来自外部估计 $\hat R_s$。若 $\hat R_s$ 带误差，最小二乘会把姿态误差吸收进零偏。设 $S$ 个零加速度段的真实模型为 $\bar a_s = R_s^{\top}u_W + b_a + n_s$，用带误差的姿态 $\hat R_s = R_s\operatorname{Exp}(\delta\theta_s)$ 做等权最小二乘：
-
-$$
-\hat b_a = \frac{1}{S}\sum_{s=1}^{S}\big(\bar a_s - \hat R_s^{\top}u_W\big)
-$$
-
-代入真实模型，零均值噪声在平均中消失：
-
-$$
-\hat b_a - b_a = \frac{1}{S}\sum_{s=1}^{S}\big(R_s^{\top}u_W - \hat R_s^{\top}u_W\big)
-$$
-
-把 $\hat R_s^{\top}$ 展开到一阶：$\hat R_s^{\top} \approx (I - [\delta\theta_s]_\times)R_s^{\top}$，再用 $[x]_\times y = -[y]_\times x$：
-
-$$
-\hat b_a - b_a \approx -\frac{1}{S}\sum_{s=1}^{S}[R_s^{\top}u_W]_\times\,\delta\theta_s
-$$
-
-对纯 roll/pitch 姿态误差（$\delta\theta_s \perp R_s^{\top}u_W$），每段贡献的虚假零偏幅度为 $g\|\delta\theta_s\| \approx g\sin\|\delta\theta_s\|$。若各段姿态误差同向（只有一段静止，或各段误差来自同一个外参偏差），虚假零偏叠加在一起：姿态误差 1 度对应约 $g\sin 1^\circ \approx 0.17\ \mathrm{m/s^2}$，5 度对应约 $0.86\ \mathrm{m/s^2}$，而车载级 IMU 的真实零偏在 $0.05\ \mathrm{m/s^2}$ 量级——虚假零偏高一个数量级。这里的代入、转置展开和幅值换算对应 A.3，关键不在 $g\sin\theta$ 近似本身，而在「错误姿态先进入估计、估计再返回零偏」这条链上。这个值远超器件标称，却没有任何独立手段能验证它：姿态与零偏本来就是同一批数据里分不开的两个量。校准会失败得无声无息：倾斜被当成零偏原样保留，重力校正随之失效。
-
-公式右端是各段姿态误差在机体系投影的平均，这个平均结构决定了抵消发生的条件。若误差来自同一个世界系倾斜，各段姿态互不相同，投影方向随姿态旋转，平均会有部分抵消——这正是多姿态静止标定（多个朝向的静止段联合估计）有效的原因；而误差本身若系统性偏向（例如共用外参错误，或各段姿态本就相近），各段投影方向接近，抵消很小，虚假零偏依旧存在。结论不变：静止数据能否给出干净的 $b_a$，取决于姿态信息是否独立于这批数据且足够准；单靠静止段自身，水平零偏与 roll/pitch 之间的二维混淆无法消除。
-
-> 小结：静止时两条路线的差别已经很清楚了。陀螺仪测量里真实角速度已知为零，平均直接给出 $b_g$，不需姿态、三轴独立；加速度计测到的是「重力投影加零偏」的混合，姿态误差每 1 度转化为约 $0.17\ \mathrm{m/s^2}$ 的虚假零偏。静止对陀螺仪是完备观测，对加速度计只是把问题换了个形式——除非姿态由外部精确给出。
-
-## 3. 运动中的陀螺仪零偏
-
-### 3.1 观测结构：姿态只由 $\tilde\omega - b_g$ 决定
-
-运动时 $\omega \neq 0$，平均立即失效：
-
-$$
-\frac{1}{N}\sum_{k=1}^{N}\tilde\omega_k
-= \underbrace{\frac{1}{N}\sum_{k=1}^{N}\omega_k}_{\text{平均角速度}}
-+ b_g + \bar n_g
-$$
-
-窗口平均角速度与 $b_g$ 都以常数的形式出现在结果里，平均把 $\omega$ 的时间变化抹掉之后，剩下的常数无法拆成「真实平均角速度」与零偏两份。出路在姿态信息：姿态积分能逐时刻用上 $\omega$，而不是把它平均掉。真实角速度由测量扣除零偏得到，$\omega = \tilde\omega - b_g$，姿态动力学 $\dot R = R[\omega]_\times$ 变成 $\dot R = R[\tilde\omega - b_g]_\times$。在区间 $[t_i, t_j]$ 内把 $b_g$ 视为常数并积分：
-
-$$
-R_j = R_i\operatorname{Exp}\Big(\int_{t_i}^{t_j}\big(\tilde\omega(t) - b_g\big)\,dt\Big)
-$$
-
-离散预积分 $\Delta R_{ij} = \prod_k \operatorname{Exp}\big((\tilde\omega_k - b_g)\Delta t\big)$ 是同一结论。因此任何旋转观测都只通过差 $\tilde\omega - b_g$ 依赖陀螺仪的两个量——$b_g$ 与 $\omega$ 永远以差的形式出现，这是陀螺仪可观测性问题的根源。
-
-### 3.2 平移对称性：没有参考就不可观测
-
-上面的观测结构立刻给出一个严格结论：对任意常向量 $c$，把真实角速度与零偏同时平移
-
-$$
-(\omega,\ b_g) \longrightarrow (\omega + c,\ b_g + c)
-$$
-
-$\tilde\omega - b_g$ 不变，于是每一个姿态观测 $\Delta R$ 都不变。陀螺仪数据无法区分「载体在转 $\omega$、零偏为 $b_g$」与「载体在转 $\omega + c$、零偏为 $b_g + c$」。$c$ 有三个自由度，即三维方向不可观测。这不是数值精度问题，而是观测结构决定的：仅凭陀螺仪，$b_g$ 不可观测。要打破这个对称性，必须有独立信息把 $\omega$ 或 $R$ 钉住——静止假设（$\omega = 0$，第 2.1 节）是其中一种，外部旋转观测是另一种。
-
-### 3.3 独立旋转参考使零偏可观测
-
-设外部（视觉、LiDAR、SfM、回环）给出相对旋转 $\hat R_{ij}$，构造旋转残差：
-
-$$
-r_R = \operatorname{Log}\Big(\hat R_{ij}^{-1}\,\Delta R_{ij}(b_g)\Big),
-\qquad
-\Delta R_{ij}(b_g) = \prod_{k=i}^{j-1}\operatorname{Exp}\big((\tilde\omega_k - b_g)\Delta t\big)
-$$
-
-在标称值 $\bar b_g$ 附近线性化。预积分旋转对零偏的一阶展开是
-
-$$
-\Delta R_{ij}(b_g) \approx \Delta\bar R_{ij}\,\operatorname{Exp}\big(J\,\delta b_g\big),
-\qquad
-J = \frac{\partial \Delta R_{ij}}{\partial b_g}
-$$
-
-残差随之近似为 $r_R \approx r_R^0 + J\,\delta b_g$。这个一阶展开的关键不是 $J$ 的闭式有多复杂，而是它只描述「零偏改变后预积分旋转如何变化」，不负责把 $\omega$ 与 $b_g$ 拆开；右 Jacobian 约定见 A.1。把所有区间堆叠起来做最小二乘，若堆叠 Jacobian 满足 $\operatorname{rank}(\mathbf J) = 3$，三个轴的零偏都进入可观测集合。外部旋转参考正是打破 3.2 节平移对称性的手段：参考越准，零偏估计越准。
-
-### 3.4 误差传播：$\delta b_g \approx \delta\theta_R / T$
-
-外部参考不是完美的。零偏误差 $\delta b_g$ 在长度 $T$ 的窗口内累积的旋转误差，来自 $\Delta R = \operatorname{Exp}(b_g T)$ 对零偏的一阶展开：
-
-$$
-\delta\theta_b \approx T\,\delta b_g
-$$
-
-最小二乘把所有旋转残差都归因于零偏，所以零偏误差约等于旋转观测误差除以窗口长度：
-
-$$
-\delta b_g \approx \frac{\delta\theta_R}{T}
-$$
-
-代几个数看看。外部旋转误差 $0.1^\circ = 1.745\times10^{-3}\ \mathrm{rad}$：窗口 $T = 10\ \mathrm{s}$ 时 $\delta b_g \approx 1.7\times10^{-4}\ \mathrm{rad/s} \approx 0.01^\circ/\mathrm{s}$；窗口 $T = 100\ \mathrm{s}$ 时约 $0.001^\circ/\mathrm{s}$。在零偏为常数的前提下，长时间窗口加高精度旋转参考最有利；这段一阶推导见 A.8。这个公式的极限情形是：若窗口内真实无旋转（静止或低动态），外部参考给出 $\Delta\hat R = I$，则 $\operatorname{Log}(\Delta R_{\mathrm{IMU}}) \approx b_g T$，直接得到 $b_g \approx \operatorname{Log}(\Delta R_{\mathrm{IMU}})/T$——静止反而是陀螺仪零偏最容易观测的情形，与加速度计恰好相反。在线估计器在静止或近静止段里零偏收敛最快，原因就在这里。
-
-### 3.5 窗口的上限：零偏会漂移
-
-3.4 的误差公式说窗口越长越好，但 $b_g$ 不是真常数，通常建模成随机游走：
-
-$$
-\dot b_g = n_{wg}
-$$
-
-窗口 $T$ 内零偏自身漂移约 $\sigma_{wg}\sqrt{T}$，随 $T$ 增长。两个约束互相制约：下限是窗口太短时 $T\,\delta b_g$ 低于噪声水平，测不出来；上限是窗口太长时零偏漂移超过估计精度，常数假设破裂。所以工程上不给整条序列一个 $b_g$，而是每个关键帧一个零偏状态，相邻帧之间用随机游走因子 $r_{b_g} = b_{g,j} - b_{g,i}$ 约束——既允许慢漂移，又不让一个错误的常值污染整条轨迹。
-
-> 小结：运动时陀螺仪零偏的估计问题归结为：所有旋转观测只含 $\tilde\omega - b_g$，必须有一个独立的旋转参考钉住姿态；误差 $\delta b_g \approx \delta\theta_R / T$，参考越准、窗口越长越好，但窗口受随机游走限制；静止与低动态是它的最优观测场景。
-
-## 4. 运动中的加速度计零偏
-
-加速度计的问题要反过来看：重力方向这个参考始终在测量里，问题不是找参考，而是把零偏从重力投影里剥出来。剥不干净时，世界系带着一个小 roll/pitch 倾斜去积分轨迹，水平距离 $h$ 会投影出约 $h\tan\|\delta\theta\| \approx h\|\delta\theta\|$ 的高度误差：2 度的倾斜在 100 m 水平运动上就是约 3.5 m。这是长距离轨迹高度畸变的来源，也是加速度计零偏在工程上重要的原因。
-
-### 4.1 重力能观测什么
-
-先说重力参考的边界。相对旋转 $R_i^{\top}R_j$ 对任何共同世界旋转 $Q$ 不变（$R'_k = QR_k$ 时 $R_i'^{\top}R_j' = R_i^{\top}R_j$），所以旋转约束（预积分旋转、视觉相对旋转、回环）对共同的 roll、pitch、yaw 都不敏感。绝对姿态自由度只能经过速度、位置传播中显式的重力项进入估计。
-
-yaw 不是「难以观测」，而是严格不可观测。对全体位姿施加绕世界竖直轴的共同旋转 $R_z(\psi)$（位姿、速度、位置都转，零偏不动），$g_W$ 与 $u_W$ 都落在旋转轴上，满足 $R_z^{\top}g_W = g_W$、$R_z^{\top}u_W = u_W$；相对量随之刚性旋转，相互抵消；静态锚 $(R_zR_k)^{\top}u_W = R_k^{\top}u_W$ 不变。所有残差都不变，完整似然对共同 yaw 不敏感。这是规范对称性，不是建模近似：运动再充分也观测不到 yaw。逐类残差的验证见 A.4。静态通道里同一个结论更具体：姿态小扰动 $\delta\phi$ 引起 $\delta\bar a = [R^{\top}u_W]_\times\delta\phi$，平移无响应，旋转 Jacobian 秩恰为 2。重力因此锚定 roll/pitch 两个自由度，yaw 与纯平移都在可观测集合之外，任何重力校正流程都必须从轨迹与相对约束继承它们。
-
-### 4.2 预积分通道：常数零偏对旋转投影
-
-静止要求 $a_W \approx 0$，一般运动下重力信息经预积分的速度、位置关系进入。下面把关键帧 $i$ 到 $j$ 的区间时长记为 $T_{ij}$，单个采样间隔在离散定义里记为 $h$。关键帧 $i$ 到 $j$ 的速度传播（世界系）为
-
-$$
-v_j = v_i + g_W T_{ij} + R_i\,\Delta v_{ij}
-$$
-
-其中 $\Delta v_{ij}$ 由扣除当前零偏估计后的采样算出，是零偏状态的函数，不含重力项；位置传播 $p_j = p_i + v_i T_{ij} + \frac{1}{2}g_W T_{ij}^2 + R_i\Delta p_{ij}$ 同理。绝对重力经显式的 $g_W$ 项进入。速度残差在机体系 $i$ 内表达（预积分残差的标准形式）：
-
-$$
-r_{v,ij} = R_i^{\top}\big(v_j - v_i - g_W T_{ij}\big) - \Delta v_{ij}
-$$
-
-现在同时扰动世界重力方向与零偏：$\delta g_W$ 是水平扰动（竖直分量即重力大小已知，不参与耦合），$\delta b_a$ 是机体系零偏扰动。对 $g_W$ 的扰动只作用在显式重力项上，贡献 $-T_{ij}\,R_i^{\top}\delta g_W$，预积分增量由实测采样算出、不含 $g_W$，不受影响；对零偏的扰动经预积分增量进入：速度增量对零偏的 Jacobian 为 $\mathbf J_v^a \approx -T_{ij}\, I$（零偏状态调大 $\delta b_a$，补偿后的采样整体减小，增量随之减小 $T_{ij}\,\delta b_a$，残差增大 $T_{ij}\,\delta b_a$）。合起来：
-
-$$
-\delta r_{v,ij} = T_{ij}\big(\delta b_a - R_i^{\top}\delta g_W\big),
-\qquad
-\delta r_{p,ij} = \frac{1}{2}T_{ij}^2\big(\delta b_a - R_i^{\top}\delta g_W\big)
-$$
-
-而旋转残差不响应，$\delta r_{R,ij} = 0$。从离散预积分定义逐项求导可得到同样的 $T_{ij}$ 与 $T_{ij}^2/2$ 系数，过程见 A.5；这里先看结构。耦合结构直接写在公式里：每个区间观测到的是「机体系常数 $\delta b_a$」减去「世界系常数 $\delta g_W$ 在机体系旋转的投影 $R_i^{\top}\delta g_W$」。零偏在所有区间取值相同，投影随姿态变化——分离的可能性全在这个差别上。姿态恒定时投影固定，任何水平 $\delta g_W$ 都可以被零偏吸收。另外 $\delta g_W$ 水平意味着 $R_i^{\top}\delta g_W$ 与机体系重力方向 $R_i^{\top}u_W$ 正交，因此零偏沿重力方向的分量直接出现在残差里、不与 $\delta g_W$ 耦合；真正纠缠的只剩水平方向的两个自由度。
-
-### 4.3 可分性：姿态激励的几何条件
-
-把 $N$ 个区间的残差方程堆起来看零空间。若存在一个非零的水平世界方向 $t$，其机体系投影在整条姿态轨迹上不变，即 $R_i^{\top}t = R_j^{\top}t$ 对所有 $i, j$ 成立，那么取 $\delta g_W = t$、$\delta b_a = R_i^{\top}t$（一个常数机体系向量）时，每个区间的 $\delta r_v = T_{ij}(\delta b_a - R_i^{\top}\delta g_W)$ 都为零：这个 $t$ 被零偏完全吸收，不可分离。反过来，若不存在这样的方向，堆叠的 Jacobian 列满秩，水平重力扰动的两个自由度与零偏联合可分离。因此：
-
-**水平重力扰动的两个自由度与零偏联合可分离，当且仅当不存在水平方向 $t$，使 $R_i^{\top}t$ 沿整条姿态轨迹保持不变。**
-
-退化方向随姿态运动消失：恒定姿态时所有水平方向都退化，两个自由度全被零偏吸收；任何姿态变化都让至少一个方向失去不变性；姿态把水平方向扫得越开，退化子空间越小，直到没有水平方向保持投影不变。注意激励来自 $R_i^{\top}\delta g_W$ 的变化本身，不要求线加速度，也不要求 roll/pitch 运动：$\delta g_W$ 是水平向量，纯航向旋转就改变它在机体系下的投影——yaw 变化与 roll/pitch 变化同样有效。这一点与陀螺仪（3.2 节需要打破平移对称的独立参考）根本不同：加速度计问题里的「参考」就是姿态变化自己。
-
-### 4.4 可分是二值，精度是连续：平均旋转与条件数
-
-4.3 的条件是几何的：只要姿态运动把退化子空间逐步缩小，分离能力就变好；当整条轨迹不再存在保持投影不变的水平方向时，理论可分性成立，所以可分性是二值性质。估计精度是连续的：姿态几乎不变时投影变化缓慢，同样的测量噪声被放大成很大的零偏误差。把精度讲清楚，需要先把问题限制在二维：姿态保持水平、只做航向变化（汽车、轮式平台这样的运动），$R_i^{\top}\delta g_W$ 始终留在机体系水平面内，耦合严格退化为二维系统。令 $\delta b$、$\delta g \in \mathbb{R}^2$ 为水平分量，每区间的观测方程为 $y_i = \delta b - R_i^{\top}\delta g$，$i = 1, \ldots, N$。最小二乘的法方程是（推导见 A.6）
-
-$$
-A^{\top}A = N\begin{bmatrix} I & -\bar R^{\top} \\ -\bar R & I \end{bmatrix},
-\qquad
-\bar R = \frac{1}{N}\sum_{i=1}^{N}R_i
-$$
-
-$\bar R$ 是姿态序列在水平面内的平均旋转。块矩阵的特征值为 $1 \pm \sigma_k$，其中 $\sigma_k$ 是 $\bar R$ 的奇异值；$\sigma_1 \le 1$，等号当且仅当所有 $R_i$ 相同。条件数为
-
-$$
-\kappa = \frac{1 + \sigma_1}{1 - \sigma_1}
-$$
-
-- 姿态不变：$\bar R$ 是纯旋转，$\sigma_1 = 1$，$\kappa = \infty$，法方程奇异，即 4.3 节的退化。
-- 弱激励：姿态小幅摆动，$\bar R$ 接近纯旋转，$\sigma_1 \to 1$，$\kappa$ 很大。一个参考数字：航向在 $90^\circ$ 内均匀扫过时，平均旋转的幅值为 $\frac{2\sin(\pi/4)}{\pi/2} \approx 0.90$，$\kappa \approx 19$——结构上可分（姿态确实动了），噪声却被放大近 20 倍，这就是「可分但分不干净」的量化形式。
-- turn-and-return（先转 $180^\circ$ 再转回原航向，前后两半等长）：$\bar R = (I + (-I))/2 = 0$，$\kappa = 1$，零偏与倾斜完全解耦，是最优观测。反过来，直行多、转弯少的轨迹 $\bar R$ 接近纯旋转，即使可分，条件数也很大。
-
-> 判断一条轨迹分离得好不好，看 $\kappa = (1+\sigma_1)/(1-\sigma_1)$，而不是看它转没转过弯。
-
-### 4.5 时变零偏：慢漂移陷阱与诊断
-
-4.3、4.4 的分析假设零偏是常数。真实加速度计零偏会漂移，因子图通常逐区间建模 $\delta b_a^{(i)}$，用随机游走先验约束，每步漂移尺度为 $\sigma_{rw}\sqrt{T_i}$。零偏一旦时变，就多出一种常数情形下不会出现的失效方式：令 $\delta b_a^{(i)} \approx R_i^{\top}\delta g_W$，速度残差可以恒为零——时变零偏「跟踪」倾斜投影。随机游走先验惩罚相邻零偏的差，代价小到可接受的条件是每步投影变化落在漂移尺度内（A.7 会把「零残差」和「先验代价」拆开写）：
-
-$$
-\big\|R_{i+1}^{\top}\delta g_W - R_i^{\top}\delta g_W\big\| \lesssim \sigma_{rw}\sqrt{T_i}
-$$
-
-沿相关区间成立时，慢变的倾斜投影被慢漂移的零偏吸收，$\delta g_W$ 变得不可辨识；投影变化快于漂移尺度时，零偏跟不上，倾斜留在边际信息里，仍然可估。可分性因此是速率比较，不是激励的二元问题：激励充分的轨迹在随机游走密度足够大时同样失效；$\sigma_{rw} \to 0$ 时退化为 4.3 节的常数零偏条件。
-
-这给出一个诊断方法：看拟合出的零偏的时间特征。一次成功的分离，拟合零偏应当大致平稳；若它带有与输入倾斜同时间尺度的缓慢变化，倾斜多半没有被去掉，而是被零偏吸收掉了。时间平坦是干净分离的必要条件而非充分条件——恒定倾斜被恒定零偏吸收时拟合零偏同样是平的，但那种情况零偏的量级会暴露出来（远超器件标称）。
-
-> 小结：运动时加速度计零偏与水平重力扰动通过 $\delta b_a - R_i^{\top}\delta g_W$ 耦合：常数零偏对旋转投影。可分当且仅当没有水平方向在整条轨迹上保持机体系投影不变；退化方向会随姿态扫动逐步减少，纯航向激励通常可以扫掉全部退化方向。精度由平均旋转的条件数 $\kappa = (1+\sigma_1)/(1-\sigma_1)$ 决定，最优观测是 turn-and-return；零偏一旦时变，变化慢于漂移尺度的倾斜会被吸收，拟合零偏的时间特征可以诊断。
-
-## 5. 采集与启动建议
-
-前面四节的结论可以落成两条操作规则：静止段交给陀螺仪零偏，姿态激励交给加速度计零偏；实时系统则把这两件事排进启动流程。
-
-### 5.1 手持采集：首尾静止，中途多转向
-
-录制开始与结束各留一段真静止（设备放稳，数秒即可）。静止是陀螺仪零偏的最优观测：真实角速度已知为零，平均直接给出 $b_g$（2.1 节），噪声按 $\sigma_g / \sqrt{N}$ 收敛；结束段还可以用来复核：若它拟合出的零偏与开始段不一致，先怀疑零偏被时变倾斜污染（4.5 节）。
-
-运动段的设计围绕加速度计零偏：它需要姿态把重力投影方向扫开（4.3 节），不要求线加速度，所以具体到动作上就三点：
-
-- 多转弯，至少做一次 turn-and-return（水平转 $180^\circ$ 再转回原航向）：此时 $\bar R = 0$、$\kappa = 1$，一次操作把水平两个自由度分到最干净（4.4 节）；
-- 避免长直行：直行时姿态几乎不变，$\kappa$ 接近无穷，加速度计零偏与倾斜重新纠缠，前面转出来的分离会被慢慢拉回去；
-- 激励只需要绕竖直轴的旋转，不需要剧烈晃动：纯航向扫动已经改变水平重力扰动在机体系下的投影（4.3 节）。
-
-### 5.2 实时 SLAM 启动：静止初始化，旋转分离，再出发
-
-实时系统的启动顺序直接对应正文的三段结论。
-
-先静止，设备放稳数秒，让初始化完成。静止段里陀螺仪零偏以 $\omega = 0$ 为参考直接收敛（2.1、3.4 节），视觉—惯性初始化也靠这段数据定下重力锚。此时不要指望加速度计零偏收敛：静止观测里水平零偏与 roll/pitch 秩亏（2.2 节），它本来就是不可观测的，不收敛是正常的。
-
-初始化成功（视觉或外部参考就位）后，原地做旋转激励：水平转 $180^\circ$ 再转回，或转一整圈。这一步对陀螺仪和加速度计各解决一个问题。陀螺仪一侧，视觉参考打破了 3.2 节的平移对称，$(\omega, b_g)$ 不再整体不可区分，旋转中的角速度开始约束零偏（3.3 节）；加速度计一侧，姿态扫动把 $R_i^{\top}\delta g_W$ 的投影方向展开，水平零偏与倾斜进入可分区间，turn-and-return 使 $\kappa = 1$（4.4 节）。旋转绕竖直轴、慢而连续即可，不需要俯仰翻滚。
-
-激励完成后才进入正常行进，并保持转弯密度；若轨迹以直行为主，分离条件会退化。事后若发现轨迹高度隆起，先查 roll/pitch 漂移和拟合零偏的时间特征，而不是直接归咎于平移（4.5 节）。
-
-这个顺序不是操作习惯，而是观测结构决定的：旋转激励的分离依赖外部姿态参考，陀螺仪数据本身给不出这个参考（3.2 节），先转后初始化，旋转段里没有姿态锚，零偏从旋转里拆不出来；先静止后旋转，静止段不需要任何外部信息（$\omega = 0$ 是静止条件自己给出的参考），旋转段又有视觉参考钉住姿态——两步各用自己的参考。
-
-> 一句话流程：放稳静止数秒（陀螺仪零偏 + 重力锚）→ 初始化成功 → 原地转 $180^\circ$ 再转回（加速度计零偏分离）→ 正常运动，转弯别停。
-
-## 6. 总结
-
-| | 陀螺仪零偏 $b_g$ | 加速度计零偏 $b_a$ |
+| 问题 | 陀螺仪零偏 $\mathbf b_g$ | 加速度计零偏 $\mathbf b_a$ |
 |---|---|---|
-| 静止时的观测 | $\tilde\omega = b_g + n_g$，真值 $\omega = 0$ 已知 | $\bar a = R^{\top}u_W + b_a$，投影与零偏同通道 |
-| 静止能否直接平均 | 能，不需姿态，三轴独立 | 不能，需外部姿态；姿态误差每 1 度产生约 $0.17\ \mathrm{m/s^2}$ 虚假零偏 |
-| 运动时的观测结构 | 姿态只由 $\tilde\omega - b_g$ 决定 | $\delta r_v = T_{ij}(\delta b_a - R_i^{\top}\delta g_W)$：常数零偏对旋转投影 |
-| 可分性条件 | 独立旋转参考打破 $(\omega, b_g)$ 平移对称 | 无水平方向投影全程不变；纯 yaw 通常可扫掉全部退化方向 |
-| 误差主导因素 | $\delta b_g \approx \delta\theta_R / T$ | 条件数 $\kappa = (1+\sigma_1)/(1-\sigma_1)$ |
-| 最优观测场景 | 静止/低动态（$\operatorname{Log}(\Delta R)/T$） | turn-and-return（$\bar R = 0$，$\kappa = 1$） |
-| 时变零偏 | 随机游走限制窗口上限，关键帧级零偏 | 慢漂移吸收慢变倾斜，拟合零偏的时间特征可诊断 |
+| 静止时 | 真实角速度为零，可直接平均 | 测量为重力投影加零偏，不能单靠平均分离 |
+| 运动时 | 真实角速度与零偏只以差的形式进入姿态 | 零偏与重力扰动通过机体系投影耦合 |
+| 所需参考 | 外部旋转或静止约束 | 姿态变化、重力方向和运动约束 |
+| 主要退化 | 没有独立姿态参考时三轴不可观 | 姿态不变或激励不足时水平分量与倾斜混淆 |
+| 主要诊断 | 旋转残差随窗口长度的变化 | 拟合零偏的幅值和时间变化是否跟随倾斜 |
 
-两条线的结论可以合成一句：零偏可观测，当且仅当存在一个与零偏无关的独立参考。陀螺仪的这个参考是姿态——静止假设（$\omega = 0$）或外部旋转观测都行，参考越准、窗口越长，估计越准；加速度计的这个参考是姿态变化本身——把重力投影方向扫开，激励越充分条件数越小。怎么把这两句话变成采集动作和启动流程，见第 5 节。
+下面的分析都采用同一坐标约定，不把两个问题割裂成互不相干的校准步骤。原因很简单：陀螺仪零偏会改变姿态，而姿态又决定重力在机体系中的投影；如果先用错误姿态估计加速度计零偏，两个估计会互相污染。
 
-## 附录 A：正文公式的推导链
+## 2. 统一测量模型与旋转记号
 
-### A.1 Exp、Log 与预积分记号
+### 2.1 坐标系和姿态
 
-对 $\phi \in \mathbb{R}^3$，令 $\theta = \|\phi\|$、$\hat\phi = \phi/\theta$。本文使用的 $\mathrm{SO}(3)$ 指数映射是
+世界坐标系记为 $W$，机体或 IMU 坐标系记为 $B$。世界系的 $+Z$ 轴向上，姿态旋转 $\mathbf R$ 表示 body-to-world 变换：
 
 $$
-\operatorname{Exp}(\phi)
-= \exp([\phi]_\times)
-= I + \sin\theta\,[\hat\phi]_\times + (1 - \cos\theta)\,[\hat\phi]_\times^2
-$$
-
-$\operatorname{Log}$ 是它在 $\|\phi\| < \pi$ 开球内的主值逆。右 Jacobian 为
-
-$$
-\mathbf J_r(\phi)
-= I - \frac{1 - \cos\theta}{\theta^2}\,[\phi]_\times
-+ \frac{\theta - \sin\theta}{\theta^3}\,[\phi]_\times^2
-$$
-
-正文反复使用两条性质：
-
-$$
-\operatorname{Exp}(\delta\theta)^{\top}
-= \operatorname{Exp}(-\delta\theta)
-\approx I - [\delta\theta]_\times,
+\mathbf x_W=\mathbf R\mathbf x_B,
 \qquad
-[x]_\times y = -[y]_\times x
+\mathbf x_B=\mathbf R^\top\mathbf x_W .
 $$
 
-前一条把姿态扰动搬到向量前面，后一条把叉积换到容易消去的方向。预积分离散式中，陀螺仪测量用
+重力加速度和向上的比力方向分别记为
 
 $$
-\tilde\omega_k^\circ = \tilde\omega_k - b_g
+\mathbf g_W=(0,0,-g)^\top,
+\qquad
+\mathbf u_W=(0,0,g)^\top,
+\qquad
+g\approx9.81\,\mathrm{m/s^2}.
 $$
 
-逐段旋转写成 $\operatorname{Exp}(\tilde\omega_k^\circ h)$，其中 $h$ 是单个采样间隔。
+对任意 $\boldsymbol\phi\in\mathbb R^3$，用 $[\boldsymbol\phi]_\times$ 表示叉乘矩阵：
 
-### A.2 静止加速度计观测的线性化
+$$
+[\boldsymbol\phi]_\times\mathbf x
+=\boldsymbol\phi\times\mathbf x .
+$$
 
-把观测写成 $f(R) = R^{\top}u_W$。令姿态按 $R' = R\operatorname{Exp}(\delta\theta)$ 变化，则
+旋转的小量通过指数映射进入：
+
+$$
+\operatorname{Exp}(\boldsymbol\phi)
+=\exp([\boldsymbol\phi]_\times).
+$$
+
+当 $\lVert\boldsymbol\phi\rVert$ 足够小时，
+
+$$
+\operatorname{Exp}(\boldsymbol\phi)
+\approx\mathbf I+[\boldsymbol\phi]_\times,
+\qquad
+\operatorname{Exp}(\boldsymbol\phi)^\top
+\approx\mathbf I-[\boldsymbol\phi]_\times.
+$$
+
+还会反复使用恒等式
+
+$$
+[\mathbf x]_\times\mathbf y
+=-[\mathbf y]_\times\mathbf x .
+$$
+
+### 2.2 IMU 测量方程
+
+陀螺仪测量为
+
+$$
+\tilde{\boldsymbol\omega}
+=\boldsymbol\omega+\mathbf b_g+\boldsymbol\eta_g,
+$$
+
+其中 $\boldsymbol\omega$ 是真实角速度，$\mathbf b_g$ 是角速度零偏，$\boldsymbol\eta_g$ 是测量噪声。
+
+加速度计测量为
+
+$$
+\tilde{\mathbf a}
+=\mathbf R^\top(\mathbf a_W-\mathbf g_W)
++\mathbf b_a+\boldsymbol\eta_a
+=\mathbf R^\top\mathbf a_W
++\mathbf R^\top\mathbf u_W
++\mathbf b_a+\boldsymbol\eta_a,
+$$
+
+其中 $\mathbf a_W$ 是 IMU 原点在世界系中的线加速度，$\mathbf b_a$ 是加速度计零偏。
+
+这两个方程的结构差异很重要。陀螺仪中，真实角速度与零偏直接相加；加速度计中，除了运动加速度，还存在一个由姿态决定的重力投影。对于零加速度片段，$\mathbf a_W\approx\mathbf0$，于是
+
+$$
+\bar{\mathbf a}
+\approx\mathbf R^\top\mathbf u_W+\mathbf b_a .
+$$
+
+静止平均可以消除噪声，却不能消除 $\mathbf R^\top\mathbf u_W$。这就是为什么陀螺仪和加速度计不能采用完全相同的“静止取均值”策略。
+
+### 2.3 连续时间动力学
+
+姿态动力学为
+
+$$
+\dot{\mathbf R}
+=\mathbf R[\boldsymbol\omega]_\times
+=\mathbf R[\tilde{\boldsymbol\omega}-\mathbf b_g-\boldsymbol\eta_g]_\times .
+$$
+
+速度和位置动力学为
+
+$$
+\dot{\mathbf p}=\mathbf v,
+\qquad
+\dot{\mathbf v}=\mathbf g_W+\mathbf R(\tilde{\mathbf a}-\mathbf b_a-\boldsymbol\eta_a).
+$$
+
+从这三式可以看到零偏的传播路径：
+
+1. $\mathbf b_g$ 先改变 $\mathbf R$；
+2. $\mathbf R$ 再改变重力投影 $\mathbf R^\top\mathbf u_W$ 和世界系比力 $\mathbf R(\tilde{\mathbf a}-\mathbf b_a)$；
+3. $\mathbf b_a$ 直接改变加速度，并通过一次、两次积分分别进入速度和位置。
+
+所以，在联合估计中不能把姿态、陀螺仪零偏和加速度计零偏完全串行处理。串行初始化可以作为起点，但最终需要回到同一个动力学模型中联合修正。
+
+## 3. 陀螺仪零偏的可观性
+
+### 3.1 静止时：真实角速度为零
+
+如果 IMU 真正静止，则
+
+$$
+\boldsymbol\omega_k=\mathbf0,
+$$
+
+陀螺仪测量退化为
+
+$$
+\tilde{\boldsymbol\omega}_k
+=\mathbf b_g+\boldsymbol\eta_{g,k} .
+$$
+
+对 $N$ 个样本求均值：
+
+$$
+\hat{\mathbf b}_g
+=\frac1N\sum_{k=1}^N\tilde{\boldsymbol\omega}_k
+=\mathbf b_g+\frac1N\sum_{k=1}^N\boldsymbol\eta_{g,k} .
+$$
+
+若噪声独立、零均值、每个轴的方差为 $\sigma_g^2$，则
+
+$$
+\mathbb E[\hat{\mathbf b}_g]=\mathbf b_g,
+\qquad
+\operatorname{Cov}(\hat{\mathbf b}_g)=\frac{\sigma_g^2}{N}\mathbf I .
+$$
+
+因此均值的标准差按 $1/\sqrt N$ 下降。这个估计不需要知道姿态，因为静止条件直接给出了 $\boldsymbol\omega=\mathbf0$。无论设备朝向如何，静止时真实角速度都为零。
+
+该结论的前提有三个：设备确实没有微旋转，窗口内零偏近似恒定，噪声没有强烈的低频相关性。如果存在振动、缓慢转动或随机游走，均值仍然是一个有用的初值，但不再是严格的恒定零偏估计。
+
+### 3.2 运动时：仅凭陀螺仪存在平移对称性
+
+运动时 $\boldsymbol\omega\neq\mathbf0$，窗口均值为
+
+$$
+\frac1N\sum_k\tilde{\boldsymbol\omega}_k
+=\frac1N\sum_k\boldsymbol\omega_k
++\mathbf b_g+\bar{\boldsymbol\eta}_g .
+$$
+
+平均角速度和零偏都以常量形式出现，无法从这个均值中分开。更强的结论来自姿态动力学：陀螺仪数据只通过
+
+$$
+\tilde{\boldsymbol\omega}-\mathbf b_g
+$$
+
+进入姿态积分。
+
+设 $\mathbf c$ 为任意常向量，同时作变换
+
+$$
+\boldsymbol\omega' =\boldsymbol\omega+\mathbf c,
+\qquad
+\mathbf b_g'=\mathbf b_g-\mathbf c .
+$$
+
+则
+
+$$
+\boldsymbol\omega'+\mathbf b_g'
+=\boldsymbol\omega+\mathbf b_g .
+$$
+
+测量不变，而真实角速度与零偏分别改变。因而，仅凭陀螺仪，三维零偏都不可观。这不是噪声过大，而是观测方程本身存在三维对称性。
+
+必须引入一个不依赖同一陀螺仪积分的参考来打破对称性：静止条件把真实角速度钉为零；视觉、LiDAR、外部转台或可靠回环提供姿态变化；联合 IMU—视觉/LiDAR 因子图则通过相对姿态残差约束零偏。
+
+### 3.3 外部旋转参考如何约束零偏
+
+设关键帧区间 $[i,j]$ 上，外部系统给出相对旋转 $\hat{\mathbf R}_{ij}$。以零偏为参数计算 IMU 预积分旋转：
+
+$$
+\Delta\mathbf R_{ij}(\mathbf b_g)
+=\prod_{k=i}^{j-1}
+\operatorname{Exp}\left((\tilde{\boldsymbol\omega}_k-\mathbf b_g)\Delta t_k\right).
+$$
+
+构造旋转残差
+
+$$
+\mathbf r_{R,ij}
+=\operatorname{Log}\left(
+\hat{\mathbf R}_{ij}^{\top}
+\Delta\mathbf R_{ij}(\mathbf b_g)
+\right).
+$$
+
+在当前估计 $\bar{\mathbf b}_g$ 附近令
+
+$$
+\mathbf b_g=\bar{\mathbf b}_g+\delta\mathbf b_g .
+$$
+
+预积分旋转可以写成一阶形式
+
+$$
+\Delta\mathbf R_{ij}(\mathbf b_g)
+\approx
+\Delta\bar{\mathbf R}_{ij}
+\operatorname{Exp}\left(\mathbf J_{R,b_g}^{ij}\delta\mathbf b_g\right),
+$$
+
+其中 $\mathbf J_{R,b_g}^{ij}\in\mathbb R^{3\times3}$ 是预积分旋转对陀螺仪零偏的 Jacobian。于是
+
+$$
+\mathbf r_{R,ij}
+\approx\bar{\mathbf r}_{R,ij}
++\mathbf J_{R,b_g}^{ij}\delta\mathbf b_g .
+$$
+
+将多个区间堆叠：
+
+$$
+\mathbf r_R
+\approx\bar{\mathbf r}_R+\mathbf J_R\delta\mathbf b_g .
+$$
+
+若
+
+$$
+\operatorname{rank}(\mathbf J_R)=3,
+$$
+
+则三个轴向的陀螺仪零偏在该批数据中都具备局部可观性。若某一轴的旋转激励不足，$\mathbf J_R$ 在相应方向上的信息变弱，估计会变得病态，即便形式上已经满秩。
+
+### 3.4 零偏误差如何变成姿态误差
+
+先考虑零偏误差近似恒定的简单情形。若估计零偏误差为 $\delta\mathbf b_g$，则校正后的角速度误差约为 $-\delta\mathbf b_g$。在短时间内忽略姿态变化对误差方向的旋转，累计旋转误差满足
+
+$$
+\delta\boldsymbol\theta_g(T)
+\approx-\int_0^T\delta\mathbf b_g\,dt
+=-T\delta\mathbf b_g .
+$$
+
+因此
+
+$$
+\lVert\delta\boldsymbol\theta_g(T)\rVert
+\approx T\lVert\delta\mathbf b_g\rVert .
+$$
+
+如果外部旋转参考的误差量级是 $\delta\theta_R$，一个长度为 $T$ 的区间能够约束的零偏误差量级近似为
+
+$$
+\lVert\delta\mathbf b_g\rVert
+\approx\frac{\delta\theta_R}{T} .
+$$
+
+这解释了两个工程事实：窗口太短时，零偏造成的旋转变化小于外部姿态噪声，估计不稳定；在零偏确实恒定的前提下，窗口变长会提高零偏精度。静止是这一关系的极限情形：外部参考告诉我们总旋转为零，因此
+
+$$
+\mathbf b_g
+\approx\frac1T\operatorname{Log}(\Delta\mathbf R_{\mathrm{IMU}}).
+$$
+
+但窗口不能无限变长，因为零偏本身会漂移。
+
+### 3.5 时变陀螺仪零偏与窗口上限
+
+常用的零偏随机游走模型为
+
+$$
+\dot{\mathbf b}_g=\mathbf n_{wg},
+$$
+
+其中 $\mathbf n_{wg}$ 是白噪声。长度为 $T$ 的窗口内，零偏自身漂移的典型量级约为
+
+$$
+\sigma_{wg}\sqrt T .
+$$
+
+当窗口继续延长时，固定零偏模型带来的失配会增加。于是窗口长度存在折中：窗口太短，$T\delta\mathbf b_g$ 不足以超过参考噪声；窗口太长，恒定零偏假设失效。
+
+更合理的做法是在关键帧上设置零偏状态 $\mathbf b_g^{(k)}$，并用随机游走因子连接相邻状态：
+
+$$
+\mathbf r_{bg,k}
+=\mathbf b_g^{(k+1)}-\mathbf b_g^{(k)} .
+$$
+
+其加权代价可以写为
+
+$$
+\sum_k
+\left\|
+\mathbf b_g^{(k+1)}-\mathbf b_g^{(k)}
+\right\|^2_{\boldsymbol\Sigma_{bg,k}} .
+$$
+
+这样既允许真实慢漂移，又避免让整条轨迹共享一个错误的常值零偏。
+
+## 4. 加速度计零偏的可观性
+
+### 4.1 静止时：重力投影与零偏叠加
+
+零加速度时
+
+$$
+\bar{\mathbf a}=\mathbf R^\top\mathbf u_W+\mathbf b_a .
+$$
+
+若姿态 $\mathbf R$ 由外部高精度设备给出，则可以直接计算
+
+$$
+\hat{\mathbf b}_a
+=\bar{\mathbf a}-\mathbf R^\top\mathbf u_W .
+$$
+
+此时加速度计零偏也可以通过长时间平均提高精度。但如果姿态未知，静止测量自身无法同时确定姿态和零偏。
+
+令姿态发生右侧小扰动
+
+$$
+\mathbf R'=\mathbf R\operatorname{Exp}(\delta\boldsymbol\theta),
+$$
+
+则
 
 $$
 \begin{aligned}
-f(R') &= \operatorname{Exp}(\delta\theta)^{\top} R^{\top} u_W \\
-&\approx (I - [\delta\theta]_\times) R^{\top}u_W
-= R^{\top}u_W - [\delta\theta]_\times R^{\top}u_W \\
-&= R^{\top}u_W + [R^{\top}u_W]_\times \delta\theta
+\mathbf R'^{\top}\mathbf u_W
+&=\operatorname{Exp}(\delta\boldsymbol\theta)^\top
+\mathbf R^\top\mathbf u_W\\
+&\approx(\mathbf I-[\delta\boldsymbol\theta]_\times)
+\mathbf R^\top\mathbf u_W\\
+&=\mathbf R^\top\mathbf u_W
++[\mathbf R^\top\mathbf u_W]_\times
+\delta\boldsymbol\theta .
 \end{aligned}
 $$
 
-因此同时扰动零偏时，$\delta\bar a = \delta f + \delta b_a$ 给出正文中的
+同时扰动加速度计零偏，得到
 
 $$
-\delta\bar a \approx [R^{\top}u_W]_\times\,\delta\theta + \delta b_a
+\delta\bar{\mathbf a}
+=[\mathbf R^\top\mathbf u_W]_\times
+\delta\boldsymbol\theta+
+\delta\mathbf b_a .
 $$
 
-矩阵 $[R^{\top}u_W]_\times$ 是三维叉积矩阵，秩为 2，核空间正好是 $R^{\top}u_W$ 方向。也就是说，绕机体系竖直方向旋转不会改变静止观测，而另外两个方向与水平零偏各差一个未知量：单个姿态下共有 2 个独立观测方程、4 个耦合未知量。
+叉乘矩阵 $[\mathbf R^\top\mathbf u_W]_\times$ 的秩为 2，核空间是重力方向。因此：
 
-### A.3 错误姿态如何变成虚假零偏
+- 绕机体系竖直轴的旋转不改变静止加速度计观测，yaw 不在其中；
+- 沿 $\mathbf R^\top\mathbf u_W$ 的零偏分量，在重力大小已知时可以直接约束；
+- 水平零偏的两个自由度与 roll/pitch 的两个自由度混合在同一个二维观测通道中。
 
-设 $S$ 个零加速度片段的真实模型是
+单一姿态下，水平部分只有两个有效观测量，却包含四个未知量。于是“静止平均得不到加速度计零偏”不是平均时间不够，而是结构上存在秩亏。
 
-$$
-\bar a_s = R_s^{\top}u_W + b_a + n_s
-$$
+### 4.2 姿态误差如何转化为虚假加速度计零偏
 
-如果标定所用的姿态带误差 $\hat R_s = R_s\operatorname{Exp}(\delta\theta_s)$，等权最小二乘为
-
-$$
-\hat b_a = \frac{1}{S}\sum_{s=1}^{S}\big(\bar a_s - \hat R_s^{\top}u_W\big)
-$$
-
-代入真实模型并消去零均值噪声：
+设有 $S$ 个零加速度片段，真实模型为
 
 $$
-\hat b_a - b_a
-= \frac{1}{S}\sum_{s=1}^{S}\big(R_s^{\top}u_W - \hat R_s^{\top}u_W\big)
+\bar{\mathbf a}_s
+=\mathbf R_s^\top\mathbf u_W
++\mathbf b_a+\mathbf n_s .
 $$
 
-用 A.1 的转置展开：
+如果实际使用的姿态为
 
 $$
-R_s^{\top}u_W - \hat R_s^{\top}u_W
-\approx [\delta\theta_s]_\times R_s^{\top}u_W
-= -[R_s^{\top}u_W]_\times\,\delta\theta_s
+\hat{\mathbf R}_s
+=\mathbf R_s\operatorname{Exp}
+([\delta\boldsymbol\theta_s]_\times),
+$$
+
+则等权静态零偏估计为
+
+$$
+\hat{\mathbf b}_a
+=\frac1S\sum_{s=1}^S
+\left(\bar{\mathbf a}_s-
+\hat{\mathbf R}_s^\top\mathbf u_W\right).
+$$
+
+代入真实模型并忽略均值后的零均值噪声：
+
+$$
+\hat{\mathbf b}_a-\mathbf b_a
+=\frac1S\sum_{s=1}^S
+\left(\mathbf R_s^\top\mathbf u_W-
+\hat{\mathbf R}_s^\top\mathbf u_W\right).
+$$
+
+由于
+
+$$
+\hat{\mathbf R}_s^\top
+\approx(\mathbf I-[\delta\boldsymbol\theta_s]_\times)
+\mathbf R_s^\top,
 $$
 
 所以
 
 $$
-\hat b_a - b_a
-\approx -\frac{1}{S}\sum_{s=1}^{S}[R_s^{\top}u_W]_\times\,\delta\theta_s
-$$
-
-这个推导没有假设噪声分布，也没有假设「姿态误差很小才需要校准」：只要把错误姿态当真值代入，最小二乘就会把错误投影放进零偏。$S = 1$ 时完全无法平均掉；$S > 1$ 时能否抵消取决于各段误差方向与机体系投影方向是否错开。
-
-幅值部分的准确说法是：纯 roll/pitch 误差使重力向量端点移动的弦长为 $2g\sin(\|\delta\theta_s\|/2)$，一阶为 $g\|\delta\theta_s\|$；若单独看水平分量，则是 $g\sin\|\delta\theta_s\|$。这就是正文中 $1^\circ \to 0.17\ \mathrm{m/s^2}$、$5^\circ \to 0.86\ \mathrm{m/s^2}$ 的来源。
-
-### A.4 yaw 为什么不可观测
-
-对每个位姿施加共同 yaw 旋转：$R'_k = R_z R_k$，速度、位置同样乘以 $R_z$，零偏不动。对任意关键帧区间时长 $T$，相对旋转满足
-
-$$
-R_i'^{\top}R_j' = R_i^{\top}R_z^{\top}R_z R_j = R_i^{\top}R_j
-$$
-
-因此旋转预积分残差不变。速度残差中的重力项满足
-
-$$
 \begin{aligned}
-R_i'^{\top}\big(v_j' - v_i' - g_W T\big)
-&= R_i^{\top}R_z^{\top}\big(R_z(v_j - v_i) - g_W T\big) \\
-&= R_i^{\top}\big(v_j - v_i - R_z^{\top}g_W T\big) \\
-&= R_i^{\top}(v_j - v_i - g_W T)
+\mathbf R_s^\top\mathbf u_W-
+\hat{\mathbf R}_s^\top\mathbf u_W
+&\approx[\delta\boldsymbol\theta_s]_\times
+\mathbf R_s^\top\mathbf u_W\\
+&=-[\mathbf R_s^\top\mathbf u_W]_\times
+\delta\boldsymbol\theta_s .
 \end{aligned}
 $$
 
-最后一步用了 $R_z^{\top}g_W = g_W$，因为 $g_W$ 与世界竖直轴平行。位置残差同理。静态锚也满足
+最终得到
 
 $$
-(R_zR_k)^{\top}u_W = R_k^{\top}R_z^{\top}u_W = R_k^{\top}u_W
+\boxed{
+\hat{\mathbf b}_a-\mathbf b_a
+\approx -\frac{1}{S}\sum_{s=1}^S
+[\mathbf R_s^\top\mathbf u_W]_\times
+\delta\boldsymbol\theta_s
+} .
 $$
 
-回环残差对共同世界变换天然不变。于是完整似然沿共同 yaw 方向存在一维规范对称性，yaw 不属于可观测集合。
-
-### A.5 加速度计预积分残差的 Jacobian
-
-记关键帧 $i$、$j$ 之间区间时长为 $T_{ij}$，单次采样间隔为 $h$。离散预积分增量只保留与加速度计零偏有关的一阶结构：
+对纯 roll/pitch 小倾斜，虚假零偏的幅值近似为
 
 $$
-\Delta v_{ij}
-= h\sum_{k=i}^{j-1}\Delta R_{ik}\big(\tilde a_k - b_a\big)
+\lVert\delta\mathbf b_a^{\mathrm{false}}\rVert
+\approx g\sin\lVert\delta\boldsymbol\theta\rVert
+\approx g\lVert\delta\boldsymbol\theta\rVert .
 $$
 
-$$
-\Delta p_{ij}
-= h\sum_{k=i}^{j-1}\Delta v_{ik}
-+ \frac{1}{2}h^2\sum_{k=i}^{j-1}\Delta R_{ik}\big(\tilde a_k - b_a\big)
-$$
-
-$\Delta R_{ik}$ 只依赖陀螺仪测量，不依赖 $b_a$，所以可以直接求导。若区间内有 $n$ 个采样、$T_{ij}=nh$，则
+因此，$1^\circ$ 的倾斜约对应
 
 $$
-\frac{\partial\Delta v_{ij}}{\partial b_a} \approx -nh\,I = -T_{ij}I
+9.81\sin(1^\circ)\approx0.17\,\mathrm{m/s^2},
 $$
 
-$$
-\frac{\partial\Delta p_{ij}}{\partial b_a}
-\approx -\frac{1}{2}n^2h^2\,I = -\frac{1}{2}T_{ij}^2 I
-$$
+$5^\circ$ 的倾斜约对应 $0.86\,\mathrm{m/s^2}$ 的水平虚假零偏。若姿态误差来自同一个系统性外参或世界系倾斜，各静止段的误差投影可能同向，平均并不会消除它。
 
-标准残差是
+### 4.3 预积分中的加速度计零偏—重力耦合
+
+静止模型只说明了单个姿态下的退化。一般运动中，重力信息通过预积分的速度和位置残差进入。
+
+关键帧 $i$ 到 $j$ 的区间时长记为 $T_{ij}$。标准传播关系为
 
 $$
-r_{v,ij}
-= R_i^{\top}\big(v_j - v_i - g_W T_{ij}\big) - \Delta v_{ij}
+\mathbf v_j
+=\mathbf v_i+\mathbf g_WT_{ij}
++\mathbf R_i\Delta\mathbf v_{ij},
 $$
 
 $$
-r_{p,ij}
-= R_i^{\top}\Big(p_j - p_i - v_iT_{ij} - \frac{1}{2}g_W T_{ij}^2\Big) - \Delta p_{ij}
+\mathbf p_j
+=\mathbf p_i+\mathbf v_iT_{ij}
++\frac12\mathbf g_WT_{ij}^2
++\mathbf R_i\Delta\mathbf p_{ij} .
 $$
 
-重力扰动只进入残差中的显式 $g_W$ 项，加速度计零偏只进入预积分增量。两处一阶变化合起来就是
+预积分增量由去除零偏后的加速度计测量计算。速度残差写成
 
 $$
-\delta r_{v,ij} = T_{ij}\big(\delta b_a - R_i^{\top}\delta g_W\big),
+\mathbf r_{v,ij}
+=\mathbf R_i^\top
+\left(\mathbf v_j-\mathbf v_i-\mathbf g_WT_{ij}\right)
+-\Delta\mathbf v_{ij}(\mathbf b_a).
+$$
+
+位置残差为
+
+$$
+\mathbf r_{p,ij}
+=\mathbf R_i^\top
+\left(\mathbf p_j-\mathbf p_i-\mathbf v_iT_{ij}
+-\frac12\mathbf g_WT_{ij}^2\right)
+-\Delta\mathbf p_{ij}(\mathbf b_a).
+$$
+
+对加速度计零偏，离散预积分增量的一阶导数近似为
+
+$$
+\frac{\partial\Delta\mathbf v_{ij}}
+{\partial\mathbf b_a}
+\approx-T_{ij}\mathbf I,
 \qquad
-\delta r_{p,ij} = \frac{1}{2}T_{ij}^2\big(\delta b_a - R_i^{\top}\delta g_W\big)
+\frac{\partial\Delta\mathbf p_{ij}}
+{\partial\mathbf b_a}
+\approx-\frac12T_{ij}^2\mathbf I .
 $$
 
-旋转预积分残差不响应这两个扰动，因为它不含世界重力项，也不含 $b_a$。
-
-### A.6 水平法方程与条件数
-
-把问题限制在水平面，记 $R_i$ 为二维航向旋转，$b$、$g$ 为水平向量。每段观测方程是
+对世界重力方向扰动 $\delta\mathbf g_W$ 和机体系零偏扰动 $\delta\mathbf b_a$ 同时线性化：
 
 $$
-y_i = b - R_i^{\top}g
+\boxed{
+\delta\mathbf r_{v,ij}
+=T_{ij}\left(\delta\mathbf b_a
+-\mathbf R_i^\top\delta\mathbf g_W\right)
+}
 $$
 
-设计矩阵的行是 $A_i = [I_2,\ -R_i^{\top}]$。把 $N$ 段堆叠后，法方程为
+以及
 
 $$
-A^{\top}A
-= N\begin{bmatrix}
-I & -\bar R^{\top} \\
--\bar R & I
+\boxed{
+\delta\mathbf r_{p,ij}
+=\frac12T_{ij}^2\left(\delta\mathbf b_a
+-\mathbf R_i^\top\delta\mathbf g_W\right)
+} .
+$$
+
+旋转残差不直接响应这两个扰动：
+
+$$
+\delta\mathbf r_{R,ij}=\mathbf0 .
+$$
+
+公式中的结构比系数更重要：每个区间观测到的不是 $\delta\mathbf b_a$ 或 $\delta\mathbf g_W$ 各自，而是
+
+$$
+\delta\mathbf b_a-\mathbf R_i^\top\delta\mathbf g_W .
+$$
+
+前者是固定在机体系中的常量，后者是一个固定在世界系中的方向经过姿态变换后的投影。姿态变化正是二者能够分离的唯一来源。
+
+### 4.4 可观性的几何条件
+
+先只看水平重力扰动。若存在一个非零水平向量 $\mathbf t$，使得
+
+$$
+\mathbf R_i^\top\mathbf t
+=\mathbf R_j^\top\mathbf t,
+\qquad\forall i,j,
+$$
+
+则可以取
+
+$$
+\delta\mathbf g_W=\mathbf t,
+\qquad
+\delta\mathbf b_a=\mathbf R_i^\top\mathbf t .
+$$
+
+由于右侧对所有区间都是同一个机体系向量，因此每个区间都有
+
+$$
+\delta\mathbf b_a-
+\mathbf R_i^\top\delta\mathbf g_W=\mathbf0 .
+$$
+
+该水平世界方向就被加速度计零偏完全吸收，无法观测。
+
+反过来，如果不存在这样的非零水平向量，堆叠后的 Jacobian 在水平重力扰动和恒定加速度计零偏方向上满秩，二者局部可分离。因此，严格条件是：
+
+> 加速度计零偏与水平重力扰动可分离，当且仅当不存在一个水平世界方向，其机体系投影在整段姿态轨迹上保持不变。
+
+这句话需要避免两个常见误读。
+
+第一，“姿态发生过变化”不一定意味着两个水平自由度都已经被高精度分离。某一种姿态变化可能只消除一个退化方向，或者虽然满秩但条件数很差。
+
+第二，激励不要求一定有线加速度，也不要求一定有 roll/pitch。纯 yaw 旋转就能改变水平世界向量在机体系中的投影，因此对加速度计零偏—重力分离同样有效。
+
+### 4.5 条件数：可分离与分得好是两件事
+
+考虑平台始终近似水平、主要进行航向变化的情况。将水平零偏和水平重力扰动写成二维向量 $\mathbf b,\mathbf g\in\mathbb R^2$，第 $i$ 个区间的线性观测为
+
+$$
+\mathbf y_i=\mathbf b-\mathbf R_i^\top\mathbf g,
+$$
+
+其中 $\mathbf R_i$ 是二维航向旋转。设计矩阵为
+
+$$
+\mathbf A_i=[\mathbf I_2\; -\mathbf R_i^\top].
+$$
+
+将 $N$ 个区间堆叠，得到
+
+$$
+\mathbf A^\top\mathbf A
+=N\begin{bmatrix}
+\mathbf I_2&-\bar{\mathbf R}^\top\\
+-\bar{\mathbf R}&\mathbf I_2
 \end{bmatrix},
 \qquad
-\bar R = \frac{1}{N}\sum_{i=1}^{N}R_i
+\bar{\mathbf R}=\frac1N\sum_{i=1}^N\mathbf R_i .
 $$
 
-对纯航向运动，$\bar R$ 是某个平均复旋转的矩阵表示，其两个奇异值都等于平均幅值 $\rho$。法方程的最小与最大奇异值按 $1 \pm \rho$ 分开，条件数为
+设 $\sigma_1$ 是 $\bar{\mathbf R}$ 的最大奇异值，则该块矩阵的最大和最小特征值分别与 $1+\sigma_1$、$1-\sigma_1$ 成正比，条件数为
 
 $$
-\kappa = \frac{1+\rho}{1-\rho}
+\boxed{
+\kappa
+=\frac{1+\sigma_1}{1-\sigma_1}
+} .
 $$
 
-因此姿态完全不变时 $\rho=1$、$\kappa=\infty$；姿态把投影扫开时 $\rho<1$。若航向在长度 $L$ 的角度区间内均匀扫过，平均幅值为
+- 姿态完全不变时，$\sigma_1=1$，$\kappa=\infty$，法方程奇异。
+- 姿态只有小幅摆动时，$\sigma_1$ 接近 1，问题形式上可分，但噪声被显著放大。
+- 若航向覆盖范围增大，平均旋转的模长减小，条件数下降。
+- 理想的转向—返回动作使平均旋转接近零，条件数接近 1。
+
+因此应把“是否可观”和“估计是否可靠”分开：前者由零空间决定，后者由最小奇异值或条件数决定。
+
+### 4.6 时变加速度计零偏：慢漂移吸收慢倾斜
+
+若加速度计零偏不是常数，而是在每个区间使用 $\delta\mathbf b_a^{(i)}$，则可以令
 
 $$
-\rho = \frac{2\sin(L/2)}{L}
+\delta\mathbf b_a^{(i)}
+=\mathbf R_i^\top\delta\mathbf g_W .
 $$
 
-取 $L = \pi/2$，得 $\rho \approx 0.90$、$\kappa \approx 19$，这是「理论可分但数值分不干净」的典型例子。turn-and-return 是先把航向转 $180^\circ$ 再等长返回，$\bar R = (I + (-I))/2 = 0$，所以 $\rho=0$、$\kappa=1$。
-
-一个容易误读的地方是：不是任意非零姿态变化都自动把两个水平自由度完全分开。若姿态只绕一条水平轴小幅摆动，沿该轴的某个水平方向可能仍然保持机体系投影不变，退化只减少一维。完整分离要求整条轨迹上不存在这种水平方向；纯航向激励通常可以做到这一点，但它也不是「转得越快越好」的充分条件，精度仍然由 $\kappa$ 决定。
-
-### A.7 慢漂移零空间
-
-若把零偏建模为逐区间变量 $\delta b_a^{(i)}$，并令所有速度与位置残差为零，由 A.5 得到
+这样速度和位置残差中的耦合项为零。随机游走先验惩罚相邻状态变化：
 
 $$
-\delta b_a^{(i)} = R_i^{\top}\delta g_W
+\mathcal C_{rw}
+=\sum_i
+\frac{\left\|
+\delta\mathbf b_a^{(i+1)}-
+\delta\mathbf b_a^{(i)}
+\right\|^2}
+{\sigma_{rw}^2T_i} .
 $$
 
-这是一个恰好吸收水平重力扰动的零偏序列。它是否可行，取决于随机游走先验。设相邻区间时长 $T_i$、随机游走密度 $\sigma_{rw}$，先验代价为
+代入上述吸收序列：
 
 $$
-\sum_i \frac{\big\|\delta b_a^{(i+1)} - \delta b_a^{(i)}\big\|^2}{\sigma_{rw}^2 T_i}
+\mathcal C_{rw}
+=\sum_i
+\frac{\left\|
+\mathbf R_{i+1}^\top\delta\mathbf g_W-
+\mathbf R_i^\top\delta\mathbf g_W
+\right\|^2}
+{\sigma_{rw}^2T_i} .
 $$
 
-把上式代入：
+当每一步满足
 
 $$
-\sum_i \frac{\big\|\big(R_{i+1}^{\top} - R_i^{\top}\big)\delta g_W\big\|^2}{\sigma_{rw}^2 T_i}
+\left\|
+\mathbf R_{i+1}^\top\delta\mathbf g_W-
+\mathbf R_i^\top\delta\mathbf g_W
+\right\|
+\lesssim\sigma_{rw}\sqrt{T_i},
 $$
 
-当相邻投影变化满足
+零偏跟踪重力投影的代价不大，倾斜便会被吸收到时变零偏中。此时可分离性不再只是“姿态有没有变化”的问题，而是投影变化速率是否超过零偏漂移速率的问题。
+
+该结论也给出一个实用诊断：如果联合优化得到的加速度计零偏具有与倾斜相同时间尺度的缓慢变化，说明倾斜可能没有被消除，而是被零偏吸收。零偏时间上较平坦是分离成功的必要条件，但不是充分条件；恒定倾斜也可能被恒定零偏吸收，因此还要检查零偏量级和独立传感器规格。
+
+## 5. 角速度零偏如何进入重力对齐
+
+前面的两条理论线并不是彼此独立的。角速度零偏会通过姿态积分改变重力投影，从而把误差传递到加速度计零偏估计和高度。
+
+### 5.1 姿态误差对重力投影的影响
+
+设姿态误差为 $\delta\boldsymbol\theta$，则
 
 $$
-\big\|R_{i+1}^{\top}\delta g_W - R_i^{\top}\delta g_W\big\|
-\lesssim \sigma_{rw}\sqrt{T_i}
+\mathbf R' = \mathbf R\operatorname{Exp}(\delta\boldsymbol\theta).
 $$
 
-时，这项先验代价与一次随机游走步的典型代价同量级，零偏可以低代价跟踪倾斜；当投影变化更快时，跟踪会被先验强烈惩罚，倾斜仍会留在边际信息中。$\sigma_{rw} \to 0$ 迫使 $\delta b_a^{(i)}$ 为常数，退化为 A.6 讨论的常数零偏情形。
-
-### A.8 陀螺仪零偏误差到旋转残差
-
-陀螺仪的旋转观测只由 $\tilde\omega - b_g$ 决定。设窗口长度 $T$ 内真实旋转为零，而零偏估计带误差 $\delta b_g$。把去偏后的角速度积分得到的总旋转角约等于 $T\delta b_g$：
+重力在机体系中的投影变化为
 
 $$
-\delta\theta_b \approx T\,\delta b_g
+\delta(\mathbf R^\top\mathbf u_W)
+=[\mathbf R^\top\mathbf u_W]_\times
+\delta\boldsymbol\theta .
 $$
 
-如果外部参考相对旋转的误差是 $\delta\theta_R$，而最小二乘把所有旋转残差都解释为零偏误差，那么
+而姿态误差又主要由陀螺仪零偏误差产生：
 
 $$
-\delta b_g \approx \frac{\delta\theta_R}{T}
+\delta\boldsymbol\theta_g(T)
+\approx-\int_0^T\delta\mathbf b_g(t)\,dt .
 $$
 
-所以陀螺仪零偏的精度由「外部旋转误差除以观测窗口长度」主导；窗口受随机游走限制时，工程上把 $b_g$ 放进状态并逐关键帧约束，而不是把整条轨迹压成一个常数。
+因此，陀螺仪零偏误差进入加速度计观测的链路为
+
+$$
+\delta\mathbf b_g
+\longrightarrow
+\delta\boldsymbol\theta
+\longrightarrow
+\delta(\mathbf R^\top\mathbf u_W)
+\longrightarrow
+\delta\mathbf b_a^{\mathrm{false}} .
+$$
+
+如果使用错误的姿态计算
+
+$$
+\hat{\mathbf b}_a
+=\bar{\mathbf a}-\hat{\mathbf R}^\top\mathbf u_W,
+$$
+
+则由姿态误差带来的加速度计零偏偏差为
+
+$$
+\delta\hat{\mathbf b}_a
+\approx
+-[\mathbf R^\top\mathbf u_W]_\times
+\delta\boldsymbol\theta .
+$$
+
+所以，“先把陀螺仪零偏固定，再静态标定加速度计零偏”只有在前一步姿态已经足够可靠时才成立。否则，前一步的姿态误差会被后一步重新命名为加速度计零偏。
+
+### 5.2 为什么相对回环不能单独解决共同倾斜
+
+相对旋转约束只涉及
+
+$$
+\mathbf R_i^\top\mathbf R_j .
+$$
+
+对所有位姿施加共同世界旋转 $\mathbf Q$：
+
+$$
+\mathbf R_k'=\mathbf Q\mathbf R_k,
+$$
+
+有
+
+$$
+\mathbf R_i'^{\top}\mathbf R_j'
+=\mathbf R_i^\top\mathbf Q^\top\mathbf Q\mathbf R_j
+=\mathbf R_i^\top\mathbf R_j .
+$$
+
+因此相对旋转、相对平移和回环都无法确定共同世界姿态。重力方向则是 unary 约束，直接作用于
+
+$$
+\mathbf R_k^\top\mathbf u_W .
+$$
+
+在重力方向中，yaw 仍不可观，但 roll/pitch 可以被锚定。相对约束负责保持轨迹内部结构，重力负责补充绝对倾斜，二者缺一不可。
+
+## 6. 联合求解方法
+
+### 6.1 求解目标
+
+输入为已有关键帧轨迹、同步原始 IMU 数据，以及可选的视觉、LiDAR 或回环相对位姿约束。输出为校正后的关键帧位姿和零偏轨迹。
+
+目标不是重新运行 SLAM 前端，而是在已有相对几何结构上补充惯性动力学和重力约束。状态设为
+
+$$
+\mathbf x_k
+=\left(\mathbf R_k,\mathbf p_k,\mathbf v_k,
+\mathbf b_{a,k},\mathbf b_{g,k}\right),
+$$
+
+并可选地加入全局重力方向扰动 $\delta\mathbf g_W$ 或加速度计尺度 $s$。若世界系的重力模长已知，则约束
+
+$$
+\lVert\mathbf g_W\rVert=g .
+$$
+
+### 6.2 预积分量
+
+在关键帧区间内，对原始 IMU 样本计算
+
+$$
+\tilde{\boldsymbol\omega}_k^\circ
+=\tilde{\boldsymbol\omega}_k-\mathbf b_g,
+\qquad
+\tilde{\mathbf a}_k^\circ
+=\frac{\tilde{\mathbf a}_k-\mathbf b_a}{s} .
+$$
+
+预积分旋转为
+
+$$
+\Delta\mathbf R_{ij}
+=\prod_{k=i}^{j-1}
+\operatorname{Exp}
+(\tilde{\boldsymbol\omega}_k^\circ\Delta t_k).
+$$
+
+速度和位置增量为
+
+$$
+\Delta\mathbf v_{ij}
+=\sum_k\Delta\mathbf R_{ik}
+\tilde{\mathbf a}_k^\circ\Delta t_k,
+$$
+
+$$
+\Delta\mathbf p_{ij}
+=\sum_k\Delta\mathbf v_{ik}\Delta t_k
++\frac12\sum_k\Delta\mathbf R_{ik}
+\tilde{\mathbf a}_k^\circ\Delta t_k^2 .
+$$
+
+实际实现中，增量不必在每次优化迭代中从头计算；保留对 $\mathbf b_a$、$\mathbf b_g$ 的一阶 Jacobian，即可在当前线性化点附近快速更新：
+
+$$
+\Delta\mathbf R_{ij}(\mathbf b_g+\delta\mathbf b_g)
+\approx
+\Delta\bar{\mathbf R}_{ij}
+\operatorname{Exp}
+(\mathbf J_{R,b_g}^{ij}\delta\mathbf b_g),
+$$
+
+$$
+\Delta\mathbf v_{ij}
+\approx\Delta\bar{\mathbf v}_{ij}
++\mathbf J_{v,b_a}^{ij}\delta\mathbf b_a
++\mathbf J_{v,b_g}^{ij}\delta\mathbf b_g,
+$$
+
+$$
+\Delta\mathbf p_{ij}
+\approx\Delta\bar{\mathbf p}_{ij}
++\mathbf J_{p,b_a}^{ij}\delta\mathbf b_a
++\mathbf J_{p,b_g}^{ij}\delta\mathbf b_g .
+$$
+
+### 6.3 因子残差
+
+旋转残差为
+
+$$
+\mathbf r_{R,ij}
+=\operatorname{Log}\left(
+\Delta\mathbf R_{ij}^{\top}
+\mathbf R_i^\top\mathbf R_j
+\right).
+$$
+
+速度残差为
+
+$$
+\mathbf r_{v,ij}
+=\mathbf R_i^\top
+(\mathbf v_j-\mathbf v_i-\mathbf g_WT_{ij})
+-\Delta\mathbf v_{ij} .
+$$
+
+位置残差为
+
+$$
+\mathbf r_{p,ij}
+=\mathbf R_i^\top
+\left(\mathbf p_j-\mathbf p_i-\mathbf v_iT_{ij}
+-\frac12\mathbf g_WT_{ij}^2\right)
+-\Delta\mathbf p_{ij} .
+$$
+
+相邻关键帧的相对位姿、视觉或 LiDAR 约束可以作为外部因子。例如给定相对旋转 $\hat{\mathbf R}_{ij}$ 和相对平移 $\hat{\mathbf t}_{ij}$，可加入
+
+$$
+\mathbf r_{\mathrm{rel},ij}^{R}
+=\operatorname{Log}\left(
+\hat{\mathbf R}_{ij}^{\top}
+\mathbf R_i^\top\mathbf R_j
+\right),
+$$
+
+以及相应的平移残差。回环因子只用来约束相对结构，不应被误认为是重力绝对参考。
+
+### 6.4 先验与规范自由度
+
+由于重力不能观测 yaw 和全局纯平移，优化问题必须处理规范自由度。可采用固定首帧的部分状态，或使用软先验。对于后处理重力对齐，推荐各向异性先验：
+
+- roll/pitch 使用较弱先验，让 IMU 重力证据能够改变输入倾斜；
+- yaw 使用较强先验或固定输入 yaw，因为重力无法提供 yaw；
+- 平移使用较松先验，避免把原有高度隆起强行固定；
+- 速度使用动力学和相邻状态约束；
+- 零偏使用初值先验与随机游走约束。
+
+联合目标函数可以写成
+
+$$
+\begin{aligned}
+\mathcal C(\mathbf x)=
+&\sum_{(i,j)\in\mathcal I}
+\left\|\mathbf r_{ij}^{\mathrm{imu}}\right\|^2_{\boldsymbol\Sigma_{ij}}\\
+&+\sum_k
+\left\|\mathbf r_k^{\mathrm{pose\ prior}}\right\|^2_{\boldsymbol\Sigma_k^{\mathrm{prior}}}\\
+&+\sum_k
+\left\|\mathbf b_{a,k+1}-\mathbf b_{a,k}\right\|^2_{\boldsymbol\Sigma_{ba,k}}\\
+&+\sum_k
+\left\|\mathbf b_{g,k+1}-\mathbf b_{g,k}\right\|^2_{\boldsymbol\Sigma_{bg,k}}\\
+&+\sum_{(i,j)\in\mathcal E}
+\rho\left(\left\|\mathbf r_{ij}^{\mathrm{rel}}\right\|^2_{\boldsymbol\Sigma_{ij}^{\mathrm{rel}}}\right).
+\end{aligned}
+$$
+
+其中 $\mathbf r_{ij}^{\mathrm{imu}}$ 包含旋转、速度和位置残差，$\rho$ 可以使用 Cauchy 等鲁棒核抑制错误回环或异常惯性区间。
+
+### 6.5 初始化顺序
+
+初始化顺序应遵循可观性，而不是把所有状态同时从任意值开始。
+
+**第一步：静止估计陀螺仪零偏。** 设备真正静止时，直接平均 $\tilde{\boldsymbol\omega}$。这一步不需要姿态参考，是最可靠的零偏初值。
+
+**第二步：建立初始重力方向。** 对静止加速度计均值使用已知重力模长，得到初始重力锚。此时只把它当作方向和初值，不要在单一姿态上把水平加速度计零偏强行解释出来。
+
+**第三步：引入外部姿态或相对位姿。** 视觉、LiDAR 或已有 SLAM 轨迹提供相对旋转，使运动中的陀螺仪零偏获得约束。没有独立姿态参考时，不能指望陀螺仪自身在任意运动中估计出三轴零偏。
+
+**第四步：使用姿态激励分离加速度计零偏。** 通过转弯、多航向运动或其他姿态变化，使 $\mathbf R_i^\top\delta\mathbf g_W$ 发生变化。姿态变化不足时，先验只能稳定数值，不能凭空创造可观性。
+
+**第五步：联合迭代。** 重新估计姿态会改变重力投影，重新估计零偏又会改变预积分，因此需要在同一个因子图中迭代优化，而不是固定某一方后永久使用。
+
+### 6.6 诊断量
+
+求解后至少检查以下量：
+
+1. **陀螺仪零偏的时间变化：** 是否符合随机游走模型，是否出现与姿态残差同步的突变。
+2. **加速度计零偏的幅值：** 是否远超传感器规格。远超规格通常意味着姿态倾斜被吸收进零偏。
+3. **加速度计零偏的时间平坦性：** 若零偏缓慢跟随输入 tilt 曲线，说明慢漂移陷阱可能发生。
+4. **姿态激励的条件数：** 计算堆叠 Jacobian 的最小奇异值或条件数，而不是只记录“是否转过弯”。
+5. **重力模长：** 检查 $\lVert\mathbf g_W\rVert$ 是否维持在物理合理范围；若同时估计尺度，应避免尺度、重力模长和加速度计零偏形成新的退化。
+6. **残差分解：** 分别查看旋转、速度、位置和相对几何残差，避免用位置先验掩盖惯性模型错误。
+
+## 7. 采集与工程使用建议
+
+### 7.1 采集阶段
+
+如果任务允许设计运动，建议采用以下顺序：
+
+1. 开始时保持设备稳定数秒，估计陀螺仪零偏和噪声；
+2. 完成视觉或其他外部姿态初始化；
+3. 进行多航向旋转，最好包含转向—返回动作；
+4. 正常运动时保持一定转弯密度，避免整段轨迹只有长距离直行；
+5. 结束时再次静止，用于检查陀螺仪零偏是否发生明显漂移。
+
+对加速度计零偏而言，转动不一定要伴随剧烈线加速度。只要姿态改变，固定世界倾斜在机体系中的投影就会改变。对汽车或轮式平台，航向变化通常比 roll/pitch 变化更容易获得，也足以提供水平重力分离信息。
+
+### 7.2 不应采用的简化
+
+以下做法容易产生看似合理、实际上错误的结果：
+
+- 将整段运动加速度计均值直接当成零偏；
+- 用单一静止姿态同时估计水平加速度计零偏和 roll/pitch；
+- 先用可能含有倾斜漂移的姿态标定加速度计零偏，再把该零偏固定；
+- 只使用相对回环，希望回环自动恢复绝对重力方向；
+- 为了让优化收敛，把 roll/pitch 设很强的先验，使重力因子无法修正输入姿态；
+- 给逐帧零偏过大的随机游走自由度，使零偏能够无代价地追踪重力投影；
+- 用完整 SE(3) 对齐评估重力校正，把要测的 roll/pitch 漂移在评估时吸收掉。
+
+### 7.3 在线与离线的取舍
+
+在线滑动窗口估计器需要在有限窗口内完成零偏—姿态分离。早期如果激励不足，相关状态被边缘化后，后续激励难以完全追溯修正。离线全序列优化可以保留完整的姿态激励和原始 IMU 信息，适合已有 SLAM 轨迹的后处理，但代价是计算延迟和更高的状态规模。
+
+无论在线还是离线，信息不足都无法被优化器弥补。姿态始终不变时，加速度计零偏与水平重力倾斜就是结构性不可分；没有外部旋转参考时，运动中的陀螺仪零偏也无法仅靠陀螺仪自身确定。
+
+## 8. 结语
+
+角速度零偏和加速度零偏都叫 bias，但它们的可观性完全不同。
+
+陀螺仪零偏的问题是缺少真实角速度参考。静止时，真实角速度为零，零偏可以直接平均；运动时，测量只包含真实角速度和零偏的和，必须借助外部姿态或相对旋转打破三维对称性。零偏误差以时间积分为姿态误差，短期近似满足
+
+$$
+\delta\boldsymbol\theta_g(T)\approx-T\delta\mathbf b_g .
+$$
+
+加速度计零偏的问题不是没有重力参考，而是重力投影和零偏叠加在同一个通道中。静止单姿态只能观察二者的组合；在预积分中，观测结构变成
+
+$$
+\delta\mathbf b_a-\mathbf R_i^\top\delta\mathbf g_W .
+$$
+
+只有当姿态变化使第二项改变，而第一项保持机体系恒定时，二者才可能分离。姿态激励越弱，问题越病态；零偏随机游走越自由，越容易吸收缓慢变化的倾斜。
+
+因此，可靠的 IMU 零偏处理不应是两个互相独立的校准脚本，而应是一个受可观性约束的联合估计问题：静止段提供陀螺仪零偏初值，外部旋转约束建立运动中的角速度参考，完整预积分连接姿态、速度、位置和加速度计零偏，重力约束提供 roll/pitch 的绝对方向，随机游走先验限制零偏随时间的变化，yaw 和全局平移则由相对轨迹约束或规范选择处理。
+
+只要把“零偏是什么”和“什么信息能够区分它”分开，很多看似神秘的高度漂移、姿态慢漂和异常 bias 估计，都可以还原为明确的观测结构问题。
+
+
+
