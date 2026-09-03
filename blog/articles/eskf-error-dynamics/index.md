@@ -2,7 +2,7 @@
 title: "ESKF 误差动力学推导：从 IMU 模型到 F 和 G"
 date: 2026-09-04
 tags: [ESKF, IMU, Error State, VINS, FAST-LIO2, State Estimation]
-excerpt: "在固定坐标系和右侧姿态扰动约定下，从陀螺仪、加速度计和 bias 随机游走模型逐项推导误差动力学矩阵 F、G 及协方差传播，并说明它们在 VINS 预积分和 FAST-LIO2 IESKF 中分别扮演的角色。"
+excerpt: "在固定坐标系和右侧姿态扰动约定下，从陀螺仪、加速度计和 bias 随机游走模型逐项推导误差动力学矩阵 F、G，并把它们接到 IMU 传播、协方差传播、观测更新、误差注入和 reset 的完整闭环中，最后简要说明与 VINS 预积分和 FAST-LIO2 IESKF 的关系。"
 draft: false
 ---
 
@@ -22,7 +22,7 @@ $$
 
 本文固定如下约定：$R_{WB}$ 把机体坐标系 $B$ 的向量变换到世界坐标系 $W$；姿态采用右侧扰动 $R=\hat R\operatorname{Exp}([\delta\theta]_\times)$；误差排列为 $[\delta\theta,\delta p,\delta v,\delta b_g,\delta b_a]$。在这个约定下，本文推导出一组 15 维连续时间误差动力学，并区分连续噪声强度 $Q_c$ 和离散过程噪声协方差 $Q_d$。
 
-最后，文章把这组方程放回两个常见系统中理解。VINS-Mono 的主估计器是 IMU 预积分加滑动窗口非线性优化；FAST-LIO2 则采用紧耦合迭代误差状态 Kalman filter。两者都会用到误差传播的 Jacobian 和协方差，但它们在整个估计框架中的位置不同。
+推导完成后，文章把这些公式串成一轮完整的 ESKF 工作流：初始化名义状态和协方差，用 IMU 推进名义状态并传播协方差，观测到达后计算残差和观测 Jacobian，再更新、注入误差并完成 reset。最后只用一小节定位 VINS 预积分和 FAST-LIO2 IESKF 与这条传播—更新链路的关系。
 
 **关键词：** ESKF；IMU；误差动力学；协方差传播；IMU 预积分；VINS；FAST-LIO2
 
@@ -763,111 +763,294 @@ $$
 
 两种写法对应两种噪声约定，不能在没有单位和采样定义的情况下直接比较。VINS-Mono 论文在预积分协方差递推中写出了 $(G_t\delta t)Q(G_t\delta t)^{\top}$ 的形式；阅读这类公式时，需要结合它对离散采样噪声的定义理解 $Q$，不能把符号名称直接等同于连续时间的 $Q_c$。
 
-## 8. 这组方程和 VINS 预积分是什么关系
+## 8. 推导完成后，ESKF 每个时刻如何工作
 
-### 8.1 VINS 的主框架
+到这里，我们已经得到名义状态方程、误差动力学 $F/G$ 和协方差传播公式。它们还需要被组织成一个循环，估计器才能真正运行起来。
 
-VINS-Mono 的主估计器是紧耦合滑动窗口非线性优化。它把相邻图像帧之间的大量 IMU 测量预积分成一组相对运动量，再把这些量与视觉特征残差一起放进窗口优化问题。
-
-VINS-Mono 的主流程可以概括为：
-
-1. 在两个关键帧之间读取高频 IMU 测量；
-2. 在局部参考系中递推预积分量，例如位置变化、速度变化和相对旋转；
-3. 同时递推预积分量的 bias Jacobian、状态转移 Jacobian 和协方差；
-4. 将预积分结果作为关键帧之间的 IMU 残差，和视觉残差共同参与非线性优化。
-
-VINS-Mono 论文 Section IV-B 给出的预积分误差状态排列是 $[\delta\alpha,\delta\beta,\delta\theta,\delta b_a,\delta b_g]$。其中 $\delta\alpha$ 和 $\delta\beta$ 分别对应预积分的位置与速度误差，$\delta\theta$ 对应预积分旋转误差。它的连续线性化方程同样可以写成
+ESKF 的一次循环可以先用一条信息流表示：
 
 $$
-\dot{\delta z}=F_t\delta z+G_t n_t,
+(\hat{\mathcal X}_k^+,P_k^+)
+\xrightarrow{\text{IMU}}
+(\hat{\mathcal X}_{k+1}^-,P_{k+1}^-)
+\xrightarrow{\text{观测 }z_{k+1}}
+(\delta\hat x_{k+1},\widetilde P_{k+1}^+)
+\xrightarrow{\boxplus\;\text{与 reset}}
+(\hat{\mathcal X}_{k+1}^+,P_{k+1}^+).
 $$
 
-并通过
+上标 $+$ 表示已经融合当前观测，上标 $-$ 表示只经过 IMU 传播、还没有融合当前观测。IMU 通常频率更高，所以中间会有多次“传播”，再进行一次观测更新。
+
+### 8.1 初始化：先准备名义状态和协方差
+
+ESKF 开始工作前，需要给出一个初始名义状态
 
 $$
-J_{t+\delta t}=(I+F_t\delta t)J_t
+\hat{\mathcal X}_0
+=(\hat R_0,\hat p_0,\hat v_0,\hat b_{g,0},\hat b_{a,0})
 $$
 
-递推初始状态到当前预积分量的 Jacobian，通过协方差递推保存 IMU 约束的不确定性。
+以及初始误差协方差 $P_0$。$P_0$ 反映我们对初始姿态、位置、速度和 bias 的不确定程度。
 
-### 8.2 共同的数学基础
+静止初始化可以提供一些粗略信息：陀螺仪平均值常用于估计初始 gyro bias，加速度计测得的重力方向可以帮助确定 roll 和 pitch，初始位置与速度则需要由任务设定或其他传感器提供。加速度计 bias 与重力方向存在耦合，静止数据通常只能给出带有先验假设的初值，不能自动解决所有初始误差。
 
-本文 15 维 ESKF 与 VINS 预积分的状态排列不相同，使用的姿态参考系也可能不同，但它们共享同一条推导链：
+初始化完成后，滤波器反复执行同一套传播和更新步骤。初始化方法可以变化，后面的误差动力学和滤波闭环仍然保持不变。
 
-- 先写出 IMU 非线性运动模型；
-- 选择局部姿态误差；
-- 对误差动力学一阶线性化；
-- 得到状态 Jacobian $F$ 和噪声 Jacobian $G$；
-- 用它们递推状态转移关系、bias Jacobian 和协方差。
+### 8.2 IMU 到达：传播名义状态
 
-本文的 $F$ 描述“误差如何在连续时间流动”。预积分再把这条连续流动压缩到两个关键帧之间，形成一个可以被优化器反复使用的相对约束。
-
-### 8.3 两者在系统中的位置不同
-
-| 方面 | ESKF | VINS-Mono 预积分与优化 |
-|---|---|---|
-| IMU 的作用 | 高频传播名义状态和误差协方差 | 高频压缩为关键帧之间的预积分量 |
-| $F$、$G$ 的用途 | 构造当前误差状态的状态转移和过程噪声 | 递推预积分 Jacobian、bias 修正和协方差 |
-| 观测融合 | 观测到达后直接更新当前滤波状态 | 视觉和 IMU 残差一起进入滑动窗口非线性优化 |
-| 线性化管理 | 围绕当前名义状态进行局部误差更新 | 优化器围绕窗口状态反复重线性化，旧状态通过边缘化处理 |
-| 主要估计形式 | 在线滤波 | 有限窗口的 MAP/非线性优化 |
-
-VINS 也可以在优化结果基础上继续做 IMU 前向传播，产生更高频的状态输出。这一步服务于实时输出和控制，不能把 VINS 的主估计器改称为全局 EKF。判断一个系统属于哪类方法，要看它如何组织主要状态、残差和不确定性，而不只是看它是否出现了 $F$、$G$ 或“Kalman”这些词。
-
-## 9. 这组方程和 FAST-LIO2 IESKF 是什么关系
-
-### 9.1 FAST-LIO2 的滤波框架
-
-FAST-LIO2 使用 IMU 和 LiDAR 进行紧耦合状态估计。论文 Section IV 将它描述为 on-manifold iterated Kalman filter：
-
-- IMU 到达时，传播名义状态；
-- 同时使用状态 Jacobian 和噪声 Jacobian 传播协方差；
-- LiDAR 扫描到达后，利用点到局部平面的几何残差建立观测模型；
-- 在同一帧 LiDAR 更新内反复线性化和更新，直到状态增量收敛。
-
-这种结构属于迭代误差状态 Kalman filter（IESKF）一类。FAST-LIO2 论文和相关实现中使用的具体术语有“tightly-coupled iterated Kalman filter”“on-manifold iterated Kalman filter”等不同写法，描述的是同一类滤波结构。
-
-### 9.2 状态比本文更大
-
-本文为了清楚推导 IMU 核心，使用了
+假设上一次观测更新后的状态是 $(\hat{\mathcal X}_k^+,P_k^+)$。在时间间隔 $\Delta t$ 内，收到一组 IMU 测量 $(\tilde\omega_k,\tilde a_k)$，先计算名义输入
 
 $$
-(R,p,v,b_g,b_a)
+\hat\omega_k=\tilde\omega_k-\hat b_{g,k}^+,
+\qquad
+\hat a_k=\tilde a_k-\hat b_{a,k}^+.
 $$
 
-这组 15 自由度状态。FAST-LIO2 还把重力和 LiDAR-IMU 外参放进状态，典型状态可以写成
+为了看清流程，先使用一阶的常值输入离散化。定义世界系中的名义加速度
 
 $$
-\mathcal X=
-(R_{WI},p_{WI},v_{WI},b_g,b_a,g_W,R_{IL},p_{IL}).
+\hat a_{W,k}=g+\hat R_k^+\hat a_k.
 $$
 
-由此，FAST-LIO2 的误差状态维度会比本文大。扩展后，速度误差方程还会多出重力误差项：
+名义状态传播为
 
 $$
-\delta\dot v
-=\cdots+\delta g_W.
+\hat R_{k+1}^-
+=\hat R_k^+
+\operatorname{Exp}([\hat\omega_k\Delta t]_\times),
 $$
 
-对应的 $F_{v g}$ block 是 $I$；若重力被视为常量，重力误差行的确定性导数仍为零。LiDAR-IMU 外参也会产生自己的误差 block 和观测 Jacobian。
+$$
+\hat v_{k+1}^-
+=\hat v_k^+ +\hat a_{W,k}\Delta t,
+$$
 
-本文的 15 维 $F$、$G$ 可以看作这类系统中 IMU 核心传播模型的一个简化子块。FAST-LIO2 的完整推导还要处理 LiDAR 点的采样时间、运动畸变补偿、外参和点到平面残差，这些内容留到后续文章。
+$$
+\hat p_{k+1}^-
+=\hat p_k^+ +\hat v_k^+\Delta t
++\frac{1}{2}\hat a_{W,k}\Delta t^2,
+$$
 
-### 9.3 ESKF 和 FAST-LIO2 的直接对应
+$$
+\hat b_{g,k+1}^- =\hat b_{g,k}^+,
+\qquad
+\hat b_{a,k+1}^- =\hat b_{a,k}^+.
+$$
 
-| 本文的 ESKF 部分 | FAST-LIO2 中的对应位置 |
-|---|---|
-| 名义 IMU 状态传播 | 每个 IMU 测量到达时的 forward propagation |
-| $F$ | 状态误差对上一时刻误差的 Jacobian |
-| $G$ | 状态误差对 IMU 过程噪声的 Jacobian |
-| $P$ 的传播 | IMU 传播阶段的协方差更新 |
-| 观测 Jacobian $H$ | LiDAR 点到平面隐式残差的线性化 Jacobian |
-| 误差更新 | 每个 LiDAR 扫描内的迭代 Kalman update |
-| 姿态流形处理 | on-manifold 的状态加法与误差定义 |
+这几行只传播名义状态的均值。真实 IMU 含有噪声，bias 也会随机游走；它们对不确定性的影响由下一步的协方差传播处理。实际实现中常使用中点积分或其他更高阶积分，基本信息流不变。
 
-所以 FAST-LIO2 和本文的 ESKF 在“IMU 传播—误差线性化—协方差传播—观测更新”这条链路上非常接近。差别主要出现在状态扩展、观测模型和迭代更新方式，而非 $F$、$G$ 是否存在。
+### 8.3 同时传播协方差：$F$ 和 $G$ 在这里发挥作用
+
+在当前名义状态和 IMU 输入处计算本文推导的 $F_k$、$G_k$。用一阶离散化表示：
+
+$$
+\Phi_k\approx I+F_k\Delta t,
+$$
+
+$$
+Q_{d,k}\approx G_kQ_cG_k^{\top}\Delta t.
+$$
+
+于是误差协方差从上一次更新后的 $P_k^+$ 传播为
+
+$$
+\boxed{
+P_{k+1}^-
+=\Phi_kP_k^+\Phi_k^{\top}+Q_{d,k}.
+}
+$$
+
+这里有两个并行过程：
+
+- 名义状态按照非线性 IMU 方程传播；
+- 协方差按照线性化误差模型传播。
+
+名义状态告诉滤波器“机器人现在大概在哪里、朝向如何、速度多大”；协方差告诉滤波器“这个估计有多不确定”。只有名义状态而没有协方差，后面无法判断应该更相信 IMU 预测还是外部观测。
+
+### 8.4 观测到达：从传感器输出形成残差
+
+当相机、LiDAR、GNSS、轮速计或其他观测到达时，先写出观测模型
+
+$$
+z=h(\mathcal X)+v,
+$$
+
+其中 $v$ 是观测噪声，协方差记为 $R$。利用刚才的预测状态计算观测预测值
+
+$$
+\hat z_{k+1}=h(\hat{\mathcal X}_{k+1}^-).
+$$
+
+实际测量和预测测量的差为残差：
+
+$$
+r_{k+1}=z_{k+1}-\hat z_{k+1}.
+$$
+
+在预测名义状态附近使用误差状态线性化：
+
+$$
+h(\hat{\mathcal X}_{k+1}^-\boxplus\delta x)
+\approx
+h(\hat{\mathcal X}_{k+1}^-)+H_{k+1}\delta x.
+$$
+
+因此
+
+$$
+r_{k+1}
+\approx H_{k+1}\delta x+v_{k+1}.
+$$
+
+$H$ 的具体形式取决于传感器。比如位置观测可以写成
+
+$$
+z_p=p+v_p,
+$$
+
+其中 $v_p$ 是位置观测噪声。此时
+
+$$
+r_p=z_p-\hat p^-,
+$$
+
+并且按照 $[\delta\theta,\delta p,\delta v,\delta b_g,\delta b_a]$ 的排列，观测 Jacobian 为
+
+$$
+H_p=
+\begin{bmatrix}
+0&I&0&0&0
+\end{bmatrix}.
+$$
+
+相机重投影、LiDAR 点到平面和轮速观测会产生不同的 $h$ 与 $H$，但它们进入 ESKF 的位置相同：都从预测状态出发构造残差，随后修正误差状态。
+
+### 8.5 Kalman 更新：先更新误差，不直接改完整状态
+
+有了预测协方差 $P^-$、观测 Jacobian $H$ 和观测噪声协方差 $R$，先计算残差协方差
+
+$$
+S=HP^-H^{\top}+R.
+$$
+
+Kalman gain 为
+
+$$
+K=P^-H^{\top}S^{-1}.
+$$
+
+误差状态的后验均值为
+
+$$
+\delta\hat x=Kr.
+$$
+
+这里的 $\delta\hat x$ 仍然只是局部误差。它还没有被直接加到旋转矩阵、位置或速度上。
+
+为了保持数值稳定性，可以使用 Joseph 形式计算更新后的协方差：
+
+$$
+\widetilde P^+
+=(I-KH)P^-(I-KH)^{\top}+KRK^{\top}.
+$$
+
+符号 $\widetilde P^+$ 表示“误差注入之前”的后验协方差。它和 reset 之后、位于新误差坐标中的 $P^+$ 可能不同。
+
+### 8.6 误差注入：把局部修正放回名义状态
+
+误差更新完成后，将误差均值注入名义状态：
+
+$$
+\hat{\mathcal X}^+
+=\hat{\mathcal X}^-\boxplus\delta\hat x.
+$$
+
+对于本文的右侧姿态扰动，姿态注入为
+
+$$
+\hat R^+
+=\hat R^-\operatorname{Exp}([\delta\hat\theta]_\times).
+$$
+
+其余状态使用加法：
+
+$$
+\begin{aligned}
+\hat p^+&=\hat p^-+\delta\hat p,\\
+\hat v^+&=\hat v^-+\delta\hat v,\\
+\hat b_g^+&=\hat b_g^-+\delta\hat b_g,\\
+\hat b_a^+&=\hat b_a^-+\delta\hat b_a.
+\end{aligned}
+$$
+
+这一步完成后，名义状态已经移动到了更合理的位置。误差状态的均值也要重新定义为零，下一次 IMU 传播从新的名义状态附近开始。
+
+### 8.7 reset：重新定义局部误差坐标
+
+对加性状态来说，注入后可以把局部误差近似理解为
+
+$$
+\delta x_{\mathrm{new}}
+\approx
+\delta x_{\mathrm{old}}-\delta\hat x.
+$$
+
+旋转状态需要使用群上的复合：
+
+$$
+\delta\theta_{\mathrm{new}}
+=\operatorname{Log}\left(
+\operatorname{Exp}(-\delta\hat\theta)
+\operatorname{Exp}(\delta\theta_{\mathrm{old}})
+\right).
+$$
+
+因此，reset 的作用是把误差坐标重新放到新名义状态附近。它不会删除剩余的不确定性，只改变协方差所对应的局部坐标。
+
+设注入前的后验协方差为 $\widetilde P^+$，新旧误差坐标之间的一阶 Jacobian 为 $J_{\mathrm{reset}}$，则
+
+$$
+\boxed{
+P^+
+=J_{\mathrm{reset}}\widetilde P^+
+J_{\mathrm{reset}}^{\top}.
+}
+$$
+
+对于普通加性状态，相关坐标变换通常是单位矩阵；旋转部分的 Jacobian 取决于左侧或右侧扰动、注入方式和采用的近似阶数。第一篇文章已经介绍过这一步的几何含义，本文只需要记住：误差注入和协方差 reset 是同一轮更新的两个部分。
+
+### 8.8 把一轮算法压缩成一张表
+
+| 阶段 | 输入 | 计算 | 输出 |
+|---|---|---|---|
+| 初始化 | 初始读数、先验 | 设置名义状态和 $P_0$ | $(\hat{\mathcal X}_0,P_0)$ |
+| IMU 传播 | $\tilde\omega,\tilde a$ | 非线性传播名义状态 | $\hat{\mathcal X}^-$ |
+| 协方差传播 | $F,G,Q_c$ | $\Phi P\Phi^{\top}+Q_d$ | $P^-$ |
+| 观测线性化 | $z,h,R$ | 计算 $\hat z$、残差 $r$ 和 $H$ | $(r,H,R)$ |
+| 误差更新 | $P^-,r,H,R$ | 计算 $K$ 和 $\delta\hat x$ | 局部误差修正 |
+| 注入 | $\hat{\mathcal X}^-,\delta\hat x$ | 使用 $\boxplus$ 更新名义状态 | $\hat{\mathcal X}^+$ |
+| reset | $\widetilde P^+$、$J_{\mathrm{reset}}$ | 转换新的局部误差坐标 | $P^+$ |
+
+这张表也说明了本文为什么先推导 $F$ 和 $G$，再讨论观测更新。$F$、$G$ 负责把 IMU 预测的不确定性送到观测时刻；$H$ 负责说明当前观测对哪些误差敏感；Kalman gain 决定两类信息如何加权；注入和 reset 则把局部计算结果接回下一轮传播。
+
+## 9. VINS 和 FAST-LIO2 只需要这样定位
+
+本文的主线是基本 ESKF 的运行闭环，VINS 和 FAST-LIO2 放在这里作为两个方法方向的参照。
+
+### 9.1 VINS：同一类 IMU 线性化，另一种全局组织方式
+
+VINS-Mono 会使用与本文相同类型的 IMU 误差传播思想，递推预积分量的 Jacobian 和协方差。它把一段时间内的高频 IMU 压缩成关键帧之间的预积分约束，再与视觉残差一起放入滑动窗口非线性优化。
+
+因此，VINS-Mono 的主估计器属于预积分加优化框架。本文介绍的 ESKF 循环则在观测到达后直接更新当前名义状态和协方差。两者共享局部动力学推导，状态估计的组织方式不同。
+
+### 9.2 FAST-LIO2：更接近本文闭环的 IESKF
+
+FAST-LIO2 采用紧耦合迭代误差状态 Kalman filter。它用 IMU 高频传播名义状态和协方差，再把 LiDAR 几何残差线性化后进行迭代更新。
+
+从“IMU 传播—协方差传播—观测残差—误差更新—注入与 reset”的角度看，FAST-LIO2 与本文的 ESKF 闭环更接近。它的完整系统还会扩展重力、LiDAR-IMU 外参、点云运动畸变补偿和迭代观测模型，这些内容不影响本文对基本 ESKF 工作流的理解。
 
 ## 10. 推导时最容易混淆的几件事
+
 
 ### 10.1 $R_{WB}$ 和 $R_{BW}$ 写反
 
@@ -919,9 +1102,10 @@ F/G 是局部线性化的通用工具。ESKF 用它们传播当前滤波器的�
 4. 逐项推导姿态、位置、速度和 bias 误差方程；
 5. 组装连续时间 $F$、$G$；
 6. 用 $F$、$G$ 推导连续和离散协方差传播；
-7. 解释同一套误差动力学如何进入 VINS 预积分与 FAST-LIO2 IESKF。
+7. 把名义传播、协方差传播、观测更新、误差注入和 reset 串成一轮完整的 ESKF 工作流；
+8. 简要定位 VINS 预积分优化和 FAST-LIO2 IESKF 与这条工作流的关系。
 
-这组矩阵适用于重力在世界系已知、IMU 外参暂不作为状态、bias 采用随机游走的基本模型。实际系统需要根据任务扩展：FAST-LIO2 会估计重力和 LiDAR-IMU 外参；VINS 会把相邻关键帧的预积分量、视觉特征和 bias 一起放进窗口优化；有些惯性导航系统还会估计地球自转、尺度、时间偏移或杆臂效应。
+这组矩阵适用于重力在世界系已知、IMU 外参暂不作为状态、bias 采用随机游走的基本模型。实际系统需要根据任务扩展状态、过程模型和观测模型；例如，某些 LiDAR 惯性系统会估计重力与外参，某些视觉惯性系统会把预积分约束放入滑动窗口优化。有些惯性导航系统还会估计地球自转、尺度、时间偏移或杆臂效应。
 
 这些扩展会增加状态和 Jacobian block，但推导方法没有改变：先写非线性动力学，再定义流形误差，最后对误差和噪声分别求一阶导数。
 
@@ -946,7 +1130,7 @@ $$
 \dot P=FP+PF^{\top}+GQ_cG^{\top}.
 $$
 
-VINS-Mono 和 FAST-LIO2 都会使用这类局部线性化，但系统架构不同：前者把 IMU 信息预积分成优化因子，后者把 IMU 传播和 LiDAR 迭代更新组织成误差状态 Kalman filter。理解这个区别，才能正确阅读论文中形式相似的 $F$、$G$、Jacobian 和 covariance 公式。
+VINS-Mono 和 FAST-LIO2 可以作为这条主线的两个延伸参照：前者把 IMU 信息预积分成优化约束，后者把 IMU 传播和 LiDAR 迭代更新组织成误差状态 Kalman filter。理解 ESKF 的运行闭环后，再阅读这些系统中形式相似的 $F$、$G$、Jacobian 和 covariance 公式会更容易。
 
 ## 参考文献
 
