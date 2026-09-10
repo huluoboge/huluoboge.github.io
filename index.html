@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hu Yang, Lead of 3D Reconstruction at Realsee (realsee.com).">
+  <meta name="theme-color" content="#ffffff">
+  <title>Hu Yang — Lead of 3D Reconstruction, Realsee</title>
+  <link rel="stylesheet" href="styles.css?v=20260729-1">
+</head>
+<body>
+  <div class="page">
+    <aside class="sidebar">
+      <a class="portrait" href="#about" aria-label="Back to introduction">
+        <img src="assets/hu-yang.jpg?v=1" alt="Hu Yang">
+      </a>
+
+      <div class="identity">
+        <h1>Hu Yang</h1>
+        <p class="name-cn">胡洋</p>
+        <p class="role">Lead of 3D<br>Reconstruction</p>
+        <p class="affiliation"><a href="https://www.realsee.com/">realsee.com</a><br>Beijing, China</p>
+      </div>
+
+      <nav class="side-nav" aria-label="Section navigation">
+        <a href="#about">About</a>
+        <a href="#focus">Focus</a>
+        <a href="#software">Software</a>
+        <a href="#contact">Contact</a>
+        <a href="blog/index.html">Blog ↗</a>
+      </nav>
+
+      <div class="profile-links">
+        <a href="mailto:huyang0909@gmail.com">Email</a>
+        <a href="https://github.com/huluoboge">GitHub</a>
+      </div>
+
+    </aside>
+
+    <main class="content">
+      <section id="about" class="intro section">
+        <p class="kicker">Lead of 3D Reconstruction at Realsee.</p>
+        <h2>About Me</h2>
+        <div class="intro-grid">
+          <div>
+            <p>I am Lead of 3D Reconstruction at <a href="https://www.realsee.com/">Realsee</a> (realsee.com), working across <strong>photogrammetry</strong>, <strong>multi-view geometry</strong>, point clouds, meshes, and production reconstruction systems.</p>
+            <p>My work combines algorithm design, C++/CUDA implementation, validation, and performance optimization, with an emphasis on large real-world scenes and reliable engineering delivery.</p>
+          </div>
+          <div class="intro-cn" lang="zh-CN">
+            <p>我目前就职于如视（<a href="https://www.realsee.com/">realsee.com</a>），负责三维重建方向，长期从事 SfM/MVS、SLAM、点云、网格、纹理与大规模重建系统研发。</p>
+            <p>工作覆盖算法设计、工程实现、性能优化和质量验证，关注真实业务场景中的精度、效率、稳定性与可交付性。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="blog" class="section">
+        <div class="section-title-row">
+          <h2>Recent Posts</h2>
+          <p><a href="blog/index.html">View all posts ↗</a></p>
+        </div>
+        <div id="recent-posts"><!-- CI 构建时自动注入最新文章 --></div>
+      </section>
+
+      <section id="focus" class="section">
+        <h2>Focus Areas</h2>
+        <div class="interest-list">
+          <article>
+            <h3>Reconstruction</h3>
+            <p>SfM, MVS, SLAM, bundle adjustment, panoramic geometry, aerial and indoor reconstruction.</p>
+          </article>
+          <article>
+            <h3>Geometry Processing</h3>
+            <p>Point-cloud filtering, registration, mesh reconstruction, structural modeling, and texture mapping.</p>
+          </article>
+          <article>
+            <h3>Production Systems</h3>
+            <p>Large-scene tiling, parallel pipelines, memory-bounded processing, LOD, and browser delivery.</p>
+          </article>
+          <article>
+            <h3>Engineering Practice</h3>
+            <p>C++/CUDA implementation, numerical validation, performance profiling, and reconstruction quality evaluation.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="software" class="section">
+        <div class="section-title-row">
+          <h2>Software</h2>
+          <p>Open tools and engineering outputs</p>
+        </div>
+        <div class="software-list">
+          <article>
+            <h3><a href="https://github.com/huluoboge/InsightAT">InsightAT</a></h3>
+            <p>Command-line SfM pipeline for aerial triangulation and practical reconstruction workflows.</p>
+            <span>C++ · SfM · MVS</span>
+            <a class="row-link" href="https://github.com/huluoboge/InsightAT">Code / Documentation</a>
+          </article>
+          <article>
+            <h3><a href="https://fastmvs.github.io/">FastMVS</a></h3>
+            <p>High-speed dense matching software focused on MVS performance and reconstruction quality.</p>
+            <span>C++ · CUDA · MVS</span>
+            <a class="row-link" href="https://fastmvs.github.io/">Project / Documentation</a>
+          </article>
+          <article>
+            <h3><a href="freeptd/">Free PTD</a></h3>
+            <p>Airborne LiDAR ground filtering tool using progressive TIN densification and block processing.</p>
+            <span>C++ · LiDAR · TIN</span>
+            <a class="row-link" href="freeptd/">Project / Documentation</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="contact" class="section contact">
+        <h2>Contact</h2>
+        <p>For technical discussions, open-source collaboration, or reconstruction engineering work, please contact me by email.</p>
+        <p><a href="mailto:huyang0909@gmail.com">huyang0909@gmail.com</a> · <a href="https://github.com/huluoboge">github.com/huluoboge</a></p>
+      </section>
+
+      <footer>
+        <p>© 2026 Hu Yang. Built as a lightweight static page.</p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
