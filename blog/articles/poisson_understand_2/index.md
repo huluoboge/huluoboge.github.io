@@ -2,675 +2,608 @@
 title: "Poisson 表面重建的核心思想以及与有限元方法（FEM）的关系"
 date: 2025-10-18T22:00:00+08:00
 tags: ["Poisson reconstruction", "Finite Element Method", "Surface Reconstruction", "3D Reconstruction"]
-excerpt: "Poisson 表面重建的本质是一种有限元离散化的 Poisson 方程求解。Kazhdan 等人使用八叉树与局部基函数形式实现了自适应的 FEM 求解，使其成为连接 PDE 与几何重建的典型案例。本篇文章详细介绍了 Poisson 表面重建与有限元方法之间的关系。"
+excerpt: "从点云法向场出发，逐步说明 Poisson 表面重建如何恢复隐式函数，以及有限元、八叉树和 B-spline 如何参与离散求解。"
 draft: false
 ---
 
-[toc]
-# Poisson 表面重建的核心思想
+# Poisson 表面重建：从法向场到有限元离散
 
-## 🧩 一、问题背景
+点云表面重建要解决的问题是：已知一组位于物体表面附近的点，以及每个点的法向量，如何恢复一个连续的三维表面？
 
-在点云重建中，我们通常有：
+Poisson Surface Reconstruction 的思路不是直接把点连接成三角形，而是先在三维空间中寻找一个标量场，使它的梯度整体上符合输入点云提供的法向信息。求出这个标量场之后，再提取一个等值面作为重建结果。
 
-* 一组三维点：$\{p_i\}$，在物体表面上；
-    
-* 每个点的法向量：$\{n_i\}$。
-    
+这条思路可以分成四步：
 
-目标是：
+1. 将带法向的点云转成一个连续或离散的向量场；
+2. 把向量场看成隐式函数梯度的近似，并得到 Poisson 方程；
+3. 用有限元风格的基函数离散这个方程，得到稀疏线性系统；
+4. 求出标量场后，用等值面提取方法生成三角网格。
 
-> 从这些点和法向量重建一个连续的表面 $S$。
+**阅读路线：** 第 1 节说明点云、隐式函数和等值面；第 2 节解释法向场为什么会导出 Poisson 方程；第 3～5 节推导弱形式、有限元离散和线性系统；第 6 节把这些数学对象对应到八叉树实现；第 7 节总结边界条件、FEM 与有限差分的关系。全文使用同一组符号，不再把核心推导和附录重复展开。
 
-* * *
+## 摘要
 
-## 🧭 二、Poisson重建的核心思想
-
-Poisson Surface Reconstruction (Kazhdan et al., 2006, 2007) 的核心想法是：
-
-> 将点云的法向信息看作是某个隐函数的梯度场，然后通过求解泊松方程来恢复这个隐函数。
-
-换句话说：
-
-$$\nabla \chi = \mathbf{v}$$
-
-其中：
-
-* $\chi(\mathbf{x})$：体素网格上的一个 **隐式函数（indicator function）**；
-    
-* $\mathbf{v}(\mathbf{x})$：表示法向场的 **向量场**。
-    
-
-* * *
-
-## 🧮 三、什么是 $\chi(\mathbf{x})$？
-
-我们定义一个函数 $\chi(\mathbf{x})$ 表示物体内部外部关系：
-
-$$\chi(\mathbf{x}) =  
-\begin{cases}  
-1, & \text{if } \mathbf{x} \text{ 在物体 } M \text{ 内部}\\  
-0, & \text{if } \mathbf{x} \text{ 在物体 } M \text{ 外部}  
-\end{cases}$$
-
-这个函数叫做 **indicator function（指示函数）** 或 **characteristic function**。
-
-* * *
-
-## ⚙️ 四、从法向到泊松方程
-
-我们知道在表面上，法向量方向与 $\nabla \chi$ 一致：
-
-$$\mathbf{n} = \frac{\nabla \chi}{\|\nabla \chi\|}$$
-
-因此有：
-
-$$\nabla \chi \approx \mathbf{v}$$
-
-（$\mathbf{v}$ 是点云法向插值得到的连续向量场。）
-
-对上式取散度：
-
-$$\nabla \cdot \nabla \chi = \nabla \cdot \mathbf{v}$$
-
-这就变成 **Poisson 方程**：
-
-$$\Delta \chi = \nabla \cdot \mathbf{v}$$
-
-* * *
-
-## 🔍 五、求解与提取表面
-
-解出 $\chi(\mathbf{x})$ 后，我们取等值面（通常是 $\chi = 0.5$）：
-
-$$S = \{ \mathbf{x} \mid \chi(\mathbf{x}) = \tau \}$$
-
-这就是重建出的表面。
-
-* * *
-
-## 🧾 六、总结
-
-| 概念 | 含义 |
-| --- | --- |
-| $\chi(\mathbf{x})$ | 体素场上表示物体“内外”的隐函数 |
-| $\nabla \chi$ | 指示函数的梯度（偏导）＝ 法向方向 |
-| 表面 | $\chi$ 从 1 变为 0 的过渡区域（梯度不为零处） |
-| 泊松方程 | 从梯度场（法向）恢复 $\chi$ 的积分方程 |
-
-* * *
-
-
-# Poisson 表面重建与有限元（FEM）方法之间的关系
-
-**Poisson Surface Reconstruction** 本质上是用 **有限元方法（Finite Element Method, FEM）** 离散求解一个 **Poisson 方程**。  
-这听起来很数学，但其实直观地说就是：
-
-> “用一堆局部的小积木（基函数）拼出一个连续函数，并让它在平均意义上满足方程。”
-
----
-
-## 一、为什么要用有限元？
-
-我们要求解的偏微分方程（PDE）为(Poisson方程）：
-
+设输入点云为
 
 $$
-\begin{equation}
-\Delta \chi = \nabla \cdot \mathbf{v}
-\end{equation}
+\{(p_i,n_i)\}_{i=1}^{N},
 $$
 
-其中 $\Delta$ 是拉普拉斯算子（包含二阶导数）。
-
-其中：
-- $\chi(\mathbf{x})$ 是隐函数；
-- $\mathbf{v}(\mathbf{x})$ 是由点云法线方向定义的向量场。
-
-计算机不能处理连续函数，只能处理有限维向量，因此必须**离散化**这个 PDE。  
-常见的两种离散化思路如下：
-
-| 方法 | 基本思想 | 特点 |
-| ---- | ---------- | ---- |
-| **有限差分法（FDM）** | 在规则格点上用差分近似导数 | 只能用均匀网格，结构固定 |
-| **有限元法（FEM）** | 用局部基函数拼成连续近似 | 可用不规则、自适应网格（如八叉树） |
-
-有限元法可以看作差分法的更灵活版本——它允许网格大小与形状根据数据密度自适应调整。
-
----
-
-## 二、有限元的基本思想
-
-设要求解的未知函数为 $\chi(\mathbf{x})$。  
-我们用一组基函数 $\{\phi_i(\mathbf{x})\}$ 近似它：
+其中 $p_i\in\mathbb R^3$ 是采样点，$n_i$ 是已经定向的法向量。我们希望找到一个标量场 $\chi(\mathbf x)$，使得它的某个等值面能够表示物体表面，并且在表面附近满足
 
 $$
-\begin{equation}
-\chi(\mathbf{x}) \approx \sum_i c_i \, \phi_i(\mathbf{x}),
-\end{equation}
+\nabla\chi(\mathbf x)\approx \mathbf V(\mathbf x),
 $$
 
-其中：
-- $\phi_i(\mathbf{x})$ 为**局部形函数（shape function）**；
-- $c_i$ 为对应系数（待求未知量）；
-- 每个 $\phi_i$ 仅在局部单元上非零，因此称为“分片函数（piecewise function）”。
+其中 $\mathbf V$ 是由点云法向构造出的向量场。
 
-例如在一维中，每个基函数形如三角形：
-
-
-```
-       /\
-      /  \
------/----\-----
-   i-1   i   i+1
-```
-在三维中，这些“积木”则对应于立方体、四面体或八叉树节点上的局部基。
-
----
-
-## 三、从强形式到弱形式
-
-Poisson 方程的强形式为：
-$$\Delta \chi = \nabla \cdot \mathbf{v}.$$
-
-
-直接对每个点要求方程成立（强形式）会遇到问题：
-
-- $\Delta \chi$ 要求函数二阶可导；
-- 而有限元中的分片线性函数二阶导数为零。
-
-因此我们转化为“弱形式（weak form）”，即方程在**积分意义上**成立。
-
-对任意测试函数 $\psi(\mathbf{x})$，要求：
-
+对这个关系取散度，可以得到
 
 $$
-\begin{equation}
-\int_\Omega \psi \, \Delta \chi \,  d\mathbf{x} = \int_\Omega \psi \, (\nabla \cdot \mathbf{v}) \,  d\mathbf{x}
-\end{equation}
+\Delta\chi=\nabla\cdot\mathbf V.
 $$
 
-
-这称为“弱形式”或“变分形式”（Weak / Variational Form）。
-
-
-应用**分部积分（Integration by Parts）** 可将左式中的二阶导数转为一阶导数。下面是详细过程。 
-
-我们利用下面的**分部积分（integration by parts）[推导详见附录A](#附录A)**
-$$
-\begin{equation}
-\boxed{\displaystyle
-\int_\Omega ψ\,\Delta χ \,d\mathbf{x}
-= \int_{\partial\Omega} ψ\,\frac{\partial χ}{\partial n}\,dS
-\;-\;
-\int_\Omega \nabla ψ\cdot\nabla χ\,d\mathbf{x}}
-\end{equation}
-$$
-对左边进行替换，得到： 
+这就是 Poisson 方程。计算机不能直接求解连续函数，于是用局部基函数近似
 
 $$
-\int_{\partial\Omega} ψ\,\frac{\partial χ}{\partial n}\,dS \;-\; \int_\Omega \nabla ψ\cdot\nabla χ\,d\mathbf{x} = \int_\Omega \psi \, (\nabla \cdot \mathbf{v}) \, d\mathbf{x}
+\chi_h(\mathbf x)=\sum_j c_j\phi_j(\mathbf x),
 $$
 
-进一步整理后，得到：
-$$
-\begin{equation}
-\int_\Omega \nabla ψ\cdot\nabla χ\,d\mathbf{x}  = - \int_\Omega \psi \, (\nabla \cdot \mathbf{v}) \, d\mathbf{x} + \int_{\partial\Omega} ψ\,\frac{\partial χ}{\partial n}\,dS 
-\end{equation}
-$$
-
-右边第二项就是边界项，假设边界项消失（通常取 Dirichlet 边界或自然边界条件），就得到：
+再通过弱形式得到
 
 $$
-\begin{equation}
-\int_\Omega \nabla ψ\cdot\nabla χ\,d\mathbf{x}  = - \int_\Omega \psi \, (\nabla \cdot \mathbf{v}) \, d\mathbf{x}
-\end{equation}
+A\mathbf c=\mathbf b.
 $$
 
-这就是 **Poisson 方程的弱形式**。
-这个形式有好处：只含一阶导数，更容易离散。
+矩阵 $A$ 来自基函数梯度之间的内积，向量 $\mathbf b$ 来自输入法向场。解出系数 $\mathbf c$ 后，对 $\chi_h$ 提取合适的等值面，就得到重建表面。
 
----
-## 四、离散化并形成线性系统
+需要先说明一个容易混淆的点：理想的二值指示函数在表面处是不连续的，它的梯度应理解为分布意义下集中在边界上的量，而不是普通的光滑函数梯度。实际算法求解的是由有限基函数表示的平滑近似场，因此“法向是指示函数的梯度”是一种几何动机，不能按普通点值微分逐字理解。
 
-令 $\chi = \sum_j c_j \phi_j$，取测试函数 $\psi = \phi_i$，代入公式（6）：
+## 1. 从带法向点云到隐式表面
+
+### 1.1 输入数据和重建目标
+
+点云重建通常提供以下数据：
+
+- 三维采样点 $p_i$；
+- 与采样点对应的法向量 $n_i$；
+- 法向量的方向已经尽可能统一，例如都指向物体外部。
+
+法向方向非常重要。如果相邻点的法向随意翻转，构造出的向量场会互相抵消，Poisson 方程也就无法得到一致的表面方向。
+
+点云本身只是离散样本，并没有告诉我们物体内部的每个位置属于“内”还是“外”。Poisson 重建引入一个定义在三维空间中的标量场，把表面变成这个场的等值面。这样，复杂的孔洞、分叉和闭合结构都可以用隐式方式表示，不需要把表面写成单值函数 $z=f(x,y)$。
+
+### 1.2 指示函数和它的局限
+
+对一个实体 $M\subset\mathbb R^3$，理想指示函数可以写成
 
 $$
-\int_{\Omega} \nabla \phi_i \cdot \sum_j c_j \nabla \phi_j \, d\mathbf{x}
-= - \int_{\Omega} \phi_i \, (\nabla \cdot \mathbf{v}) \, d\mathbf{x}.
+\chi_M(\mathbf x)=
+\begin{cases}
+1, & \mathbf x\in M,\\
+0, & \mathbf x\notin M.
+\end{cases}
 $$
 
-整理为矩阵形式：
+它记录了空间中每个位置属于物体内部还是外部。实体的边界记作 $\partial M$，这里的 $\partial$ 是“取边界”的算子，不是偏导数符号：
 
 $$
-\sum_j \underbrace{\left( \int_{\Omega} \nabla \phi_i \cdot \nabla \phi_j \, d\mathbf{x} \right)}_{A_{ij}} c_j
-= \underbrace{- \int_{\Omega} \phi_i \, (\nabla \cdot \mathbf{v}) \, d\mathbf{x}}_{b_i},
+\partial M=\text{the boundary of }M.
 $$
 
-即：
+如果把理想指示函数直接拿来求梯度，那么函数在表面处的跳变会产生分布意义下的表面项。在普通数值计算中，我们更关心一个平滑的近似场 $\chi_h$，让它在表面附近从内部值过渡到外部值。这个近似场不必严格等于 0 或 1，但它可以通过等值面表达表面。
+
+### 1.3 什么是等值面
+
+给定标量场 $f:\mathbb R^3\to\mathbb R$ 和常数 $\tau$，等值集定义为
 
 $$
-A \, \mathbf{c} = \mathbf{b}.
+L_\tau=\{\mathbf x\in\mathbb R^3\mid f(\mathbf x)=\tau\}.
 $$
 
-其中矩阵 $A$ 对称、正定，因此可通过共轭梯度（CG）或多重网格等高效方法求解。
-
-
----
-
-
-## 五 左右两边具体如何数值计算
-
-$$\sum_j \underbrace{\left( \int_{\Omega} \nabla \phi_i \cdot \nabla \phi_j \, d\mathbf{x} \right)}_{A_{ij}} c_j  
-= \underbrace{- \int_{\Omega} \phi_i \, (\nabla \cdot \mathbf{v}) \, d\mathbf{x}}_{b_i}$$
-
-
----
-
-### 1.前提与符号
-
-* $\{\phi_i\}$：全局基（形函数）。每个 $\phi_i$ 有局部支撑（只在若干单元/节点非零）。
-    
-* 网格 / 细分单元集合：$\mathcal{T}=\{K\}$。每个单元上可以进行局部积分。
-    
-* 目标：组装稀疏刚度矩阵 $A$（$A_{ij}=\int_\Omega \nabla\phi_i\cdot\nabla\phi_j$) 与右端向量 $b$（如前述 $b_i=-\int_\Omega \phi_i(\nabla\cdot v)$ 或等价 $\int_\Omega \nabla\phi_i\cdot v$ 的形式）。
-    
-* 最终解线性系统 $A\mathbf{c}=\mathbf{b}$。
-    
-
-通常做法（FEM 风格）：
-
-* 对每个单元 $K$ 计算局部刚度矩阵 $A^K_{ab}=\int_K \nabla\phi_a\cdot\nabla\phi_b\,dV$（这里 a,b 是单元的局部基索引）；
-    
-* 把局部矩阵加到全局 $A$（local→global mapping）；
-    
-* 对 $b$ 做同样的局部积分与装配。
-    
-
----
-
-
-### 2.左边：如何计算 $A_{ij}=\int_\Omega \nabla\phi_i\cdot\nabla\phi_j\,d\mathbf{x}$
-
-#### 通用公式（单元分解）
-
-$$A_{ij}=\sum_{K\in\mathcal T}\int_{K} \nabla\phi_i\cdot\nabla\phi_j\,dV$$
-
-只有当 $\operatorname{supp}\phi_i$ 与 $\operatorname{supp}\phi_j$ 在某个单元 $K$ 重叠时该单元才贡献非零，导致 $A$ 稀疏。这个在有原论文中使用basic 样条函数，n=3,支持域是1.5，所以一个Voxel最多有124个neighbor来求积分。 
-
----
-
-#### 常见情形 1 — 线性单元（tet/tri / 八叉树 piecewise linear）
-
-* 对于一个线性三角形/四面体单元，形函数在单元内是一阶多项式，梯度是常数。
-    
-* 因此局部矩阵很简单：
-    
-    $$A^K_{ab} = (\nabla\phi_a|_K)\cdot(\nabla\phi_b|_K) \cdot |K|$$
-    
-    其中 $|K|$ 是单元体积（或面积），$\nabla\phi_a|_K$ 是常数矢量（可由单元顶点坐标直接算出）。
-    
-
-**如何算梯度（四面体例子）**：
-
-* 在四面体上，若局部基是“节点为1其余为0”的 hat 函数，梯度可由单元逆雅可比计算（标准 FEM 教材）。
-    
-* 计算完每个单元的 $A^K$ 后，把它加到全局矩阵的对应 (global_i, global_j)。
-    
-
-#### 常见情形 2 — 八叉树 / B-spline / higher-order bases
-
-* 若 $\phi$ 是 B-spline/box spline，$\nabla\phi$ 在每个支撑子域可能不是常数，但通常有封闭表达或可以按单元用高斯积分求出：
-    
-    $$A^K_{ab}\approx \sum_{q} w_q \, (\nabla\phi_a(x_q)\cdot\nabla\phi_b(x_q))$$
-    
-    $x_q$ 为 Gauss 点，$w_q$ 含雅可比权重。
-    
-
-* * *
-
-
-### 3、右边，如何计算 $b_i = -\int_\Omega \phi_i(\nabla\!\cdot\!v)\,dV$（两种等价实现）
-
-如前面所述，有两种常用做法（更稳定的是第二种）：
-
-#### 方案 A（直接）：先在网格上构建 $ \nabla\cdot v$，再积分
-
-1. 在每个单元（或节点）上评估/近似散度 $\nabla\cdot v$（差分或在单元上插值后解析求散度）。
-    
-2. 做单元高斯积分（或把散度视作单元常数）：
-    
-    $$b_i \approx -\sum_{K}\sum_{q} w_q \, \phi_i(x_q) \, (\nabla\cdot v)(x_q)$$
-3. 装配进全局 $b$。
-    
-
-**缺点**：若 $v$ 是由稀疏点云插值得到且噪声较大，直接求散度不稳定。
-
-#### 方案 B（推荐，等价但数值更好）：使用散度的分部积分，把散度移到基函数上
-
-利用恒等式（把散度换成 $\nabla\phi_i\cdot v$ 加边界项）：
-
-$$-\int_\Omega \phi_i(\nabla\cdot v)\,dV = \int_\Omega \nabla\phi_i\cdot v\,dV \;-\; \int_{\partial\Omega} \phi_i(v\cdot n)\,dS.$$
-
-通常边界项可忽略或单独处理（域足够大或设边界为零）。于是
-
-$$b_i \approx \int_\Omega \nabla\phi_i\cdot v \,dV.$$
-
-这一步非常实用：你只需能在给定点评估 $v(x)$（通过 splatting/RBF/插值），而不必先计算其散度。
-
-**局部积分：**
-
-$$b_i = \sum_{K}\int_K \nabla\phi_i(x)\cdot v(x)\,dV  
-\approx \sum_{K}\sum_{q} w_q \,\nabla\phi_i(x_q)\cdot v(x_q)$$
-
----
-
-## 六、原文的理解
-
-
-### 1️⃣ 指示函数与梯度
-
-* 指示函数（indicator function）本身梯度在表面是无限大，无法直接使用。
-    
-* 解决方法是用一个 **平滑核（如 Gaussian）去卷积指示函数**，得到一个光滑的标量场 $F(\mathbf{x})$。
-    
-* 根据数学原理，卷积后梯度可以近似由 **点云的法向量分布**来表示：
-    
-    $$\nabla F(\mathbf{x}) \approx \text{某种基于法向量的向量场}$$
-
-* * *
-
-### 2️⃣ 八叉树表示
-
-* 八叉树的作用是 **自适应空间分辨率**：点云密度高的地方用更多的节点。
-    
-* 每个节点（顶点）对应一个未知系数 $c_i$，表示该位置的函数值。
-    
-* 八叉树内部是用基函数的三线性（trilinear）表示，从而可以方便插值， 基函数用 **B-spline** 表示
-
-* * *
-
-### 3️⃣ 构造梯度场
-
-* 因为真实表面未知，需要在每个八叉树节点附近 **splat 点云 patch**：
-    
-    * 每个点云点（带法向量）会对邻近的节点产生影响，形成 **离散向量场**。
-        
-* 数学上，用 **B-spline 基函数的梯度**和法向量的内积积分来得到每个节点的贡献：
-    
-    $$\mathbf{v}_o = \sum_{p} (\mathbf{n}_p \cdot \nabla B_o(\mathbf{x}_p))$$
-* 这就是构造右手边 $b$ 的过程。
-    
-
-* * *
-
-### 4️⃣ 刚度矩阵 $A$
-
-* 刚度矩阵 $A$ 来自 **拉普拉斯算子作用在 B-spline 基函数上**：
-    
-    $$A_{oo'} = \langle \nabla B_o, \nabla B_{o'} \rangle$$
-* 本质上是 **Poisson 方程的离散化**：
-    
-    $$\Delta F = \nabla \cdot \mathbf{V} \quad \Rightarrow \quad A \mathbf{c} = \mathbf{b}$$
-
-* * *
-
-### 5️⃣ 求解系数
-
-* 最终解线性系统 $A c = b$，得到每个节点的系数 $c_i$。
-    
-* 解出的 $c_i$ 表示 **光滑函数的值**，然后可以用 **marching cubes** 或等值面提取得到表面。
-    
-
----
-
-# 其他说明
-## 一、边界项的物理/数学含义
-
-边界项 $\int_{\partial\Omega} ψ\,\frac{\partial χ}{\partial n}\,dS$ 表示“流”（或通量）穿过边界对弱等式的贡献：
-
-- 如果你固定了 χ 在边界（Dirichlet），测试函数通常取为零在边界（消去边界项）。
-- 如果你指定了法向导数（Neumann）值，则该边界项会包含已知的边界贡献并进入右端项 $b$。
-- 在 Poisson 重建常见做法：把域设大并把 χ 在边界置 0（或用自然边界），实际计算中通常能安全忽略或处理该项。
----
-
-## 二、Poisson Surface Reconstruction 的有限元实现
-
-在 Kazhdan 等人的方法（2006, 2007）中：
-
-- 基函数 $\phi_i(\mathbf{x})$ 选用 **分片三线性 B-spline**；
-- 网格结构采用 **八叉树（Octree）**，可自适应细化；
-- 向量场 $\mathbf{v}$ 来源于输入点云的法线；
-- 方程求得的 $\chi(\mathbf{x})$ 是隐函数场；
-- 最终通过提取等值面 $\chi = \text{iso}$ 得到三维表面。
-
-这一过程正是一个 **有限元 Poisson 方程求解**：
-
-> FEM 离散 → 解稀疏线性系统 → 取等值面。
-
----
-
-## 三、与有限差分法的对比
-
-| 比较项 | 有限差分 (FDM) | 有限元 (FEM) |
-| ------- | ---------------- | -------------- |
-| 网格类型 | 均匀体素格点 | 任意结构（如八叉树） |
-| 导数计算 | 直接差分 | 基函数积分 |
-| 可变分辨率 | 不支持 | 自适应 refinement |
-| 精度 | 低阶 | 更高阶近似可扩展 |
-| 内存效率 | 较差 | 仅在局部单元非零 |
-| 稳定性 | 易受噪声影响 | 更平滑、鲁棒 |
-
-因此，**FEM 更适合稀疏、不规则点云的 Poisson 重建**。
-
----
-
-## 四、Poisson 图像融合的关系
-
-Poisson 图像融合（Poisson Image Editing）同样解的是 Poisson 方程：
+在三维空间中，合适的等值集通常是一张曲面。例如：
 
 $$
-\Delta I = \nabla \cdot \mathbf{v},
+f(x,y,z)=x^2+y^2+z^2
 $$
 
-只是定义域变成了 **二维图像域**，边界条件来自已知图像像素。  
-Poisson Surface Reconstruction 则是在 **三维体素域** 上进行相同的数学操作。  
-两者共享完全相同的 PDE 基础，只是应用场景与基函数不同。
+的等值集 $f=1$ 是单位球面。
 
----
-
-## 五、直观理解与总结
-
-你可以把 FEM 想象成：
-
-> 用乐高积木（基函数）拼出一个连续曲面，  
-> 调节每块的高度（系数 $c_i$），  
-> 让整体尽量满足 Poisson 方程。
-
-最终，有限元法让 Poisson Surface Reconstruction 具备：
-
-- 数学上严格的 PDE 背景；
-- 自适应空间分辨率；
-- 高效的稀疏矩阵求解特性；
-- 更鲁棒的噪声容忍性。
-
----
-
-## 六、小结
-
-> 有限元方法（FEM）通过基函数近似、弱形式求解，使得连续 Poisson 方程可在离散网格上高效求解。  
-> Poisson Surface Reconstruction 正是利用 FEM 思想在三维空间上重建连续隐函数，从而生成高质量的表面。
-
----
-
-**参考文献：**
-
-- Kazhdan, M., Bolitho, M., & Hoppe, H. (2006). *Poisson Surface Reconstruction*.  
-- Kazhdan, M. & Hoppe, H. (2013). *Screened Poisson Surface Reconstruction*.  
-- Zienkiewicz, O. C., *The Finite Element Method: Its Basis and Fundamentals*.  
-- Botsch, M. et al., *Polygon Mesh Processing*.
-
-
-
-
-## 附录A：分部积分 {#附录A}
-
-1 对任意标量场 $ψ(\mathbf{x})$ 和 $χ(\mathbf{x})$，有下面恒等式（乘积求散度的向量恒等式） [附录C](#附录C)：
+等值面的法向方向来自梯度。若曲面上有一条切向运动 $d\mathbf x$，由于沿等值面移动时函数值不变，有
 
 $$
-\nabla\cdot(ψ\,\nabla χ) = \nabla ψ \cdot \nabla χ + ψ\,\Delta χ
+df=\nabla f\cdot d\mathbf x=0.
 $$
 
-这是从乘积求导（类似一维的 $(fg)'=f'g+fg'$）在向量形式下的推广。  
-把它重排得到：
+因此 $\nabla f$ 与曲面的切平面正交，是曲面的法向方向。Poisson 重建正是利用了这条关系：让求得的标量场梯度在表面附近与输入法向一致。
+
+## 2. 从法向场得到 Poisson 方程
+
+### 2.1 构造向量场
+
+输入只在离散点 $p_i$ 上给出法向 $n_i$。为了写出空间方程，需要把这些离散样本扩展为一个向量场 $\mathbf V(\mathbf x)$。直观地说，点 $p_i$ 的法向会影响它附近的一小片区域，所有点的影响叠加后形成向量场。
+
+可以用核函数、局部基函数或 splatting 等方式完成这个扩展。写成抽象形式就是
 
 $$
-ψ\,\Delta χ = \nabla\cdot(ψ\nabla χ) - \nabla ψ\cdot\nabla χ
+\mathbf V(\mathbf x)\approx\sum_{i=1}^{N}n_i\,w_i(\mathbf x),
 $$
 
-2 对区域积分并用散度定理（Divergence theorem）
+其中 $w_i(\mathbf x)$ 是以 $p_i$ 为中心的局部权重。实际实现不一定显式构造一个规则体素上的 $\mathbf V$，也可以在积分点处直接评价点云对基函数的贡献。
 
-把上式在区域 $\Omega$ 上积分：
+### 2.2 梯度匹配
 
-$$
-\int_\Omega ψ\,\Delta χ \,d\mathbf{x}
-= \int_\Omega \nabla\cdot(ψ\nabla χ)\,d\mathbf{x} \;-\; \int_\Omega \nabla ψ\cdot\nabla χ\,d\mathbf{x}
-$$
-
-利用散度定理（Gauss theorem）[附录B](#附录B)把第一个体积分换成边界积分：
+我们希望标量场的梯度尽量接近这个向量场：
 
 $$
-\int_\Omega \nabla\cdot(ψ\nabla χ)\,d\mathbf{x}
-= \int_{\partial\Omega} ψ\,(\nabla χ\cdot \mathbf{n})\,dS,
+\nabla\chi\approx\mathbf V.
 $$
 
-其中 $\partial\Omega$ 是域的边界，$\mathbf{n}$ 是外法向，$\nabla χ\cdot\mathbf{n}=\frac{\partial χ}{\partial n}$（法向导数）。
+这个关系不是说每个位置都能精确满足，而是说在点云覆盖的区域内，求得的场要与法向信息整体一致。由于输入点有噪声、采样不均匀且法向只能在有限位置获得，使用一个全局的标量场来解释这些局部向量，实际上也起到了平滑和正则化的作用。
 
-因此合并得：
+### 2.3 取散度得到 Poisson 方程
 
-$$
-\boxed{\displaystyle
-\int_\Omega ψ\,\Delta χ \,d\mathbf{x}
-= \int_{\partial\Omega} ψ\,\frac{\partial χ}{\partial n}\,dS
-\;-\;
-\int_\Omega \nabla ψ\cdot\nabla χ\,d\mathbf{x}}
-$$
-
-可以看到，分部积分后出现边界项＋内积项。
-
-分部积分的意义在于我们把一个二阶方程转换成一阶方程。
-
-
----
-
-## 附录B 散度定理 {#附录B}
-
-对于一个任意的光滑向量场 $\mathbf{F}$：
-
-$$\int_{\Omega} \nabla \cdot \mathbf{F} \, dV = \int_{\partial \Omega} \mathbf{F} \cdot \mathbf{n} \, dS$$
-
-
-
-
-
-其中：
-
-- $\Omega$：积分域（比如三维空间中的一个体积）
-- $\partial \Omega$：这个体积的边界面
-- $\mathbf{n}$：边界面上外法向量
-- $\mathbf{F}$：任意向量场
-
-**左边**是一个$\nabla \cdot \mathbf{F}$体积积分（volume integral）
-$\nabla \cdot \mathbf{F}$（读作 divergence of F）表示这一点是不是“流的源头或汇点”。
-- 如果 $\nabla \cdot \mathbf{F} > 0$：  
-   表示流体从这个点“源源不断流出” —— 有点像喷泉口；
-- 如果 $\nabla \cdot \mathbf{F} < 0$：  
-   表示流体“流入”这个点 —— 像吸进去；
-- 如果 $\nabla \cdot \mathbf{F} = 0$：  
-   表示进出相等，局部守恒。
-
-**右边**是一个$\mathbf{F} \cdot \mathbf{n}$边界面积积分（surface integral）
-在边界面上，$\mathbf{F} \cdot \mathbf{n}$表示在该点上，流体“穿出”表面的量
-- 如果 F 与 n 同方向 → 表示流出；  
-- 如果反方向 → 表示流入；  
-- 如果垂直 → 表示不穿出。
-
-
-整个散度定理的意思是：
-
-
-> “体积内的散度积分 = 表面积上通量积分”
-
-**直觉解释一句话总结**
-
-> “所有点内部流出的总量 = 实际从表面流出去的量”
-
-或者说：
-
-> “体积里的源汇之和 = 边界上的通量之和”
-
-这就是散度定理。
-
----
-
-## 附录C 乘积求散度的向量恒等式 {#附录C}
-
-这个公式是：
+对梯度匹配关系取散度：
 
 $$
-\nabla \cdot (\psi \nabla \chi)
-= \nabla \psi \cdot \nabla \chi + \psi \, \Delta \chi
+\nabla\cdot\nabla\chi
+\approx
+\nabla\cdot\mathbf V.
 $$
 
-我们要弄懂每个符号是什么意思，然后一步步推导。
-
-
-**符号说明**
-
-| 符号| 名称| 含义 | 类比（一维）|
-| ---| ---| ---- | ---|
-| $\psi(\mathbf{x})$| 测试函数| 任意光滑的标量函数 | $ψ(x)$ |
-| $\chi(\mathbf{x})$  | 待求函数（隐函数）| 我们要求的场（例如 Poisson 方程的未知量）| $χ(x)$|
-| $\nabla$| 梯度算子 (gradient)| $\nabla = \left(\frac{\partial}{\partial x}, \frac{\partial}{\partial y}, \frac{\partial}{\partial z}\right)$| $\frac{d}{dx}$|
-| $\nabla \cdot$| 散度算子 (divergence)| 把向量场转成标量场| 在 1D 中就是$\frac{d}{dx}$ |
-| $\nabla \chi$ | 取梯度 | 得到 $\chi$ 在各方向的偏导组成的向量 | $χ'(x)$|
-| $\Delta \chi$ | 拉普拉斯算子 (Laplacian) | $\Delta \chi = \nabla \cdot (\nabla \chi) = \frac{\partial^2 \chi}{\partial x^2} + \frac{\partial^2 \chi}{\partial y^2} + \frac{\partial^2 \chi}{\partial z^2}$ | $χ''(x)$ |
-| $\nabla \psi \cdot \nabla \chi$ | 向量点积 | 各方向偏导乘积之和 | $ψ'(x)χ'(x)$ |
-
-**推导（从最基本定义出发）**
-
-我们从三维坐标展开：
+利用拉普拉斯算子的定义
 
 $$
-\nabla \cdot (\psi \nabla \chi)
-= \frac{\partial}{\partial x}(\psi \frac{\partial \chi}{\partial x}) + \frac{\partial}{\partial y}(\psi \frac{\partial \chi}{\partial y})  + \frac{\partial}{\partial z}(\psi \frac{\partial \chi}{\partial z})
+\Delta\chi=\nabla\cdot(\nabla\chi),
 $$
 
-用**一维乘积法则**展开每一项：
+得到 Poisson 方程
 
 $$
-\frac{\partial}{\partial x}(\psi \frac{\partial \chi}{\partial x})
-= \frac{\partial \psi}{\partial x} \frac{\partial \chi}{\partial x}  + \psi \frac{\partial^2 \chi}{\partial x^2},
+\boxed{\Delta\chi=\nabla\cdot\mathbf V.}
 $$
 
-同理对 $y, z$ 方向。
+这里的正负号取决于法向方向和指示函数的内外约定。如果法向全部反向，右端向量场也会反向，求出的标量场方向和等值面取值会相应变化，但几何表面仍由一致的等值面给出。阅读不同论文或代码时，应先确认它们对法向方向和 Poisson 方程符号的约定。
 
-把所有加起来：
+## 3. 为什么要从强形式转到弱形式
+
+### 3.1 强形式的问题
+
+Poisson 方程的强形式是
 
 $$
-\nabla \cdot (\psi \nabla \chi)
-= \left(
-\frac{\partial \psi}{\partial x} \frac{\partial \chi}{\partial x}+ \frac{\partial \psi}{\partial y} \frac{\partial \chi}{\partial y}+ \frac{\partial \psi}{\partial z} \frac{\partial \chi}{\partial z}
-\right)+ \\ \psi \left(\frac{\partial^2 \chi}{\partial x^2} + \frac{\partial^2 \chi}{\partial y^2} + \frac{\partial^2 \chi}{\partial z^2} \right)
+\Delta\chi=\nabla\cdot\mathbf V\quad\text{in }\Omega,
 $$
 
-用向量符号重新写：
+其中 $\Omega$ 是包围点云的三维计算域。
+
+如果要求方程在每个点严格成立，就需要对 $\chi$ 求二阶导数。但有限元常用的分片线性基函数在单元内部只有一阶导数，二阶导数并不适合作为普通函数直接计算。因此，有限元不要求方程逐点成立，而是要求它对一组测试函数在积分意义上成立。
+
+### 3.2 乘以测试函数并积分
+
+取一个足够光滑的测试函数 $\psi(\mathbf x)$，将强形式乘上 $\psi$ 并在 $\Omega$ 上积分：
+
+$$
+\int_\Omega\psi\,\Delta\chi\,d\mathbf x
+=
+\int_\Omega\psi\,(\nabla\cdot\mathbf V)\,d\mathbf x.
+$$
+
+对左侧使用乘积散度恒等式：
+
+$$
+\nabla\cdot(\psi\nabla\chi)
+=\nabla\psi\cdot\nabla\chi+\psi\,\Delta\chi.
+$$
+
+因此
+
+$$
+\psi\,\Delta\chi
+=\nabla\cdot(\psi\nabla\chi)-\nabla\psi\cdot\nabla\chi.
+$$
+
+在区域上积分，再使用散度定理
+
+$$
+\int_\Omega\nabla\cdot\mathbf F\,dV
+=\int_{\partial\Omega}\mathbf F\cdot\mathbf n\,dS,
+$$
+
+得到
+
+$$
+\int_\Omega\psi\,\Delta\chi\,d\mathbf x
+=
+\int_{\partial\Omega}\psi\,\frac{\partial\chi}{\partial n}\,dS
+-
+\int_\Omega\nabla\psi\cdot\nabla\chi\,d\mathbf x.
+$$
+
+于是，Poisson 方程的弱形式可以写为
+
+$$
+\int_\Omega\nabla\psi\cdot\nabla\chi\,d\mathbf x
+=
+-\int_\Omega\psi\,(\nabla\cdot\mathbf V)\,d\mathbf x
++\int_{\partial\Omega}\psi\,\frac{\partial\chi}{\partial n}\,dS.
+$$
+
+当测试函数在 Dirichlet 边界上为零，或者边界项按照所选边界条件被单独处理时，可以暂时写成
 
 $$
 \boxed{
-\nabla \cdot (\psi \nabla \chi)
-= \underbrace{\nabla \psi \cdot \nabla \chi}_{\text{梯度点积项}} + \underbrace{\psi \, \Delta \chi}_{\text{乘上拉普拉斯项}}
-}
+\int_\Omega\nabla\psi\cdot\nabla\chi\,d\mathbf x
+=
+-\int_\Omega\psi\,(\nabla\cdot\mathbf V)\,d\mathbf x.}
 $$
 
----
+左侧只含 $\chi$ 的一阶导数，这正是有限元离散更方便的原因。
+
+### 3.3 右端项的等价写法
+
+如果对右端的散度也做一次分部积分，则有
+
+$$
+-\int_\Omega\psi\,(\nabla\cdot\mathbf V)\,dV
+=
+\int_\Omega\nabla\psi\cdot\mathbf V\,dV
+-
+\int_{\partial\Omega}\psi(\mathbf V\cdot\mathbf n)\,dS.
+$$
+
+在边界项相容或被忽略的情况下，右端可以改写为
+
+$$
+\boxed{
+b(\psi)=\int_\Omega\nabla\psi\cdot\mathbf V\,dV.}
+$$
+
+这个形式在数值实现中很有用，因为它不要求先显式计算 $\nabla\cdot\mathbf V$。只要能在积分点处评价向量场 $\mathbf V$，就可以直接计算右端贡献。两种写法的符号必须和边界处理、法向方向保持一致，不能在代码中混用。
+
+## 4. 用有限元基函数离散
+
+### 4.1 用基函数表示未知场
+
+有限元的核心是用有限个局部基函数近似连续未知函数：
+
+$$
+\chi_h(\mathbf x)=\sum_j c_j\phi_j(\mathbf x).
+$$
+
+其中：
+
+- $\phi_j$ 是已知的局部基函数；
+- $c_j$ 是待求系数；
+- $\chi_h$ 是计算机实际求出的离散近似场。
+
+由于每个基函数只在局部区域内非零，两个基函数的支撑域不相交时，它们对同一个积分的贡献为零。这会使最终矩阵具有稀疏结构。
+
+测试函数也选为同一组基函数，即 $\psi=\phi_i$。将近似式代入弱形式左侧：
+
+$$
+\begin{aligned}
+\int_\Omega\nabla\phi_i\cdot\nabla\chi_h\,d\mathbf x
+&=\int_\Omega\nabla\phi_i\cdot
+\nabla\left(\sum_jc_j\phi_j\right)d\mathbf x\\
+&=\sum_jc_j\int_\Omega
+\nabla\phi_i\cdot\nabla\phi_j\,d\mathbf x.
+\end{aligned}
+$$
+
+定义
+
+$$
+A_{ij}=\int_\Omega\nabla\phi_i\cdot\nabla\phi_j\,d\mathbf x,
+$$
+
+以及
+
+$$
+b_i=-\int_\Omega\phi_i(\nabla\cdot\mathbf V)\,d\mathbf x,
+$$
+
+就得到线性系统
+
+$$
+\boxed{A\mathbf c=\mathbf b.}
+$$
+
+如果使用不显式计算散度的等价形式，则右端可写成
+
+$$
+b_i=\int_\Omega\nabla\phi_i\cdot\mathbf V\,d\mathbf x,
+$$
+
+前提仍然是边界项和符号约定已经一致处理。
+
+### 4.2 刚度矩阵从哪里来
+
+矩阵 $A$ 的元素是两个基函数梯度的内积，因此它衡量了不同局部基函数之间的梯度耦合。它通常被称为刚度矩阵：
+
+$$
+A_{ij}=\langle\nabla\phi_i,\nabla\phi_j\rangle_{L^2(\Omega)}.
+$$
+
+对于任意系数向量 $\mathbf c$，有
+
+$$
+\mathbf c^\top A\mathbf c
+=\int_\Omega\left\|\nabla\chi_h\right\|^2d\mathbf x\ge 0.
+$$
+
+因此 $A$ 至少是半正定的。在纯 Neumann 边界条件下，给 $\chi_h$ 加一个常数不会改变梯度，系统会存在常数方向的零空间；固定 Dirichlet 边界、增加约束或去除一个自由度后，才可以得到正定系统。实际 Poisson 重建的边界和域设置承担了消除这种不确定性的作用。
+
+### 4.3 单元分解和局部装配
+
+把计算域分成单元集合 $\mathcal T$：
+
+$$
+A_{ij}=\sum_{K\in\mathcal T}
+\int_K\nabla\phi_i\cdot\nabla\phi_j\,dV.
+$$
+
+在一个单元 $K$ 内，只需要考虑在该单元上非零的局部基函数。先计算局部矩阵
+
+$$
+A^K_{ab}=\int_K\nabla\phi_a\cdot\nabla\phi_b\,dV,
+$$
+
+再根据局部到全局的索引映射，将 $A^K_{ab}$ 累加到全局矩阵对应位置。这就是有限元中的 local-to-global assembly。
+
+对于线性三角形或四面体基函数，基函数在单元内部是一阶多项式，梯度为常量，因此
+
+$$
+A^K_{ab}
+=\left(\nabla\phi_a\big|_K\cdot
+\nabla\phi_b\big|_K\right)|K|,
+$$
+
+其中 $|K|$ 是单元面积或体积。对于 B-spline 或更高阶基函数，梯度可能不是常量，通常在单元内使用高斯积分：
+
+$$
+A^K_{ab}
+\approx\sum_qw_q\,
+\nabla\phi_a(\mathbf x_q)\cdot
+\nabla\phi_b(\mathbf x_q).
+$$
+
+## 5. 右端如何承载点云法向
+
+### 5.1 直接使用散度形式
+
+如果已经在计算域中构造出向量场 $\mathbf V$，可以先计算 $\nabla\cdot\mathbf V$，再组装
+
+$$
+b_i=-\int_\Omega\phi_i(\nabla\cdot\mathbf V)\,dV.
+$$
+
+用数值积分近似为
+
+$$
+b_i\approx-
+\sum_{K\in\mathcal T}\sum_q
+w_q\,\phi_i(\mathbf x_q)
+(\nabla\cdot\mathbf V)(\mathbf x_q).
+$$
+
+这种方法概念直接，但对稀疏、带噪的法向样本，先构造向量场再求散度可能放大噪声。
+
+### 5.2 直接对法向场积分
+
+采用分部积分后的形式，可以直接计算
+
+$$
+b_i=\int_\Omega\nabla\phi_i\cdot\mathbf V\,dV.
+$$
+
+数值上写成
+
+$$
+b_i\approx\sum_{K\in\mathcal T}\sum_q
+w_q\,\nabla\phi_i(\mathbf x_q)\cdot
+\mathbf V(\mathbf x_q).
+$$
+
+如果使用点云样本直接构造贡献，可以把向量场的评价理解为邻域点的加权叠加。对某个基函数 $B_o$，一种抽象的点云贡献形式是
+
+$$
+b_o\propto\sum_p n_p\cdot\nabla B_o(p).
+$$
+
+比例系数和具体权重取决于基函数、采样密度和实现中的归一化方式，因此这条式子表达的是结构，而不是所有实现都完全相同的公式。
+
+### 5.3 为什么右端是稀疏的
+
+基函数具有局部支撑。一个点 $p$ 只会影响支撑域覆盖它的少数基函数，因此它只会向有限个 $b_i$ 累加贡献。类似地，一个基函数只与附近基函数耦合，所以 $A$ 也是稀疏矩阵。
+
+这两个局部性共同决定了 Poisson 重建可以处理规模较大的点云：不需要存储一个每个节点都和所有节点相连的稠密系统。
+
+## 6. 八叉树、B-spline 与等值面提取
+
+### 6.1 八叉树负责空间自适应
+
+在规则体素网格中，整个空间使用同一分辨率，空旷区域也会消耗大量计算和内存。八叉树通过递归地把一个立方体分成八个子块，让空间分辨率可以随点云分布变化：
+
+- 点云稠密、几何变化快的区域可以细分；
+- 空旷或变化平缓的区域保持较粗单元；
+- 每个节点或局部区域关联有限个基函数。
+
+八叉树本身不是 Poisson 方程，也不是求解器。它提供的是自适应的空间层次和离散支撑结构。
+
+### 6.2 B-spline 或局部基函数负责近似
+
+在八叉树上，可以使用局部 B-spline、box spline 或其他分片基函数表示 $\chi_h$：
+
+$$
+\chi_h(\mathbf x)=\sum_i c_iB_i(\mathbf x).
+$$
+
+基函数的选择影响三个方面：
+
+1. 标量场的平滑性；
+2. 矩阵 $A$ 的稀疏模式；
+3. 单元积分和多层求解的计算成本。
+
+“三线性插值”和“B-spline”在具体实现中可能对应不同层次的描述，不能简单地把所有八叉树基函数都称为同一个函数。准确的说法是：实现使用局部、具有有限支撑的基函数，并在自适应八叉树结构上完成积分和装配。
+
+### 6.3 求解线性系统
+
+装配完成后得到
+
+$$
+A\mathbf c=\mathbf b.
+$$
+
+矩阵 $A$ 通常是大型、稀疏、对称的。根据边界条件和离散化方式，可以使用共轭梯度、预条件共轭梯度、多重网格或其他稀疏线性系统方法求解。
+
+公式中的 $A^{-1}$ 是数学记号，数值实现通常不会显式构造逆矩阵，而是直接求解线性方程组。
+
+### 6.4 从标量场提取表面
+
+解出系数后，在空间中得到近似场 $\chi_h(\mathbf x)$。选择一个等值阈值 $\tau$，目标表面是
+
+$$
+S_\tau=\{\mathbf x\mid\chi_h(\mathbf x)=\tau\}.
+$$
+
+在体素或局部网格上，Marching Cubes 等算法会检查相邻顶点的标量值，判断等值面穿过哪些边，并据此生成三角形。
+
+阈值不一定严格是 $0.5$。它取决于标量场的归一化、法向方向、边界处理以及实现细节。更稳妥的理解是：算法从求得的隐式场中选择一个与表面对应的等值面，而不是把 $0.5$ 当成所有实现都必须使用的常数。
+
+## 7. 把数学对象和算法步骤对应起来
+
+| 数学对象 | 在重建中的作用 | 典型实现 |
+|---|---|---|
+| 点 $p_i$ 与法向 $n_i$ | 输入几何和方向信息 | 点云采样 |
+| 向量场 $\mathbf V$ | 汇总局部法向约束 | splatting、局部核、基函数积分 |
+| 标量场 $\chi_h$ | 表示待恢复的隐式几何 | 基函数系数 $\mathbf c$ |
+| Poisson 方程 | 将梯度约束转成可求解的 PDE | $\Delta\chi=\nabla\cdot\mathbf V$ |
+| 弱形式 | 避免直接计算二阶导数 | 梯度内积积分 |
+| 基函数 $\phi_i$ | 将无限维函数变成有限维向量 | 局部 B-spline 等 |
+| 刚度矩阵 $A$ | 描述基函数之间的梯度耦合 | 稀疏矩阵装配 |
+| 右端 $\mathbf b$ | 承载点云法向信息 | 散度积分或梯度—向量场积分 |
+| 八叉树 | 提供自适应空间分辨率 | 局部细分和邻域关系 |
+| 等值面提取 | 将隐式场转换为网格 | Marching Cubes 等 |
+
+因此，完整流程可以写成：
+
+$$
+\text{点云法向}
+\longrightarrow
+\mathbf V
+\longrightarrow
+\text{弱形式}
+\longrightarrow
+A\mathbf c=\mathbf b
+\longrightarrow
+\chi_h
+\longrightarrow
+\text{等值面网格}.
+$$
+
+## 8. FEM 与有限差分有什么区别
+
+两者都可以离散 Poisson 方程，但离散方式不同。
+
+| 比较项 | 有限差分法（FDM） | 有限元法（FEM） |
+|---|---|---|
+| 基本对象 | 网格点上的函数值 | 局部基函数及其系数 |
+| 导数处理 | 用相邻点差分近似 | 通过弱形式和积分得到 |
+| 网格适应性 | 规则网格最直接 | 适合局部细分和不规则单元 |
+| 矩阵结构 | 来自差分模板 | 来自基函数支撑和局部装配 |
+| 边界条件 | 在网格方程中处理 | 通过试探空间、边界项或约束处理 |
+| 结果表示 | 网格点值 | 基函数线性组合 |
+
+不能简单地说 FEM 一定比 FDM 更准确或更鲁棒。效果取决于基函数、网格、边界条件、噪声模型和求解器。对 Poisson 表面重建而言，有限元风格的局部基函数和八叉树结构很适合点云密度不均匀的三维场景，但这是一种建模与离散选择，不是所有问题上的绝对优劣结论。
+
+## 9. 边界项和容易混淆的概念
+
+### 9.1 计算域边界不等于物体表面
+
+Poisson 方程定义在计算域 $\Omega$ 上，$\partial\Omega$ 是计算域的外边界；物体表面是 $\partial M$，或更具体地说是隐式场的某个等值面。这两个边界不是同一个概念：
+
+$$
+\partial\Omega\ne\partial M.
+$$
+
+通常把计算域设在包含点云的较大包围盒中，避免外边界过近地影响重建表面。
+
+### 9.2 Dirichlet 和 Neumann 边界条件
+
+弱形式中的边界项为
+
+$$
+\int_{\partial\Omega}
+\psi\frac{\partial\chi}{\partial n}\,dS.
+$$
+
+两类常见边界条件是：
+
+- Dirichlet 条件：直接指定边界上的 $\chi$；相应测试函数通常在该边界上为零；
+- Neumann 条件：指定法向导数 $\partial\chi/\partial n$；边界项会进入右端项。
+
+“忽略边界项”不是无条件成立的代数规则，而是对测试函数、边界条件或足够大的计算域作出假设后的简写。实现时必须让边界处理与矩阵、右端项保持一致。
+
+### 9.3 $\partial M$ 不是偏导数
+
+在几何记号中，$\partial M$ 表示实体 $M$ 的边界。它和 $\partial/\partial x$ 中的偏导符号形状相同，但含义不同：
+
+| 记号 | 含义 |
+|---|---|
+| $\partial M$ | 集合 $M$ 的边界 |
+| $\partial f/\partial x$ | 函数 $f$ 对 $x$ 的偏导数 |
+| $\nabla f$ | 标量场的梯度 |
+| $\Delta f$ | 拉普拉斯算子 |
+
+### 9.4 指示函数梯度不是普通光滑梯度
+
+理想指示函数在表面处发生跳变，它的梯度集中在边界上，需要用分布或测度理解。实际有限元计算使用的是有限基函数展开的平滑近似 $\chi_h$，所以数值上计算的是 $\nabla\chi_h$。把输入法向视为梯度信息，是从理想几何关系得到的建模动机，而不是说二值函数可以在表面处直接用普通微分规则计算。
+
+## 10. 与 Poisson 图像融合的关系
+
+Poisson 图像融合也会出现类似方程：
+
+$$
+\Delta I=\nabla\cdot\mathbf v,
+$$
+
+其中 $I$ 是二维图像域中的像素强度，$\mathbf v$ 是希望保留的梯度场。它与 Poisson 表面重建共享同一个 PDE 结构：根据梯度约束恢复标量场。
+
+区别在于：
+
+- 图像融合的定义域通常是二维区域，边界像素往往是已知的；
+- 表面重建的定义域是三维空间，输入约束来自点云法向；
+- 两者使用的离散网格、基函数、边界条件和等值面提取步骤不同。
+
+所以可以说它们共享数学骨架，但不能把两个应用的所有边界条件和实现细节直接互换。
+
+## 11. 总结
+
+Poisson 表面重建的主线可以概括为：
+
+1. 点云采样点和法向量提供局部几何约束；
+2. 这些法向被组织成向量场 $\mathbf V$；
+3. 假设 $\mathbf V$ 近似某个隐式标量场的梯度，得到
+
+$$
+\Delta\chi=\nabla\cdot\mathbf V;
+$$
+
+4. 对 Poisson 方程写弱形式，把二阶导数变成一阶梯度内积；
+5. 用局部基函数近似 $\chi$，组装稀疏线性系统
+
+$$
+A\mathbf c=\mathbf b;
+$$
+
+6. 求出系数后得到隐式场 $\chi_h$，再提取对应等值面。
+
+有限元、八叉树和等值面提取分别解决不同问题：有限元负责把连续 PDE 变成有限维系统，八叉树负责提供自适应的空间结构，Marching Cubes 等算法负责把标量场转换为三角网格。把这几层职责分开，Poisson 表面重建的整体流程就不会变成一组需要背诵的公式。
+
+## 参考资料
+
+- Kazhdan, M., Bolitho, M., & Hoppe, H. (2006). *Poisson Surface Reconstruction*.
+- Kazhdan, M. & Hoppe, H. (2013). *Screened Poisson Surface Reconstruction*.
+- Zienkiewicz, O. C. et al. *The Finite Element Method: Its Basis and Fundamentals*.
+- Botsch, M. et al. *Polygon Mesh Processing*.
