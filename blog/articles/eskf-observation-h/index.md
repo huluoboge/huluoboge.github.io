@@ -10,7 +10,7 @@ draft: false
 
 > 这是 ESKF 系列的第三篇。前两篇已经说明了 ESKF 如何组织状态，并推导了 IMU 传播所需的 $F$、$G$ 和协方差。本文接着处理闭环的另一半：传感器读数怎样变成残差，残差怎样对 15 维误差状态线性化，最后又怎样通过 $H$ 矩阵得到状态修正。
 
-**阅读路线：** [第一篇：ESKF 入门：从状态预测到误差注入](../ekf-again/index.html) → [第二篇：ESKF 误差动力学：从 IMU 模型推导 $F$ 和 $G$](../eskf-error-dynamics/index.html) → 本文。
+**阅读路线：** [第一篇：ESKF 入门：从状态预测到误差注入](../ekf-again/index.html) → [第二篇：ESKF 误差动力学：从 IMU 模型推导 $F$ 和 $G$](../eskf-error-dynamics/index.html) → 本文 → [第四篇：ESIKF：误差状态上的迭代卡尔曼更新](../esikf-iterated-error-state/index.html)。
 
 ## 摘要
 
@@ -2348,11 +2348,12 @@ $$
 
 这些矩阵的形式看起来不同，但来源完全相同：先让误差状态改变预测观测，再读取预测观测的一阶变化。
 
-到这里，ESKF 的三篇主线已经闭合：第一篇定义状态和误差注入，第二篇把 IMU 模型变成 $F/G$，本文把传感器模型变成 $H$ 并完成更新。视觉重投影和 LiDAR 点到平面只是同一套步骤在不同观测模型上的具体展开；继续扩展到 IESKF 时，变化主要发生在观测线性化和迭代方式，而不是这条基本信息流。
+到这里，ESKF 的三篇主线已经闭合：第一篇定义状态和误差注入，第二篇把 IMU 模型变成 $F/G$，本文把传感器模型变成 $H$ 并完成更新。视觉重投影和 LiDAR 点到平面只是同一套步骤在不同观测模型上的具体展开；继续扩展到 [ESIKF](../esikf-iterated-error-state/index.html) 时，变化主要发生在观测线性化和迭代方式，这条基本信息流继续保留。
 
 ## 参考文章
 
 1. [ESKF 误差动力学：从 IMU 模型推导 $F$ 和 $G$](../eskf-error-dynamics/index.html)
-2. Joan Solà, *Quaternion kinematics for the error-state Kalman filter*, arXiv:1711.02508, 2017. <https://arxiv.org/abs/1711.02508>
-3. Joan Solà, Jérémie Deray, and Dinesh Atchuthan, *A micro Lie theory for state estimation in robotics*, arXiv:1812.01537, 2018. <https://arxiv.org/abs/1812.01537>
-4. Wei Xu, Yixi Cai, Dongjiao He, Jiarong Lin, and Fu Zhang, *FAST-LIO2: Fast Direct LiDAR-inertial Odometry*, IEEE Transactions on Robotics, 38(4):2053–2070, 2022. <https://arxiv.org/abs/2107.06829>
+2. [ESIKF：误差状态上的迭代卡尔曼更新](../esikf-iterated-error-state/index.html)
+3. Joan Solà, *Quaternion kinematics for the error-state Kalman filter*, arXiv:1711.02508, 2017. <https://arxiv.org/abs/1711.02508>
+4. Joan Solà, Jérémie Deray, and Dinesh Atchuthan, *A micro Lie theory for state estimation in robotics*, arXiv:1812.01537, 2018. <https://arxiv.org/abs/1812.01537>
+5. Wei Xu, Yixi Cai, Dongjiao He, Jiarong Lin, and Fu Zhang, *FAST-LIO2: Fast Direct LiDAR-inertial Odometry*, IEEE Transactions on Robotics, 38(4):2053–2070, 2022. <https://arxiv.org/abs/2107.06829>

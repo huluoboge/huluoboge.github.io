@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="720" viewBox="0 0 1240 720" role="img" aria-labelledby="title desc">
+  <title id="title">ESIKF 的一次观测内部迭代</title>
+  <desc id="desc">图示预测先验、残差线性化、误差状态求解、误差注入和重新线性化之间的关系。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#44546A"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, 'Noto Sans CJK SC', sans-serif; fill: #1F2933; }
+      .subtitle { font: 16px Arial, 'Noto Sans CJK SC', sans-serif; fill: #52616B; }
+      .box-title { font: 700 18px Arial, 'Noto Sans CJK SC', sans-serif; fill: #1F2933; }
+      .box-text { font: 15px Arial, 'Noto Sans CJK SC', sans-serif; fill: #334E68; }
+      .arrow-label { font: 14px Arial, 'Noto Sans CJK SC', sans-serif; fill: #52616B; }
+      .note { font: 15px Arial, 'Noto Sans CJK SC', sans-serif; fill: #334E68; }
+    </style>
+  </defs>
+  <rect width="1240" height="720" fill="#FFFFFF"/>
+  <text x="620" y="48" text-anchor="middle" class="title">ESIKF：一次观测内部的误差状态迭代</text>
+  <text x="620" y="78" text-anchor="middle" class="subtitle">历史信息形成预测先验；当前观测形成非线性残差；迭代在局部误差状态上完成</text>
+
+  <rect x="60" y="160" width="210" height="104" rx="8" fill="#FFF3E0" stroke="#C47A2C" stroke-width="2"/>
+<text x="165.0" y="188" text-anchor="middle" class="box-title">IMU 传播</text>
+<text x="165.0" y="218" text-anchor="middle" class="box-text">预测名义状态</text>
+<text x="165.0" y="242" text-anchor="middle" class="box-text">预测协方差</text>
+  <rect x="330" y="150" width="230" height="124" rx="8" fill="#F5F7FA" stroke="#8795A1" stroke-width="2"/>
+<text x="445.0" y="178" text-anchor="middle" class="box-title">当前线性化点</text>
+<text x="445.0" y="208" text-anchor="middle" class="box-text">第 l 轮名义状态</text>
+<text x="445.0" y="232" text-anchor="middle" class="box-text">局部误差坐标</text>
+  <rect x="620" y="140" width="245" height="144" rx="8" fill="#EEF6FF" stroke="#4B83C4" stroke-width="2"/>
+<text x="742.5" y="168" text-anchor="middle" class="box-title">观测线性化</text>
+<text x="742.5" y="198" text-anchor="middle" class="box-text">残差 r(l)</text>
+<text x="742.5" y="222" text-anchor="middle" class="box-text">Jacobian H(l)</text>
+<text x="742.5" y="246" text-anchor="middle" class="box-text">先验偏差 δxp(l)</text>
+  <rect x="925" y="150" width="235" height="124" rx="8" fill="#F7F3FF" stroke="#7D68B3" stroke-width="2"/>
+<text x="1042.5" y="178" text-anchor="middle" class="box-title">求解误差增量</text>
+<text x="1042.5" y="208" text-anchor="middle" class="box-text">带先验最小二乘</text>
+<text x="1042.5" y="232" text-anchor="middle" class="box-text">得到 η(l)</text>
+
+  <path d="M 270 212 L 330 212" fill="none" stroke="#44546A" stroke-width="2.2" marker-end="url(#arrow)"/>
+<text x="300.0" y="200.0" text-anchor="middle" class="arrow-label">先验锚点</text>
+  <path d="M 560 212 L 620 212" fill="none" stroke="#44546A" stroke-width="2.2" marker-end="url(#arrow)"/>
+<text x="590.0" y="200.0" text-anchor="middle" class="arrow-label">评价残差</text>
+  <path d="M 865 212 L 925 212" fill="none" stroke="#44546A" stroke-width="2.2" marker-end="url(#arrow)"/>
+<text x="895.0" y="200.0" text-anchor="middle" class="arrow-label">正规方程</text>
+
+  <rect x="450" y="410" width="265" height="120" rx="8" fill="#F2F8F2" stroke="#4C9B58" stroke-width="2"/>
+<text x="582.5" y="438" text-anchor="middle" class="box-title">误差注入</text>
+<text x="582.5" y="468" text-anchor="middle" class="box-text">X(l+1) = X(l) ⊞ η(l)</text>
+<text x="582.5" y="492" text-anchor="middle" class="box-text">重置误差均值</text>
+  <rect x="790" y="410" width="245" height="120" rx="8" fill="#FFF7E8" stroke="#C47A2C" stroke-width="2"/>
+<text x="912.5" y="438" text-anchor="middle" class="box-title">停止或继续</text>
+<text x="912.5" y="468" text-anchor="middle" class="box-text">增量足够小</text>
+<text x="912.5" y="492" text-anchor="middle" class="box-text">达到迭代上限</text>
+
+  <path d="M 1042 274 L 675 410" fill="none" stroke="#44546A" stroke-width="2.2" marker-end="url(#arrow)"/>
+<text x="858.5" y="330.0" text-anchor="middle" class="arrow-label">注入</text>
+  <path d="M 715 470 L 790 470" fill="none" stroke="#44546A" stroke-width="2.2" marker-end="url(#arrow)"/>
+<text x="752.5" y="458.0" text-anchor="middle" class="arrow-label">检查</text>
+  <path d="M 790 500 C 625 610, 405 575, 445 274" fill="none" stroke="#44546A" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <text x="545" y="608" text-anchor="middle" class="arrow-label">继续时回到新的线性化点</text>
+  <path d="M 1035 470 L 1135 470 L 1135 595" fill="none" stroke="#44546A" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <text x="1110" y="452" text-anchor="middle" class="arrow-label">停止</text>
+
+  <rect x="65" y="595" width="780" height="72" rx="8" fill="#F8FAFC" stroke="#D9E2EC" stroke-width="1.5"/>
+  <text x="92" y="626" class="note">每一轮都求局部误差增量，完整状态通过注入动作更新。</text>
+  <text x="92" y="654" class="note">先验始终来自传播结果，观测项随当前线性化点重新计算。</text>
+  <rect x="910" y="590" width="250" height="82" rx="8" fill="#F2F8F2" stroke="#4C9B58" stroke-width="2"/>
+  <text x="1035" y="624" text-anchor="middle" class="box-title">后验状态</text>
+  <text x="1035" y="654" text-anchor="middle" class="box-text">进入下一轮 IMU 传播</text>
+</svg>

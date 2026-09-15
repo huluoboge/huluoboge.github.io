@@ -10,7 +10,7 @@ draft: false
 
 > 这是 ESKF 系列的第二篇。上一篇已经定义了名义状态、误差状态和完整更新闭环；本文只向前走一步，把闭环中的“IMU 传播”落实到具体方程，推导误差动力学矩阵 $F$ 和噪声输入矩阵 $G$。
 
-**阅读路线：** [上一篇：ESKF 入门：从状态预测到误差注入](../ekf-again/index.html) → 本文 → [下一篇：ESKF 观测更新：从观测模型推导 $H$ 矩阵](../eskf-observation-h/index.html)。
+**阅读路线：** [上一篇：ESKF 入门：从状态预测到误差注入](../ekf-again/index.html) → 本文 → [下一篇：ESKF 观测更新：从观测模型推导 $H$ 矩阵](../eskf-observation-h/index.html) → [第四篇：ESIKF：误差状态上的迭代卡尔曼更新](../esikf-iterated-error-state/index.html)。
 
 ## 摘要
 
@@ -1134,7 +1134,7 @@ $$
 
 VINS-Mono 和 FAST-LIO2 可以作为这条主线的两个延伸参照：前者把 IMU 信息预积分成优化约束，后者把 IMU 传播和 LiDAR 迭代更新组织成误差状态 Kalman filter。理解这一步后，再阅读这些系统中形式相似的 $F$、$G$、Jacobian 和 covariance 公式，就能知道它们分别服务于哪一种估计框架。
 
-下一篇将沿着同一个 15 维误差状态进入观测阶段：[ESKF 观测更新：从观测模型推导 $H$ 矩阵](../eskf-observation-h/index.html)。
+下一篇将沿着同一个 15 维误差状态进入观测阶段：[ESKF 观测更新：从观测模型推导 $H$ 矩阵](../eskf-observation-h/index.html)。观测模型建立后，可以继续阅读 [ESIKF：误差状态上的迭代卡尔曼更新](../esikf-iterated-error-state/index.html)，把 LiDAR 和视觉非线性残差放进一次观测内部的迭代更新中。
 
 ## 参考文献
 

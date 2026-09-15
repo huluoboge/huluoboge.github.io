@@ -60,6 +60,10 @@ The blog lives in `blog/` as markdown under `blog/articles/`. CI builds it with
 `tools/blog-renderer` and deploys via GitHub Pages
 (`.github/workflows/deploy.yml`).
 
+For writing or revising blog article prose, read `blog/references/writing-style.md`
+first. Do not load that writing guide for ordinary maintenance, build checks, or
+static asset edits.
+
 - `blog/index.html` does not exist in the repository — it is generated at build
   time. A link checker reports it as missing; it is not.
 - `blog/template.html` uses root-absolute paths such as `/blog/static/...`.

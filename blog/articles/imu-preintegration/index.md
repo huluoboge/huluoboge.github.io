@@ -1989,6 +1989,8 @@ $$
 
 理解这三层，就不必把 VINS、OKVIS、GTSAM 或 LIO 系统中的预积分代码看成一堆互不相关的矩阵。它们只是对同一套运动模型、李群局部坐标和概率传播做了不同的工程组织。
 
+下一篇把这套预积分接到完整系统里，用 VINS、LIO-SAM 与 LVI-SAM 做对照阅读：[从 IMU 预积分到 VINS、LIO-SAM 与 LVI-SAM](../vins-lio-sam-preintegration/index.html)。
+
 ## 参考文献
 
 1. Christian Forster, Luca Carlone, Frank Dellaert, and Davide Scaramuzza, *On-Manifold Preintegration for Real-Time Visual-Inertial Odometry*, IEEE Transactions on Robotics, 2017. <https://arxiv.org/abs/1512.02363>

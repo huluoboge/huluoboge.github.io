@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="720" viewBox="0 0 1180 720" role="img" aria-labelledby="title desc">
+  <title id="title">VINS、LIO-SAM 与 LVI-SAM 中的预积分信息流</title>
+  <desc id="desc">图示三类系统中 IMU 预积分因子与视觉、激光约束的关系。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333333"/>
+    </marker>
+    <style>
+      .title { font: 700 26px 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif; fill: #111111; }
+      .subtitle { font: 15px 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif; fill: #555555; }
+      .section { font: 700 18px 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif; fill: #222222; }
+      .box-title { font: 700 17px 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif; fill: #111111; }
+      .box-sub { font: 13px 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif; fill: #444444; }
+      .arrow-label { font: 12px 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif; fill: #555555; }
+      .note { font: 13px 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif; fill: #444444; }
+      .lane { fill: none; stroke: #D8D8D8; stroke-width: 1; stroke-dasharray: 6 6; }
+    </style>
+  </defs>
+
+  <rect width="1180" height="720" fill="#FFFFFF"/>
+  <text x="590" y="42" text-anchor="middle" class="title">同一段 IMU 预积分，在三种系统中的落点</text>
+  <text x="590" y="70" text-anchor="middle" class="subtitle">预积分因子保持同一语义；视觉、激光与状态管理决定系统形态</text>
+
+  <text x="70" y="120" class="section">输入时间流</text>
+  <text x="365" y="120" class="section">区间测量与因子</text>
+  <text x="720" y="120" class="section">三个案例中的后端组织</text>
+
+  <line x1="45" y1="330" x2="1135" y2="330" class="lane"/>
+  <line x1="45" y1="520" x2="1135" y2="520" class="lane"/>
+
+
+  <g>
+    <rect x="70" y="150" width="190" height="70" rx="6" fill="#EAF3FF" stroke="#4B83C4" stroke-width="1.2"/>
+    <text x="165.0" y="175" text-anchor="middle" class="box-title">图像帧</text>
+    <text x="165.0" y="200" text-anchor="middle" class="box-sub"><tspan x="165.0" dy="0">特征跟踪 / 关键帧</tspan></text>
+  </g>
+
+  <g>
+    <rect x="70" y="270" width="190" height="70" rx="6" fill="#FFF3E0" stroke="#C47A2C" stroke-width="1.2"/>
+    <text x="165.0" y="295" text-anchor="middle" class="box-title">高频 IMU</text>
+    <text x="165.0" y="320" text-anchor="middle" class="box-sub"><tspan x="165.0" dy="0">角速度 / 比力</tspan></text>
+  </g>
+
+  <g>
+    <rect x="70" y="390" width="190" height="70" rx="6" fill="#EAF7EA" stroke="#4C9B58" stroke-width="1.2"/>
+    <text x="165.0" y="415" text-anchor="middle" class="box-title">激光帧</text>
+    <text x="165.0" y="440" text-anchor="middle" class="box-sub"><tspan x="165.0" dy="0">特征提取 / 扫描匹配</tspan></text>
+  </g>
+
+
+  <g>
+    <rect x="340" y="270" width="230" height="78" rx="6" fill="#FFF7E8" stroke="#C47A2C" stroke-width="1.2"/>
+    <text x="455.0" y="295" text-anchor="middle" class="box-title">关键帧区间预积分</text>
+    <text x="455.0" y="320" text-anchor="middle" class="box-sub"><tspan x="455.0" dy="0">ΔR, Δv, Δp, J, Σ</tspan></text>
+  </g>
+
+  <g>
+    <rect x="610" y="160" width="210" height="72" rx="6" fill="#EAF3FF" stroke="#4B83C4" stroke-width="1.2"/>
+    <text x="715.0" y="185" text-anchor="middle" class="box-title">视觉重投影因子</text>
+    <text x="715.0" y="210" text-anchor="middle" class="box-sub"><tspan x="715.0" dy="0">像素观测约束位姿</tspan></text>
+  </g>
+
+  <g>
+    <rect x="610" y="390" width="210" height="72" rx="6" fill="#EAF7EA" stroke="#4C9B58" stroke-width="1.2"/>
+    <text x="715.0" y="415" text-anchor="middle" class="box-title">激光几何因子</text>
+    <text x="715.0" y="440" text-anchor="middle" class="box-sub"><tspan x="715.0" dy="0">米制结构约束位姿</tspan></text>
+  </g>
+
+  <g>
+    <rect x="610" y="275" width="210" height="72" rx="6" fill="#FFF3E0" stroke="#C47A2C" stroke-width="1.2"/>
+    <text x="715.0" y="300" text-anchor="middle" class="box-title">IMU 预积分因子</text>
+    <text x="715.0" y="325" text-anchor="middle" class="box-sub"><tspan x="715.0" dy="0">连接相邻关键帧状态</tspan></text>
+  </g>
+
+
+  <g>
+    <rect x="900" y="140" width="215" height="82" rx="6" fill="#F7FAFF" stroke="#4B83C4" stroke-width="1.2"/>
+    <text x="1007.5" y="165" text-anchor="middle" class="box-title">VINS</text>
+    <text x="1007.5" y="185" text-anchor="middle" class="box-sub"><tspan x="1007.5" dy="0">视觉因子 + IMU 因子</tspan><tspan x="1007.5" dy="16">滑动窗口优化</tspan></text>
+  </g>
+
+  <g>
+    <rect x="900" y="270" width="215" height="82" rx="6" fill="#F7FCF7" stroke="#4C9B58" stroke-width="1.2"/>
+    <text x="1007.5" y="295" text-anchor="middle" class="box-title">LIO-SAM</text>
+    <text x="1007.5" y="315" text-anchor="middle" class="box-sub"><tspan x="1007.5" dy="0">激光因子 + IMU 因子</tspan><tspan x="1007.5" dy="16">因子图平滑</tspan></text>
+  </g>
+
+  <g>
+    <rect x="900" y="420" width="215" height="88" rx="6" fill="#F7F3FF" stroke="#7D68B3" stroke-width="1.2"/>
+    <text x="1007.5" y="445" text-anchor="middle" class="box-title">LVI-SAM</text>
+    <text x="1007.5" y="465" text-anchor="middle" class="box-sub"><tspan x="1007.5" dy="0">视觉 + 激光 + IMU</tspan><tspan x="1007.5" dy="16">联合平滑估计</tspan></text>
+  </g>
+
+
+  <g>
+    <path d="M 260 185 C 435.0 185, 435.0 195, 610 195" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    <text x="435.0" y="181.0" text-anchor="middle" class="arrow-label">形成视觉约束</text>
+  </g>
+
+  <g>
+    <path d="M 260 305 C 300.0 305, 300.0 309, 340 309" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    <text x="300.0" y="298.0" text-anchor="middle" class="arrow-label">区间内累积</text>
+  </g>
+
+  <g>
+    <path d="M 570 309 C 590.0 309, 590.0 311, 610 311" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    <text x="590.0" y="301.0" text-anchor="middle" class="arrow-label">构造因子</text>
+  </g>
+
+  <g>
+    <path d="M 260 425 C 435.0 425, 435.0 426, 610 426" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    <text x="435.0" y="416.5" text-anchor="middle" class="arrow-label">形成激光约束</text>
+  </g>
+
+
+  <g>
+    <path d="M 820 196 C 860.0 196, 860.0 181, 900 181" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    
+  </g>
+
+  <g>
+    <path d="M 820 311 C 860.0 311, 860.0 181, 900 181" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    
+  </g>
+
+  <g>
+    <path d="M 820 311 C 860.0 311, 860.0 311, 900 311" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    
+  </g>
+
+  <g>
+    <path d="M 820 426 C 860.0 426, 860.0 311, 900 311" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    
+  </g>
+
+  <g>
+    <path d="M 820 196 C 860.0 196, 860.0 462, 900 462" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    
+  </g>
+
+  <g>
+    <path d="M 820 311 C 860.0 311, 860.0 462, 900 462" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    
+  </g>
+
+  <g>
+    <path d="M 820 426 C 860.0 426, 860.0 462, 900 462" fill="none" stroke="#333333" stroke-width="1.4" marker-end="url(#arrow)"/>
+    
+  </g>
+
+  <text x="92" y="575" class="note">读案例时可固定 IMU 主线：样本缓存 → 区间封存 → 因子残差 → 状态更新。</text>
+  <text x="92" y="602" class="note">系统差异来自外部几何约束：VINS 看图像，LIO-SAM 看点云，LVI-SAM 同时接入图像与点云。</text>
+  <text x="92" y="629" class="note">优化结果会继续反馈到下一关键帧初值、bias 修正、重新预积分和历史状态管理。</text>
+</svg>
