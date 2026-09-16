@@ -1,84 +1,30 @@
-# Hu Yang Homepage Maintenance Skill
+# 胡洋个人站与博客维护约定
 
-Use this skill whenever updating this personal homepage, its blog, or the
-open-source software list.
+本文件用于引导后续维护者或 AI 助手维护这个个人站点和博客。保持精简，只记录会影响决策的长期约定。
 
-## Site Shape
+## 站点定位
 
-`index.html` is deliberately minimal. It presents only:
+- 这是胡洋的个人主页与技术博客，主题围绕三维重建、SfM/MVS、SLAM、点云、网格、纹理和工程实践。
+- 根目录主页保持轻量，主要承载工作简介、技术方向、开源软件、近期博客和联系方式。
+- 这不是简历站。不要把主页改成 CV、经历时间线或项目案例集；除非用户明确要求，不要创建、恢复或链接简历 PDF、CV 页面或类似内容。
+- 不编造履历、指标、论文、项目进展、性能数据、截图或内部信息。缺少可验证数字时，用机制和工程影响做定性描述。
 
-- **About Me** — short intro, Chinese and English
-- **Recent Posts** — injected at build time by CI from `blog/`
-- **Focus Areas** — generic technical areas
-- **Software** — open-source tools (InsightAT, FastMVS, Free PTD)
-- **Contact**
+## 博客写作
 
-The site has **no** projects section, project cards, case-study pages, resume
-pages, resume PDFs, or experience timeline. These were deliberately removed.
+- 博客文章放在 `blog/articles/<slug>/index.md`，构建产物由渲染器生成。
+- 写作或大幅修改博客正文前，先读取 `blog/references/writing-style.md`。
+- 博客语气应当娓娓道来、深入浅出：先讲宏观结构，再讲机制，最后落到具体工作或系统。
+- 避免 AI 讲义口吻，不写“教读者怎么看论文”的提示式表达；用知识体系、问题脉络和系统演化来组织文章。
+- 少用套路句式，尤其避免习惯性的“不是……而是……”“把 X 放进 Y”“从 A 到 B”标题模板。
+- 多篇论文综述时，围绕状态传播、观测残差、更新位置、地图反馈和系统演化关系展开。
 
-Do not create, restore, or link to `cv/`, project case-study folders, or resume
-PDFs unless the user explicitly asks. If the user does ask for project or resume
-content, confirm where it should live before adding anything — do not assume it
-belongs on this site.
+## 公开性边界
 
-## Core Rules
+- 这个站点是公开发布内容，不写雇主内部项目名、设备代号、未公开产品、内部指标或评审信息。
+- 已公开的公司、产品、开源项目和论文可以使用；不确定是否公开时先询问。
 
-- Treat the site as the personal site of a senior 3D reconstruction engineer.
-- Keep it a lightweight static site: restrained typography, white background,
-  thin rules, compact layout. `styles.css` is shared with the blog template.
-- **Do not invent** facts, metrics, publications, benchmark results, screenshots,
-  completion status, or project limitations.
-- **Do not fabricate numbers.** When no metric is available, describe mechanism
-  and engineering or business impact qualitatively.
-- Prefer concrete, specific technical writing over generic marketing language.
+## 构建与检查
 
-### Public vs. internal names
-
-Publicly announced product names may be used freely — a product line the company
-has launched and documented publicly is not confidential.
-
-Do not publish device codenames, product names, repository names, or internal
-project names that have **not** been publicly announced. If unsure whether a name
-is public, ask before using it.
-
-### Confidential employer material
-
-This site is public. Do not put employer-internal material on it:
-
-- internal performance benchmarks, timing or throughput figures, or stability
-  targets
-- internal performance-review ratings
-- unreleased device codenames
-
-Describe work qualitatively — mechanism plus engineering or business impact.
-Scale and specification figures that the company publishes publicly on its own
-site or in press material are acceptable.
-
-## Blog
-
-The blog lives in `blog/` as markdown under `blog/articles/`. CI builds it with
-`tools/blog-renderer` and deploys via GitHub Pages
-(`.github/workflows/deploy.yml`).
-
-For writing or revising blog article prose, read `blog/references/writing-style.md`
-first. Do not load that writing guide for ordinary maintenance, build checks, or
-static asset edits.
-
-- `blog/index.html` does not exist in the repository — it is generated at build
-  time. A link checker reports it as missing; it is not.
-- `blog/template.html` uses root-absolute paths such as `/blog/static/...`.
-  Those are correct for the deployed site and also look broken to a naive
-  checker.
-- Do not hand-edit generated HTML.
-- `tools/blog-renderer` is a git submodule. Run `npm install` inside it before
-  building locally.
-
-## Verification Checklist
-
-Before finishing an update:
-
-- `rg` for stale or contradictory phrases such as "not complete", "missing
-  benchmarks", or names of removed project pages.
-- Check `git status --short` and mention only files relevant to the task.
-- Verify that every referenced image and local link exists.
-- Do not modify unrelated files unless explicitly asked.
+- 修改博客 Markdown 后运行 `./scripts/build-blog.sh`，同步生成 HTML。
+- 不手改生成的 HTML，除非任务明确要求处理构建产物。
+- 结束前检查相关链接、图片路径和 `git status --short`，只说明与本次任务相关的改动。

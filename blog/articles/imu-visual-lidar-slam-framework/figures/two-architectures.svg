@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
+  <rect width="900" height="620" fill="#fbfcfe"/>
+  <style>
+    text { dominant-baseline: middle; }
+  </style>
+
+  <rect x="40" y="35" width="240" height="50" rx="8" fill="#fff0d8" stroke="#b7791f" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="17" font-weight="700" fill="#20242a" text-anchor="middle"><tspan x="160.0" y="65.0">优化式路线</tspan></text>
+
+  <rect x="600" y="35" width="240" height="50" rx="8" fill="#e0f7f0" stroke="#0f766e" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="17" font-weight="700" fill="#20242a" text-anchor="middle"><tspan x="720.0" y="65.0">滤波式路线</tspan></text>
+
+  <rect x="60" y="130" width="220" height="64" rx="8" fill="#fffaf0" stroke="#b7791f" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="170.0" y="167.0">关键帧状态</tspan></text>
+
+  <rect x="60" y="225" width="220" height="64" rx="8" fill="#fffaf0" stroke="#b7791f" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="170.0" y="253.0">IMU 预积分</tspan><tspan x="170.0" y="271.0">形成相邻状态因子</tspan></text>
+<path d="M 170 194 L 170 225" fill="none" stroke="#b7791f" stroke-width="1.6"/>
+
+  <rect x="60" y="320" width="220" height="64" rx="8" fill="#fffaf0" stroke="#b7791f" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="170.0" y="348.0">视觉 / LiDAR 因子</tspan><tspan x="170.0" y="366.0">重投影、点到平面、回环</tspan></text>
+<path d="M 170 289 L 170 320" fill="none" stroke="#b7791f" stroke-width="1.6"/>
+
+  <rect x="60" y="430" width="220" height="64" rx="8" fill="#fffaf0" stroke="#b7791f" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="170.0" y="458.0">滑动窗口或因子图</tspan><tspan x="170.0" y="476.0">统一重线性化和边缘化</tspan></text>
+<path d="M 170 384 L 170 430" fill="none" stroke="#b7791f" stroke-width="1.6"/>
+
+  <rect x="60" y="540" width="220" height="64" rx="8" fill="#fffaf0" stroke="#b7791f" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="170.0" y="559.0">代表系统</tspan><tspan x="170.0" y="577.0">VINS、OKVIS、ORB-SLAM3</tspan><tspan x="170.0" y="595.0">LIO-SAM、LVI-SAM</tspan></text>
+<path d="M 170 494 L 170 540" fill="none" stroke="#b7791f" stroke-width="1.6"/>
+
+  <rect x="620" y="130" width="220" height="64" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="730.0" y="167.0">上一帧后验状态</tspan></text>
+
+  <rect x="620" y="225" width="220" height="64" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="730.0" y="253.0">IMU 连续传播</tspan><tspan x="730.0" y="271.0">得到当前先验和协方差</tspan></text>
+<path d="M 730 194 L 730 225" fill="none" stroke="#0f766e" stroke-width="1.6"/>
+
+  <rect x="620" y="320" width="220" height="64" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="730.0" y="348.0">当前帧观测残差</tspan><tspan x="730.0" y="366.0">点到地图、投影、光度</tspan></text>
+<path d="M 730 289 L 730 320" fill="none" stroke="#0f766e" stroke-width="1.6"/>
+
+  <rect x="620" y="430" width="220" height="64" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="730.0" y="458.0">ESIKF 迭代更新</tspan><tspan x="730.0" y="476.0">局部误差求解并注入</tspan></text>
+<path d="M 730 384 L 730 430" fill="none" stroke="#0f766e" stroke-width="1.6"/>
+
+  <rect x="620" y="540" width="220" height="64" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="730.0" y="559.0">代表系统</tspan><tspan x="730.0" y="577.0">FAST-LIO、FAST-LIO2</tspan><tspan x="730.0" y="595.0">R2LIVE、R3LIVE、FAST-LIVO2</tspan></text>
+<path d="M 730 494 L 730 540" fill="none" stroke="#0f766e" stroke-width="1.6"/>
+
+  <rect x="330" y="250" width="220" height="150" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="14" font-weight="700" fill="#20242a" text-anchor="middle"><tspan x="440.0" y="276.0">共同数学底座</tspan><tspan x="440.0" y="294.0"></tspan><tspan x="440.0" y="312.0">李群扰动</tspan><tspan x="440.0" y="330.0">噪声传播</tspan><tspan x="440.0" y="348.0">Jacobian</tspan><tspan x="440.0" y="366.0">bias 估计</tspan><tspan x="440.0" y="384.0">协方差权重</tspan></text>
+<path d="M 280 462 L 330 350" fill="none" stroke="#64748b" stroke-width="1.3"/>
+<path d="M 620 462 L 550 350" fill="none" stroke="#64748b" stroke-width="1.3"/>
+
+  <rect x="338" y="535" width="204" height="50" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.3"/>
+  <text font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="13" font-weight="500" fill="#20242a" text-anchor="middle"><tspan x="440.0" y="565.0">分歧点：历史信息保留成图，还是压缩成当前先验</tspan></text>
+</svg>
