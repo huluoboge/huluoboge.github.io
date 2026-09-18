@@ -1,6 +1,7 @@
 ---
 title: "Matplot 显示中文字体"
 date: 2025-10-11
+categories: [engineering]
 tags: ["python", "matplot", "fonts", "Chinese"]
 excerpt: "Matplot 设置显示中文字体"
 ---

@@ -1,6 +1,7 @@
 ---
 title: "IMU 零偏可观性：静止、运动与姿态激励"
 date: 2026-09-01
+categories: [state-estimation]
 tags: [IMU, Bias, Gyroscope, Accelerometer, Observability, Gravity Alignment, SLAM]
 excerpt: "从静止条件、外部旋转参考和姿态激励出发，分析陀螺仪与加速度计零偏何时可观、何时会与姿态和重力耦合，并用手持扫描作为最后的应用例子。"
 ---

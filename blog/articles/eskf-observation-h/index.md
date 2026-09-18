@@ -1,6 +1,7 @@
 ---
 title: "ESKF 观测更新：从观测模型推导 H 矩阵"
 date: 2026-09-05
+categories: [state-estimation]
 tags: [ESKF, EKF, H Matrix, Observation Model, IMU, LiDAR, State Estimation]
 excerpt: "沿着 ESKF 的观测更新阶段，从 z=h(x)+v 出发，逐步推导观测残差、H 矩阵和 Kalman 更新，并用位置、速度、姿态、重力、LiDAR 与视觉观测说明 Jacobian 的写法。"
 draft: false

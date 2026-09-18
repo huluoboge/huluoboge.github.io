@@ -10,6 +10,6 @@ title: 胡洋的博客
 
 <div id="latest-articles-placeholder"></div>
 
-## 全部文章
+## 浏览文章
 
-<div id="all-articles-placeholder"></div>
+<div id="article-discovery-placeholder"></div>

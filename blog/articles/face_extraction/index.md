@@ -1,6 +1,7 @@
 ---
 title: "Isosurface Extraction for Gradient-Based Mesh Optimization"
 date: 2025-10-24T23:04:00+08:00 
+categories: [reconstruction]
 tags: ["Poisson reconstruction", "Surface Reconstruction","3D Reconstruction"," Mesh Optimization"]
 excerpt: "Nvidia 2023年的一篇文章， 介绍一种基于梯度优化的网格优化方法"
 draft: true

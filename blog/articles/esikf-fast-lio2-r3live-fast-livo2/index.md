@@ -1,6 +1,7 @@
 ---
 title: "三篇代表性工作中的 ESIKF：FAST-LIO2、R3LIVE 与 FAST-LIVO2"
 date: 2026-09-12
+categories: [state-estimation]
 tags: [ESIKF, FAST-LIO2, R3LIVE, FAST-LIVO2, LIO, LIVO, LiDAR, Visual-Inertial]
 excerpt: "以 FAST-LIO2、R3LIVE 和 FAST-LIVO2 为例，沿着论文中的状态传播、观测构造、迭代更新和地图反馈，理解 ESIKF 在真实 LIO/LIVO 系统里的具体落点。"
 draft: false

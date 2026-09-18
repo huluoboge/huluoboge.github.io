@@ -1,6 +1,7 @@
 ---
 title: "Poisson 表面重建的核心思想以及与有限元方法（FEM）的关系"
 date: 2025-10-18T22:00:00+08:00
+categories: [reconstruction]
 tags: ["Poisson reconstruction", "Finite Element Method", "Surface Reconstruction", "3D Reconstruction"]
 excerpt: "从点云法向场出发，逐步说明 Poisson 表面重建如何恢复隐式函数，以及有限元、八叉树和 B-spline 如何参与离散求解。"
 draft: false

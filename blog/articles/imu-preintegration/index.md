@@ -1,6 +1,7 @@
 ---
 title: "IMU 预积分详解：原理、推导与 C++/Eigen 实现"
 date: 2026-09-13
+categories: [state-estimation]
 tags: [IMU, Preintegration, ESKF, VIO, SLAM, Factor Graph, Eigen]
 excerpt: "从预积分要解决的计算问题出发，详细推导旋转、速度、位置增量、中值积分、bias Jacobian、协方差传播和因子残差，并给出可直接编译运行的 C++/Eigen 示例。"
 draft: false

@@ -1,6 +1,7 @@
 ---
 title: "Taming 3DGS: High-Quality Radiance Fields with Limited Resources"
 date: 2025-10-28T20:30:00+08:00
+categories: [neural-rendering]
 tags: ["3DGS", "Volume Rendering"]
 excerpt: "3D 高斯分布 (3DGS) 凭借其快速、可解释且高保真度的渲染能力，彻底革新了新视角合成。然而，其资源需求限制了其可用性。尤其是在资源受限的设备上，训练性能会迅速下降，并且由于模型内存消耗过大，训练过程常常无法完成。该方法会使用无限数量的高斯函数收敛，其中许多函数是冗余的，这会导致渲染速度过慢，并使其无法应用于需要固定大小输入的下游任务。为了解决这些问题，我们着手解决在有限预算内训练和渲染 3DGS 模型的挑战。
 

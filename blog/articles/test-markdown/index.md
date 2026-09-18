@@ -1,6 +1,7 @@
 ---
 title: "Markdown 渲染测试"
 date: 2025-08-24
+categories: [engineering]
 tags: ["Markdown", "LaTeX", "NodeJS"]
 excerpt: "测试本博客的Markdown渲染效果"
 ---
@@ -413,4 +414,3 @@ Mermaid是一个非常强大的工具，特别适合在技术文档中使用。�
 [^1]: Berners-Lee, T. (1989). *Information Management: A Proposal*. CERN.  
 [^2]: Gruber, J. (2004). *Markdown Syntax Documentation*. Daring Fireball.  
 [^3]: W3C. (2010). *Web Content Accessibility Guidelines (WCAG) 2.0*. W3C Recommendation.
-

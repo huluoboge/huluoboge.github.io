@@ -1,6 +1,7 @@
 ---
 title: "Sampson 误差"
 date: 2025-10-03
+categories: [geometry, reconstruction]
 tags:
   [
     "2D geometry",
@@ -95,5 +96,4 @@ $$E_{\text{Sampson}}(\mathbf{x}, \mathbf{x}') = \frac{( \mathbf{x}'^T F \mathbf{
    用点到对极线的垂直距离表示，是真正的几何偏差。
 3. **Sampson 误差 (右图)**  
    用代数误差平方除以梯度平方和来近似几何误差，是二阶近似，计算快，效果接近几何误差。
-
 

@@ -1,6 +1,7 @@
 ---
 title: "带 IMU 的视觉、LiDAR 与视觉激光 SLAM 框架演化"
 date: 2026-09-16
+categories: [state-estimation]
 tags: [IMU, SLAM, VIO, LIO, LIVO, Factor Graph, ESIKF, Preintegration]
 excerpt: "梳理带 IMU 的 VIO、LIO 与 LIVO/LVI 系统谱系：从视觉惯性关键帧优化、LiDAR-Inertial 因子图，到 FAST-LIO2、R2LIVE、R3LIVE、FAST-LIVO2 代表的直接融合框架。"
 draft: false

@@ -1,6 +1,7 @@
 ---
 title: "Poisson 表面重建文章翻译"
 date: 2025-10-12
+categories: [reconstruction]
 tags: ["Poisson reconstruction", "Surface Reconstruction","3D Reconstruction"]
 excerpt: "本文翻译了经典的Poisson表面重建文章：Poisson Surface Reconstruction"
 draft: true
@@ -342,5 +343,4 @@ $$\partial \tilde{M} \equiv \{q \in \mathbb{R}^3 \mid \tilde{\chi}(q) = \gamma\}
 为了证明这一点，我们使用Poisson方程$\Delta u = f$（其中$f$是周期性的）可以使用傅里叶变换求解的事实。傅里叶级数展开是$-|\zeta|^2 \hat{u}(\zeta) = \hat{f}(\zeta)$，或等价地$\hat{u}(\zeta) = -\frac{1}{|\zeta|^2} \hat{f}(\zeta)$。
 
 因此，我们的Poisson方程$\Delta \chi = \nabla \cdot V$可以使用$\hat{\chi} = -\frac{1}{|\zeta|^2} \widehat{\nabla \cdot V}$求解。利用众所周知的恒等式$\hat{f}' = -i\zeta \hat{f}$及其推广$\widehat{\nabla \cdot V} = -i\zeta \cdot \hat{V}$，我们得到$\hat{\chi} = \frac{i}{|\zeta|^2} \zeta \cdot \hat{V}$，这与[Kaz05]完全相同。
-
 

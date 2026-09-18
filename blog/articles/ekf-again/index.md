@@ -1,6 +1,7 @@
 ---
 title: "ESKF（误差状态卡尔曼滤波）入门：从状态预测到误差注入"
 date: 2026-09-03
+categories: [state-estimation]
 tags: [ESKF, EKF, Kalman Filter, State Estimation, IMU]
 excerpt: "从状态估计的基本问题出发，理解 ESKF（误差状态卡尔曼滤波）如何维护名义状态和局部误差，并把 IMU 传播、观测更新、误差注入与 reset 串成一个完整闭环。"
 draft: false

@@ -1,6 +1,7 @@
 ---
 title: "卡尔曼滤波的推导"
 date: 2025-12-06T17:42:00+08:00
+categories: [state-estimation]
 tags: ["KF", "EKF", "Kalman Filter", "Extended Kalman Filter"]
 excerpt: "从预测—观测模型出发，逐步推导 Kalman 增益、后验协方差，并说明 EKF 如何通过局部线性化处理非线性系统。"
 draft: false

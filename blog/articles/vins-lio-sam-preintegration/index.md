@@ -1,6 +1,7 @@
 ---
 title: "从 IMU 预积分到 VINS、LIO-SAM 与 LVI-SAM"
 date: 2026-09-15
+categories: [state-estimation]
 tags: [IMU, Preintegration, VINS, LIO-SAM, LVI-SAM, VIO, LIO, Factor Graph, Sliding Window]
 excerpt: "沿着关键帧之间的一段数据流，理解 IMU 形成关键帧因子的过程，以及视觉、激光在 VINS、LIO-SAM 与 LVI-SAM 中共同进入优化的位置。"
 draft: false

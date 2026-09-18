@@ -1,6 +1,7 @@
 ---
 title: "IMU 噪声参数：噪声密度、角度随机游走、速度随机游走与零偏不稳定性"
 date: 2026-08-31
+categories: [state-estimation]
 tags: [IMU, Noise Density, Angle Random Walk, Velocity Random Walk, Bias Instability, Allan Variance, PSD, SLAM]
 excerpt: "系统解释 IMU 数据手册中的噪声密度、陀螺仪角度随机游走、加速度计速度随机游走，以及陀螺仪和加速度计各自的零偏不稳定性：它们分别描述什么，如何从静止数据和 Allan 方差中识别，以及如何转换为 ESKF 和 IMU 预积分使用的噪声参数。"
 ---

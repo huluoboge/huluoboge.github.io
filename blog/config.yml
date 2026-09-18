@@ -10,6 +10,31 @@ basePath: "/blog"
 # 外部页面模板：渲染器只提供内容，页面外壳由该模板决定
 templateFile: template.html
 
+# 文章分类：文章 front-matter 的 categories 使用这里的 slug。
+# 一篇文章可以属于多个分类；分类页会在构建时自动生成。
+categories:
+  - slug: state-estimation
+    name: "SLAM / 状态估计"
+    description: "IMU、ESKF、ESIKF、VIO、LIO 与因子图。"
+  - slug: reconstruction
+    name: "三维重建"
+    description: "Poisson、表面重建与可微几何。"
+  - slug: neural-rendering
+    name: "NeRF / 3DGS"
+    description: "神经辐射场、Gaussian Splatting 与新视角合成。"
+  - slug: local-features
+    name: "局部特征与匹配"
+    description: "关键点、描述符、匹配与局部视觉特征。"
+  - slug: geometry
+    name: "多视图几何"
+    description: "极几何、RANSAC 与多视图视觉。"
+  - slug: image-processing
+    name: "图像处理与评价"
+    description: "图像融合、感知质量与图像处理实践。"
+  - slug: engineering
+    name: "工具与工程"
+    description: "开发工具、绘图、渲染与工程经验。"
+
 # 文章自动发现：articles/ 下每个子目录的 index.md 自动渲染；
 # front-matter 标 draft: true 的跳过。写文章 = 建目录 + 写 index.md，无需改配置。
 navigation:

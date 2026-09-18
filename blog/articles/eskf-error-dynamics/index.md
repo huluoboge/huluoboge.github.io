@@ -1,6 +1,7 @@
 ---
 title: "ESKF 误差动力学：从 IMU 模型推导 F 和 G"
 date: 2026-09-04
+categories: [state-estimation]
 tags: [ESKF, IMU, Error State, VINS, FAST-LIO2, State Estimation]
 excerpt: "沿着 ESKF 的 IMU 传播阶段，在固定坐标系和右侧姿态扰动约定下，从陀螺仪、加速度计和 bias 随机游走模型逐项推导误差动力学矩阵 F、G，并把结果接回协方差传播。"
 draft: false

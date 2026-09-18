@@ -1,6 +1,7 @@
 ---
 title: "ESIKF：误差状态上的迭代卡尔曼更新"
 date: 2026-09-6
+categories: [state-estimation]
 tags: [ESKF, ESIKF, IESKF, Kalman Filter, Nonlinear Least Squares, State Estimation]
 excerpt: "从 ESKF 的一次观测更新出发，把 Kalman 更新写成带先验的局部最小二乘问题，再说明 ESIKF 如何在误差状态上迭代求解非线性观测。"
 draft: false

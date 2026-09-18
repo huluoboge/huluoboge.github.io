@@ -125,12 +125,32 @@
     .article-item-with-image { display: grid; grid-template-columns: 140px 1fr; gap: 20px; align-items: start; }
     .article-thumbnail { width: 100%; height: auto; border: 1px solid var(--line); }
 
+    /* ===== 文章导航与分类 ===== */
+    .article-discovery { margin-top: 12px; }
+    .discovery-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 190px auto; gap: 12px; align-items: end; margin: 20px 0 26px; }
+    .discovery-toolbar label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; }
+    .discovery-toolbar input, .discovery-toolbar select { width: 100%; min-height: 38px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 0; background: #fff; color: var(--text); font: inherit; }
+    .discovery-toolbar input:focus, .discovery-toolbar select:focus { outline: 2px solid rgba(0, 64, 153, .18); border-color: var(--blue); }
+    .discovery-count { padding-bottom: 9px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .discovery-section-label { margin-bottom: 10px; color: var(--ink); font: bold 16px var(--serif); }
+    .category-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 28px; }
+    .category-card { display: grid; gap: 3px; min-height: 86px; padding: 13px 14px; border: 1px solid var(--line); color: var(--ink); background: var(--soft); }
+    .category-card:hover { border-color: var(--blue); color: var(--blue); text-decoration: none; }
+    .category-card-name { font: bold 16px var(--serif); }
+    .category-card-count { color: var(--muted); font-size: 12px; }
+    .category-card-description, .category-description { color: var(--muted); font-size: 13px; }
+    .discovery-empty { margin: 22px 0; color: var(--muted); }
+    [hidden] { display: none !important; }
+
     /* ===== 响应式 ===== */
     @media (max-width: 768px) {
       .blog-header, .blog-main { padding-left: 18px; padding-right: 18px; }
       .blog-content h1 { font-size: 25px; }
       .blog-content h2 { font-size: 21px; }
       .article-item-with-image { grid-template-columns: 1fr; }
+      .discovery-toolbar { grid-template-columns: 1fr; align-items: stretch; }
+      .discovery-count { padding-bottom: 0; }
+      .category-grid { grid-template-columns: 1fr; }
       table { display: block; overflow-x: auto; white-space: nowrap; }
       .katex-display { font-size: .95em; }
     }

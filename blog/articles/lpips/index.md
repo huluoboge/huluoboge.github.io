@@ -1,6 +1,7 @@
 ---
 title: "LPIPS:Learned Perceptual Image Patch Similarity"
 date: 2025-10-29T22:30:00+08:00
+categories: [image-processing]
 tags: ["SSIM", "Structural similarity index measure"]
 excerpt: "LPIPS是一种**感知图像相似度（perceptual similarity）**的度量方法，由 Richard Zhang 等人在 2018 年提出（论文：“The Unreasonable Effectiveness of Deep Features as a Perceptual Metric”，CVPR 2018）。LPIPS 衡量两张图像在深度特征空间中的“感知距离”，比传统的 L2 或 SSIM 更符合人眼主观感受。"
 draft: false

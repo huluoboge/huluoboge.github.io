@@ -1,6 +1,7 @@
 ---
 title: "Data-Parallel Octrees for Surface Reconstruction"
 date: 2025-10-24T23:04:00+08:00 
+categories: [reconstruction]
 tags: ["Poisson reconstruction", "Surface Reconstruction","3D Reconstruction"," Mesh Optimization"]
 excerpt: "使用GPU进行Poisson表面重建"
 draft: true

@@ -1,6 +1,7 @@
 ---
 title: "3Geometry-Grounded Gaussian Splatting"
 date: 2026-02-05T19:58:00+08:00
+categories: [neural-rendering, reconstruction]
 tags: ["3DGS", "Volume Rendering"]
 excerpt: "Geometry-Grounded Gaussian Splatting文章翻译"
 draft: true

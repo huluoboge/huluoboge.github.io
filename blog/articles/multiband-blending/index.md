@@ -1,6 +1,7 @@
 ---
 title: "图像金字塔多波段融合：原理、权值与 OpenCV 实践"
 date: 2026-09-17
+categories: [image-processing]
 tags: [Image Blending, Laplacian Pyramid, Multi-band Blending, OpenCV, Computer Vision]
 excerpt: "从高斯金字塔、拉普拉斯金字塔和权值金字塔出发，解释多波段融合为什么能消除结构接缝、为什么还需要颜色匀色，并给出可编译的 OpenCV C++ 示例。"
 draft: true

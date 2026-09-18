@@ -1,6 +1,7 @@
 ---
 title: "Poisson表面重建--B-spline核函数和box filter"
 date: 2025-10-14T23:30:00+08:00 
+categories: [reconstruction]
 tags: ["Poisson reconstruction", "Surface Reconstruction", "3D Reconstruction"]
 excerpt: "本篇文章详细介绍了 Poisson 表面重建文章里面使用的基函数B-spline与box filter之间的关系"
 draft: false

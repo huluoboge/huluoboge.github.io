@@ -1,6 +1,7 @@
 ---
 title: "NeRF：将场景表示为用于视图合成的神经辐射场"
 date: 2025-10-24T23:04:00+08:00
+categories: [neural-rendering]
 tags:
   [
     "NeRF",

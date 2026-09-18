@@ -1,6 +1,7 @@
 ---
 title: "Fixing the RANSAC Stopping Criterion"
 date: 2025-10-03
+categories: [geometry]
 tags: ["RANSAC", "Multi-View Geometry"]
 excerpt: "Fixing the RANSAC Stopping Criterion 论文总结"
 draft: false

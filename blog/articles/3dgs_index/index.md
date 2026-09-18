@@ -1,6 +1,7 @@
 ---
 title: "Owesome 3DGS papers"
 date: 2025-10-29T20:30:00+08:00
+categories: [neural-rendering]
 tags: ["3DGS", "Volume Rendering"]
 excerpt: "总结一些3DGS论文"
 draft: false
@@ -48,4 +49,3 @@ https://github.com/MrNeRF
 
 
 # Meshing
-
