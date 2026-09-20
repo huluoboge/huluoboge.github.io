@@ -139,7 +139,7 @@ cv::Mat MultiBandBlend(const cv::Mat& image_a,
   std::vector<cv::Mat> blended_pyr(levels);
   for (int i = 0; i < levels; ++i) {
     cv::Mat w3 = To3Channels(weight_pyr[i]);
-    cv::Mat one = cv::Mat::ones(w3.size(), w3.type());
+    cv::Mat one(w3.size(), w3.type(), cv::Scalar::all(1.0));
     blended_pyr[i] = lap_a[i].mul(w3) + lap_b[i].mul(one - w3);
   }
 

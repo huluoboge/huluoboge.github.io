@@ -1,7 +1,7 @@
 from pathlib import Path
 
 out = Path(__file__).resolve().parents[1] / "pyramid-blending-flow.svg"
-W, H = 1180, 680
+W, H = 1180, 880
 navy = "#20344d"
 blue = "#4e8dd8"
 green = "#55a868"
@@ -22,12 +22,15 @@ def line(x1, y1, x2, y2, color="#6b7280", sw=2, dash=""):
     return f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="{sw}" marker-end="url(#arrow)"{dash_attr}/>'
 
 def pyramid(x, y, label, color, levels=4):
-    parts = [text(x + 95, y - 18, label, 18, dark, "700")]
+    # Keep the four levels compact enough that the three pyramids do not
+    # collide with one another or with their labels.
+    parts = [text(x + 95, y - 16, label, 18, dark, "700")]
     for i in range(levels):
         ww = 190 - i * 34
-        hh = 50 - i * 5
-        parts.append(rect(x + i * 17, y + i * 62, ww, hh, color, stroke="#2c3e50", sw=1.2, rx=8))
-        parts.append(text(x + 95, y + i * 62 + 31, f"level {i}", 15, white, "700"))
+        hh = 40
+        yy = y + i * 50
+        parts.append(rect(x + i * 17, yy, ww, hh, color, stroke="#2c3e50", sw=1.2, rx=8))
+        parts.append(text(x + 95, yy + 26, f"level {i}", 15, white, "700"))
     return "\n".join(parts)
 
 def formula_box(x, y, w, h, lines, fill="#f8fafc"):
@@ -49,29 +52,29 @@ svg.append('''<defs>
   </linearGradient>
 </defs>''')
 svg.append(rect(0, 0, W, H, "#ffffff", stroke="#ffffff", sw=0, rx=0))
-svg.append(text(W/2, 48, "多波段融合的信息流：分解、按尺度加权、重建", 28, navy, "800"))
+svg.append(text(W/2, 48, "多频段融合的信息流：分解、按尺度加权、重建", 28, navy, "800"))
 svg.append(text(W/2, 80, "Laplacian band 保存每层被平滑掉的细节；Gaussian weight 决定每层细节来自哪张图", 17, muted, "500"))
 
 # inputs
-svg.append(rect(70, 130, 180, 88, "#d9e9ff", stroke=blue, sw=2, rx=14))
-svg.append(text(160, 165, "图像 A", 22, navy, "800"))
-svg.append(text(160, 194, "左侧/参考曝光", 15, muted, "500"))
-svg.append(rect(70, 280, 180, 88, "#ffe6d7", stroke=orange, sw=2, rx=14))
-svg.append(text(160, 315, "图像 B", 22, navy, "800"))
-svg.append(text(160, 344, "右侧/待融合曝光", 15, muted, "500"))
-svg.append(rect(70, 430, 180, 88, "url(#maskGrad)", stroke="#8a8f98", sw=2, rx=14))
-svg.append(text(160, 466, "权值 W", 22, white, "800"))
-svg.append(text(160, 494, "0 → B，1 → A", 15, white, "700"))
+svg.append(rect(70, 125, 180, 88, "#d9e9ff", stroke=blue, sw=2, rx=14))
+svg.append(text(160, 160, "图像 A", 22, navy, "800"))
+svg.append(text(160, 189, "左侧/参考曝光", 15, muted, "500"))
+svg.append(rect(70, 350, 180, 88, "#ffe6d7", stroke=orange, sw=2, rx=14))
+svg.append(text(160, 385, "图像 B", 22, navy, "800"))
+svg.append(text(160, 414, "右侧/待融合曝光", 15, muted, "500"))
+svg.append(rect(70, 575, 180, 88, "url(#maskGrad)", stroke="#8a8f98", sw=2, rx=14))
+svg.append(text(160, 611, "权值 W", 22, white, "800"))
+svg.append(text(160, 639, "0 → B，1 → A", 15, white, "700"))
 
 # pyramids
 svg.append(pyramid(360, 125, "A 的 Laplacian 金字塔", blue))
-svg.append(pyramid(360, 292, "B 的 Laplacian 金字塔", orange))
-svg.append(pyramid(360, 459, "W 的 Gaussian 金字塔", green))
+svg.append(pyramid(360, 350, "B 的 Laplacian 金字塔", orange))
+svg.append(pyramid(360, 575, "W 的 Gaussian 金字塔", green))
 
 # arrows to pyramids
-svg.append(line(250, 174, 350, 174))
-svg.append(line(250, 324, 350, 324))
-svg.append(line(250, 474, 350, 474))
+svg.append(line(250, 169, 350, 169))
+svg.append(line(250, 394, 350, 394))
+svg.append(line(250, 619, 350, 619))
 
 # blend boxes
 ys = [125, 187, 249, 311]
@@ -79,9 +82,9 @@ for i, y in enumerate(ys):
     svg.append(rect(650, y, 220, 45, "#f8fafc", stroke="#9aa4b2", sw=1.2, rx=9))
     svg.append(text(760, y + 29, f"F{i} = W{i}·LA{i} + (1-W{i})·LB{i}", 15, dark, "700"))
 svg.append(text(760, 96, "逐层融合", 20, navy, "800"))
-svg.append(line(550, 174, 640, 147))
-svg.append(line(550, 341, 640, 272))
-svg.append(line(550, 508, 640, 331))
+svg.append(line(550, 160, 640, 147))
+svg.append(line(550, 425, 640, 272))
+svg.append(line(550, 650, 640, 331))
 
 # reconstruction
 svg.append(formula_box(935, 160, 190, 150, ["金字塔重建", "从最粗层开始", "逐层上采样相加"], fill="#f5f7fa"))
@@ -94,9 +97,9 @@ svg.append(text(1030, 456, "纹理接缝平滑", 15, muted, "500"))
 svg.append(line(1030, 310, 1030, 380))
 
 # bottom notes
-svg.append(formula_box(90, 585, 300, 62, ["分解", "L_i = G_i - Expand(G_{i+1})"], fill="#f8fbff"))
-svg.append(formula_box(440, 585, 300, 62, ["融合", "F_i = W_iL_i^A + (1-W_i)L_i^B"], fill="#f8fbff"))
-svg.append(formula_box(790, 585, 300, 62, ["恢复", "G_i = F_i + Expand(G_{i+1})"], fill="#f8fbff"))
+svg.append(formula_box(90, 790, 300, 76, ["分解", "L_i = G_i - Expand(G_{i+1})"], fill="#f8fbff"))
+svg.append(formula_box(440, 790, 300, 76, ["融合", "F_i = W_iL_i^A + (1-W_i)L_i^B"], fill="#f8fbff"))
+svg.append(formula_box(790, 790, 300, 76, ["恢复", "G_i = F_i + Expand(G_{i+1})"], fill="#f8fbff"))
 svg.append('</svg>')
 out.write_text("\n".join(svg), encoding="utf-8")
 print(out)
