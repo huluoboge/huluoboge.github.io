@@ -27,9 +27,9 @@ categories:
     description: "关键点、描述符、匹配与局部视觉特征。"
   - slug: geometry
     name: "多视图几何"
-    description: "极几何、RANSAC 与多视图视觉。"
+    description: "对极几何、RANSAC 与多视图视觉。"
   - slug: image-processing
-    name: "图像处理与评价"
+    name: "图像处理"
     description: "图像融合、感知质量与图像处理实践。"
   - slug: engineering
     name: "工具与工程"
