@@ -1,22 +1,23 @@
 ---
-title: "Pose Graph SLAM 中的回环鲁棒性"
+title: "SLAM 中的回环鲁棒性"
 date: 2026-09-21
-tags: ["Pose Graph SLAM", "Loop Closure", "Robust Optimization", "PCM", "Switchable Constraints"]
-excerpt: "介绍 Pose Graph SLAM 中错误回环的影响，梳理 Switchable Constraints、Max-Mixture、Dynamic Covariance Scaling、RRR 和 PCM 等方法的处理机制与适用位置。"
-draft: true
+categories: [state-estimation]
+tags: ["SLAM", "Loop Closure", "Robust Optimization", "PCM", "Switchable Constraints"]
+excerpt: "从候选生成、集合一致性、鲁棒优化到历史重评估，解释 SLAM 中错误回环的处理算法及其组合方式。"
+draft: false
 ---
 
-[toc]
+# SLAM 中的回环鲁棒性
 
-# Pose Graph SLAM 中的回环鲁棒性
+> 回环检测为 SLAM 提供了校正长期漂移的机会，也会把错误数据关联带入后端。这篇文章从一个错误回环进入系统后的完整生命周期出发，梳理约束构造、集合筛选、权重更新、图结构调整和历史状态管理几条线索。
 
-> 回环检测为 Pose Graph SLAM 提供了校正长期漂移的机会，也会把错误数据关联带入后端。这篇文章是我对回环鲁棒性问题的一次整理，主要沿着约束构造、权重更新、图结构调整和历史状态管理几条线索，回顾几篇有代表性的论文。
+本文讨论的是 **SLAM 系统中的回环鲁棒性**。位姿图是描述后端相对位姿约束的一种常用形式，因子图、滑动窗口或其他平滑后端也会遇到同样的错误数据关联问题。为了把各类算法写在同一个数学框架中，下面使用位姿图记号说明残差和优化过程，但文章的对象仍然是 SLAM 的回环处理问题。
 
-## 1. Pose Graph SLAM 中的回环鲁棒性
+## 1. SLAM 中的回环鲁棒性
 
-### 1.1 Pose Graph SLAM 的基本形式
+### 1.1 SLAM 的基本形式
 
-在 Pose Graph SLAM 中，每个机器人位姿对应图中的一个节点，每条相对位姿测量对应一条边。
+SLAM 同时估计机器人轨迹和环境结构。回环检测提供的是跨越较长时间间隔的观测，它通常以关键帧之间的相对位姿因子进入后端。后端可以用Pose Graph 表示这部分状态：每个位姿对应一个节点，每条相对位姿测量对应一条边。
 
 - 相邻帧之间的边通常来自轮速计、IMU、激光里程计或视觉里程计；
 - 非相邻帧之间的边通常来自回环检测；
@@ -46,6 +47,23 @@ $$
 
 这个目标函数让所有边的加权误差平方和尽可能小。优化器每次线性化这些误差并更新位姿，更新后的位姿又会成为下一轮回环残差和权重计算的输入。
 
+为了看到后端实际做了什么，可以把一次非线性迭代写成四步。先在当前估计 \(X^{(t)}\) 处计算每条边的残差和雅可比
+
+$$
+e_{ij}(X^{(t)}\boxplus\delta\xi)
+\approx
+e_{ij}(X^{(t)})+J_{ij}\delta\xi .
+$$
+
+然后用平方根信息矩阵白化残差，累加正规方程
+
+$$
+H=\sum_e J_e^T\Omega_eJ_e,\qquad
+b=\sum_e J_e^T\Omega_ee_e,
+$$
+
+求解 \(H\delta\xi=-b\)，最后通过李群上的 \(\boxplus\) 更新位姿。错误回环的问题正出现在这里：普通最小二乘会把每条边都放进同一个 \(H\) 和 \(b\)，并不会区分“测量噪声较大”和“数据关联完全错误”。鲁棒算法要做的，就是在构造残差、信息矩阵或有效边集合时加入这种区分。
+
 ### 1.2 里程计边和回环边的作用不同
 
 里程计边主要描述短时间运动。相邻帧之间的运动变化通常连续，错误关联的概率相对较低。回环边来自外观相似性、特征匹配或场景识别，容易受到感知混淆影响。
@@ -67,7 +85,7 @@ $$
 
 ### 1.3 鲁棒回环处理的大致任务
 
-在我的理解中，鲁棒回环处理大致可以分为五项任务
+前端生成的回环候选并不都可靠。要判断候选是否错误，并在错误约束已经进入图之后限制它的影响，SLAM 需要一套鲁棒的回环处理算法。沿着一条回环从产生、进入后端到长期维护的生命周期，可以把主要任务归纳为五项
 
 1. 在候选回环进入图之前，判断它与其他候选共同成立的条件；
 2. 在回环进入图之后，让优化器降低异常约束的影响；
@@ -75,18 +93,19 @@ $$
 4. 根据后续证据重新审查已经接受的回环；
 5. 为暂时拒绝的回环保留恢复机会。
 
-这五项任务并不是严格的模块划分，更像是理解相关研究时可以抓住的几条线索。围绕这些线索，已有工作分别讨论了后端图结构、约束可信度、误差模型、长期状态和候选集合一致性。
+这五项任务分别对应候选集合、单条约束、误差模型、历史决策和恢复机制。下面按这个顺序介绍代表性论文，并在每一节说明算法的输入、代价函数、迭代位置和输出状态。
 
 ## 2. 几篇代表性论文的思路
 
-下面选取几篇有代表性的论文，按照它们主要关注的方向依次介绍。这样的顺序只是为了把问题脉络串起来，不代表这些方法彼此替代。
+下面选取几篇有代表性的论文，按照它们主要关注的方向依次介绍。
 
 1. **Towards a Robust Back-End for Pose Graph SLAM** 讨论后端参与回环有效性判断，以及图拓扑的调整；
-2. **Switchable Constraints for Robust Pose Graph SLAM** 讨论用显式 switch variable 表示回环的软关闭；
-3. **Inference on Networks of Mixtures for Robust Robot Mapping** 讨论用混合概率模型表达正常测量和异常测量；
-4. **Robust Map Optimization using Dynamic Covariance Scaling** 讨论根据残差计算约束权重；
-5. **Robust Loop Closing Over Time for Pose Graph SLAM** 讨论系统根据新证据重新审查过去接受的回环；
-6. **Pairwise Consistent Measurement Set Maximization for Robust Multi-Robot Map Merging** 讨论候选测量之间的一致性。
+2. **Switchable Constraints for Robust Pose Graph SLAM** 讨论用显式 switch variable 表示回环的软剔除；本篇文章简称SC（Switchable Constraints）。
+3. **Inference on Networks of Mixtures for Robust Robot Mapping** 讨论用混合概率模型表达正常测量和异常测量；本篇文章简称Max-Mixture。
+4. **Robust Map Optimization using Dynamic Covariance Scaling** 讨论根据残差计算约束权重；本篇文章简称DCS（Dynamic Covariance Scaling）
+5. **Robust Loop Closing Over Time for Pose Graph SLAM** 讨论系统根据新证据重新审查过去接受的回环；本篇文章的算法简称RRR（ Realizing, Reversing, Recovering）。
+6. **Pairwise Consistent Measurement Set Maximization for Robust Multi-Robot Map Merging** 讨论候选测量之间的一致性。本篇文章简称PCM（Pairwise Consistent Measurement）
+
 
 把这几篇论文放在一起看，可以看到四个逐渐展开的方向
 
@@ -95,7 +114,7 @@ $$
 - 处理时间由单次优化扩展到长期运行；
 - 处理结果由连续降权扩展到接受、拒绝和恢复等状态管理。
 
-## 3. Towards a Robust Back-End for Pose Graph SLAM
+## 3. 后端参与回环判断
 
 **论文** *Towards a Robust Back-End for Pose Graph SLAM*  
 **作者** Niko Sünderhauf、Peter Protzel  
@@ -106,7 +125,7 @@ $$
 
 ### 3.1 固定图拓扑的局限
 
-传统 Pose Graph SLAM 把系统分成两个部分
+传统 SLAM 后端通常把系统分成两个部分
 
 - 前端负责传感器处理、数据关联和回环检测；
 - 后端接收一张已经构建好的图，并在固定拓扑上优化位姿。
@@ -128,7 +147,28 @@ $$
 
 因此，论文把“图拓扑”也纳入了后端需要考虑的内容。图优化的任务从“在一张固定的图上求最优位姿”，扩展为“同时寻找合理位姿和合理约束集合”。
 
-### 3.3 具体做法
+### 3.3 把约束选择写进目标函数
+
+为了说明这个变化，可以给每条可能错误的回环增加一个离散变量 \(a_e\in\{0,1\}\)。\(a_e=1\) 表示边参与当前图优化，\(a_e=0\) 表示暂时关闭它。一个抽象的联合目标为
+
+$$
+\begin{aligned}
+\min_{X,a}\quad
+&\sum_{e\in\mathcal E_{\mathrm{odom}}}
+\rho\left(e_e(X)^T\Omega_e e_e(X)\right)\\
+&+
+\sum_{e\in\mathcal E_{\mathrm{loop}}}
+a_e\,\rho\left(e_e(X)^T\Omega_e e_e(X)\right)\\
+&+
+\lambda\sum_{e\in\mathcal E_{\mathrm{loop}}}(1-a_e).
+\end{aligned}
+$$
+
+前两项衡量保留约束后的几何误差，最后一项表示关闭一条回环需要付出的代价。\(\lambda\) 越大，系统越倾向于保留回环；\(\lambda\) 越小，系统越容易牺牲单条回环来保护里程计骨架。这个式子是对“后端同时选择位姿和约束集合”的抽象表达，后续的 SC 把离散选择放松成连续的 switch，DCS 则直接用残差计算边权。
+
+如果直接枚举所有 \(a_e\)，组合数量会随回环数指数增长。因此工程实现通常采用交替更新或候选剔除：固定当前有效边优化 \(X\)，再根据残差和冲突关系提出少量剔除候选，重新优化后比较全局代价。
+
+### 3.4 具体做法
 
 论文提出了一种允许后端改变图拓扑的鲁棒建模方式。工程实现包含以下环节
 
@@ -138,6 +178,31 @@ $$
 4. 根据优化结果判断某些回环是否应该被关闭；
 5. 必要时从有效图中移除这些边并重新优化。
 
+下面的伪代码给出这种“优化—检查—重优化”骨架。
+
+```text
+输入：里程计边 E_odom，回环候选 E_loop，初始位姿 X
+active ← E_odom ∪ E_loop
+
+重复直到收敛或达到最大轮数：
+    X ← OptimizePoseGraph(active, X)
+    对每条 e ∈ active ∩ E_loop：
+        χ²[e] ← MahalanobisResidual(e, X)
+        conflict[e] ← ConsistencyConflict(e, active, X)
+    candidates ← 选择 χ² 或 conflict 最大的少量回环
+    对每条 e ∈ candidates：
+        trial ← active 删除 e
+        X_trial ← OptimizePoseGraph(trial, X)
+        如果 Objective(trial, X_trial) + removal_penalty
+           < Objective(active, X)：
+            active ← trial
+            state[e] ← rejected
+        否则：
+            state[e] ← monitored
+
+输出：位姿 X、有效边 active，以及所有回环的状态记录
+```
+
 后续 IROS 2012 的 Switchable Constraints 论文给出了更加清晰的显式变量形式。这篇 ICRA 论文的主要价值在于明确了问题定义和后端职责
 
 - 后端开始参与数据关联纠错；
@@ -145,13 +210,13 @@ $$
 - 错误回环可以在优化过程中被发现；
 - 约束选择和位姿估计开始形成联合问题。
 
-### 3.4 错误回环的处理位置
+### 3.5 错误回环的处理位置
 
 错误回环在**优化过程中**被处理。
 
 后端先把候选回环纳入一个可调整的图模型，再根据整体约束的一致程度改变图结构。它没有把全部责任推给前端，也没有等待地图完全失败后才处理。
 
-### 3.5 小结
+### 3.6 小结
 
 这篇论文带来的核心认识是，回环约束的有效性可以成为后端估计的一部分。回环状态需要成为可观测、可记录的对象，错误回环的关闭也应当保留在系统状态和历史信息中。
 
@@ -167,7 +232,7 @@ candidate -> accepted -> downweighted -> rejected
 rejected -> reactivated
 ```
 
-## 4. Switchable Constraints for Robust Pose Graph SLAM
+## 4. 用 switch 变量软关闭回环
 
 **论文** *Switchable Constraints for Robust Pose Graph SLAM*  
 **作者** Niko Sünderhauf、Peter Protzel  
@@ -180,7 +245,7 @@ rejected -> reactivated
 
 标准最小二乘对离群约束比较敏感。只要错误回环的权重较大，它就会参与拉动位姿估计。直接删除回环需要一个可靠的提前判断，固定阈值又很难覆盖不同数据集、不同初始化和不同噪声水平。
 
-SC 让优化器在估计位姿的同时估计每条回环的可信程度。这个可信程度需要满足三个要求
+Switchable Constraints(SC) 让优化器在估计位姿的同时估计每条回环的可信程度。这个可信程度需要满足三个要求
 
 1. 正确回环保持较大影响；
 2. 错误回环可以逐渐失去影响；
@@ -239,11 +304,35 @@ $$
 
 这里的公式用于表达核心机制。具体实现中，需要按照优化库的变量定义、残差定义和信息矩阵约定决定 \(s\) 的取值域以及缩放方式。
 
+把两类残差合并后，一条回环对优化器提供的是
+
+$$
+r_e(X,s_e)=
+\begin{bmatrix}
+s_e e_e(X)\\
+\sqrt{\lambda}(1-s_e)
+\end{bmatrix}.
+$$
+
+在当前线性化点，位姿增量和 switch 增量对应的雅可比分别为
+
+$$
+\frac{\partial r_e}{\partial\delta\xi}
+=
+\begin{bmatrix}s_eJ_e\\0\end{bmatrix},
+\qquad
+\frac{\partial r_e}{\partial s_e}
+=
+\begin{bmatrix}e_e(X)\\-\sqrt{\lambda}\end{bmatrix}.
+$$
+
+因此，当回环残差很大时，switch 的梯度会推动 \(s_e\) 下降；当残差较小时，先验项把 \(s_e\) 拉回 1。原始建模通常把 switch 作为带先验的标量优化，工程实现如果需要严格限制 \(0\leq s_e\leq1\)，可以优化无界变量 \(u_e\)，并令 \(s_e=\operatorname{sigmoid}(u_e)\)。这会改变变量参数化，但不改变“残差项和先验项共同决定可信度”的机制。
+
 ### 4.4 优化流程
 
 一条可实现的 SC 流程如下
 
-#### 第一步 构建普通 Pose Graph
+#### 第一步 构建普通位姿图
 
 加入所有位姿节点、里程计边和经过前端验证的回环边。
 
@@ -288,6 +377,28 @@ $$
 
 阈值应当结合数据集和优化行为进行实验确定。直接使用单个固定阈值，容易把短暂的大残差误判为永久错误。
 
+把上述步骤写成伪代码，可以清楚看到 switch 是在每次线性化时和位姿一起更新的。下面的 J_pose 只对位姿变量求导，switch 列则由回环误差直接给出。
+
+    输入：位姿节点 X，里程计边 E_odom，回环边 E_loop
+    对每条 e ∈ E_loop：s[e] ← 1
+
+    重复直到增量足够小或达到最大迭代次数：
+        H, b ← 0, 0
+        对每条 e ∈ E_odom：
+            r, J_pose ← LinearizeOdomResidual(e, X)
+            Accumulate(H, b, r, J_pose)
+        对每条 e ∈ E_loop：
+            r_pose, J_pose ← LinearizeLoopResidual(e, X)
+            r ← [s[e] · r_pose, sqrt(λ) · (1 - s[e])]
+            J ← [s[e] · J_pose, r_pose; 0, -sqrt(λ)]
+            Accumulate(H, b, r, J)
+        Δ ← SolveDampedNormalEquation(H, b)
+        X, s ← Retract(X, s, Δ)
+
+    输出：优化后的 X、每条回环的 s，以及由 s 产生的状态
+
+实际代码需要注意变量排序、李群增量和 switch 的边界处理；如果使用 Ceres、g2o 或 GTSAM，核心工作是实现带 switch 的 residual block/factor，并确保先验残差没有被错误地乘上 \(s_e\)。
+
 ### 4.5 错误回环的处理位置
 
 错误回环在**优化内部**处理。
@@ -330,7 +441,7 @@ SC 将回环的可信度作为连续变量引入图优化。它能够表达软�
 **期刊版本** IJRR 2013  
 **论文链接** [RSS 页面](https://www.roboticsproceedings.org/rss08/p40.html) · [期刊 DOI](https://doi.org/10.1177/0278364913479413)
 
-这篇论文从概率模型角度研究错误回环。SC 为约束增加软开关，Max-Mixture 则把测量属于多个误差模型的可能性直接写进概率分布。
+这篇论文从概率模型角度研究错误回环。SC 为约束增加软开关，Max-Mixture（本篇文章） 则把测量属于多个误差模型的可能性直接写进概率分布。
 
 ### 5.1 单峰误差模型的局限
 
@@ -394,7 +505,7 @@ component 1: 异常回环，协方差较大
 
 #### 第二步 根据当前位姿计算各成分的代价
 
-对每个成分计算代价
+在分量均值取零的常见设置下，对每个成分计算代价
 
 $$
 C_k(X)
@@ -426,9 +537,51 @@ $$
 
 在优化过程中，当前最有解释力的成分参与残差计算。位姿改变后，最优成分也可能发生变化。
 
+在代价域中，等价的实现是对每个分量计算
+
+$$
+C_k(X)
+=
+\frac{1}{2}
+(e(X)-\mu_k)^T\Sigma_k^{-1}(e(X)-\mu_k)
+-\log\pi_k
++\frac{1}{2}\log|\Sigma_k|,
+$$
+
+并取
+
+$$
+k^\star=\arg\min_k C_k(X).
+$$
+
+选定 \(k^\star\) 后，当前迭代使用的白化残差可以写成
+
+$$
+r_{k^\star}(X)
+=
+\Sigma_{k^\star}^{-1/2}
+\bigl(e(X)-\mu_{k^\star}\bigr).
+$$
+
+下一次迭代重新计算 \(C_k\)，所以分量选择会随着位姿更新而改变。这里的“选择”是对数和的最大项近似，不需要给每条边再增加一个连续 switch 变量；代价是分量切换会使目标函数分段光滑，对初值和阻尼策略比较敏感。
+
 #### 第四步 继续使用图优化更新位姿
 
 每条边的残差形式取决于当前被选择的混合分量。这样可以在普通图优化框架中处理多假设误差模型。
+
+整个 Max-Mixture 迭代可以写成下面的形式
+
+    输入：位姿 X，含 K 个高斯分量的回环边 E_loop
+    重复直到收敛：
+        对每条 e ∈ E_loop：
+            对 k = 1 ... K：
+                C[k] ← ComponentCost(e, k, X)
+            component[e] ← argmin_k C[k]
+            r[e], J[e] ← ResidualAndJacobian(e, component[e], X)
+        用所有里程计残差和 r[e] 组装正规方程
+        Δ ← SolveDampedNormalEquation(H, b)
+        X ← Retract(X, Δ)
+    输出：X，以及每条边最后选择的 component
 
 ### 5.4 错误回环的处理位置
 
@@ -469,7 +622,7 @@ Max-Mixture 将回环的可信度表达为多个误差模型之间的选择，�
 **会议** ICRA 2013  
 **论文链接** [PDF](http://ais.informatik.uni-freiburg.de/publications/papers/agarwalicra13_DCS.pdf) · [DOI](https://doi.org/10.1109/ICRA.2013.6630557)
 
-DCS 关注 SC 的工程代价。每条回环增加一个优化变量，图规模和计算量都会增加。DCS 直接根据当前残差计算约束权重。
+本篇文章（以下简称DCS，Dynamic Covariance Scaling） 关注 SC 的工程代价。每条回环增加一个优化变量，图规模和计算量都会增加。DCS 直接根据当前残差计算约束权重。
 
 ### 6.1 显式可信度变量的计算代价
 
@@ -496,16 +649,15 @@ $$
 
 如果 \(\chi_{ij}^2\) 较小，说明当前位姿与测量相符，保留完整信息矩阵。如果 \(\chi_{ij}^2\) 较大，说明这条边当前存在较强冲突，降低它的约束强度。
 
-DCS 用一个依赖 \(\chi^2\) 的缩放因子实现这个过程。常见形式为
+DCS 用一个依赖 \(\chi^2\) 的缩放因子实现这个过程。下面采用“缩放白化残差”的常见实现约定
 
 $$
 s_{ij}
 =
-\min
-\left(
-1,
-\frac{2\Phi}{\Phi+\chi_{ij}^2}
-\right).
+\begin{cases}
+1, & \chi_{ij}^2\leq\Phi,\\[4pt]
+\dfrac{2\Phi}{\Phi+\chi_{ij}^2}, & \chi_{ij}^2>\Phi.
+\end{cases}
 $$
 
 其中 \(\Phi\) 控制衰减范围。
@@ -522,7 +674,7 @@ $$
 s_{ij}\rightarrow 0.
 $$
 
-因此，DCS 实现了“残差越大，约束影响越小”的效果。
+因此，DCS 实现了“残差越大，约束影响越小”的效果。这里的 \(\Phi\) 是以当前信息矩阵为尺度的阈值，不能直接把不同噪声模型下的原始残差平方拿来比较。
 
 ### 6.3 动态权重的计算过程
 
@@ -533,7 +685,7 @@ DCS 的关键是把缩放因子应用到约束的代价或信息矩阵。工程�
 $$
 \Omega'_{ij}
 =
-s_{ij}\Omega_{ij}.
+s_{ij}^{2}\Omega_{ij}.
 $$
 
 然后使用新的信息矩阵计算该边的代价和雅可比。
@@ -545,10 +697,12 @@ $$
 $$
 r'_{ij}
 =
-\sqrt{s_{ij}}\Lambda_{ij}e_{ij}.
+s_{ij}\Lambda_{ij}e_{ij},
+\qquad
+\Lambda_{ij}^{T}\Lambda_{ij}=\Omega_{ij}.
 $$
 
-两种写法在具体实现中需要保持一致。代码中应明确缩放对象
+两种写法在具体实现中需要保持一致：如果代码把 \(w_{ij}=s_{ij}^{2}\) 称为 weight，那么信息矩阵写成 \(\Omega'_{ij}=w_{ij}\Omega_{ij}\)，白化残差写成 \(r'_{ij}=\sqrt{w_{ij}}\Lambda_{ij}e_{ij}\)。代码中应明确缩放对象
 
 - 原始 residual；
 - 白化 residual；
@@ -565,6 +719,26 @@ $$
 6. 进入下一轮，重新计算所有回环权重。
 
 DCS 的权重通常是迭代过程中动态变化的。它不需要把 \(s_{ij}\) 作为额外顶点加入状态向量。
+
+对应的 IRLS 式伪代码如下
+
+    输入：位姿 X，里程计边 E_odom，回环边 E_loop，阈值 Φ
+    重复直到位姿增量收敛：
+        H, b ← 0, 0
+        对每条 e ∈ E_odom：
+            r, J ← Linearize(e, X)
+            Accumulate(H, b, r, J)
+        对每条 e ∈ E_loop：
+            e_raw, J ← Linearize(e, X)
+            χ² ← e_rawᵀ Ω e_raw
+            如果 χ² ≤ Φ：s ← 1
+            否则：s ← 2Φ / (Φ + χ²)
+            r ← s · Λ · e_raw
+            J ← s · Λ · J
+            Accumulate(H, b, r, J)
+        Δ ← SolveDampedNormalEquation(H, b)
+        X ← Retract(X, Δ)
+    输出：X，以及最后一轮的 s[e]
 
 ### 6.4 错误回环的处理位置
 
@@ -608,7 +782,7 @@ DCS 可以让错误边逐渐失去影响，但它不会自动从候选集合中�
 
 SC 与 DCS 形成了清晰的对照。SC 保留显式状态变量，诊断信息更丰富；DCS 直接从残差计算权重，状态维度和计算开销更小。两者都依赖当前位姿估计，也都需要结合集合一致性或历史状态才能形成完整的回环判断。
 
-## 7. Robust Loop Closing Over Time for Pose Graph SLAM
+## 7. 长期运行中的回环重评估
 
 **论文** *Robust Loop Closing Over Time for Pose Graph SLAM*  
 **作者** Yasir Latif、César Cadena、José Neira  
@@ -616,7 +790,7 @@ SC 与 DCS 形成了清晰的对照。SC 保留显式状态变量，诊断信息
 **期刊版本** IJRR 2013  
 **论文链接** [RSS PDF](http://webdiis.unizar.es/~ylatif/papers/RSS2012_RRR.pdf) · [IJRR DOI](https://doi.org/10.1177/0278364913498910)
 
-前面几种方法主要关注一次优化中的异常约束。RRR 进一步研究长期运行系统。系统今天接受的回环，未来可能被新证据证明错误。
+本算法简称RRR（ Realizing, Reversing, Recovering）。前面几种方法主要关注一次优化中的异常约束。RRR 进一步研究长期运行系统。系统今天接受的回环，未来可能被新证据证明错误。
 
 ### 7.1 增量运行中的历史错误
 
@@ -650,6 +824,19 @@ RRR 的名字代表三个阶段
 3. **Recovering** 移除错误约束，重新计算地图估计。
 
 这个思路把回环从一个静态边扩展成一个具有生命周期的决策对象。
+
+为了让“共识”可以计算，需要为候选集合定义支持度。一个便于实现的抽象写法是
+
+$$
+\operatorname{Score}(\mathcal C)
+=
+\sum_{e\in\mathcal C}q_e
+-\alpha
+\sum_{\{e,f\}\subset\mathcal C}
+\operatorname{conflict}(e,f),
+$$
+
+其中 \(q_e\) 可以综合前端匹配置信度、几何验证结果和当前后端残差，\(\operatorname{conflict}(e,f)\) 表示两条回环在里程计骨架或相对变换上的矛盾。Realizing 阶段选择得分较高且内部冲突较少的集合；Reversing 阶段比较新集合与历史 accepted 集合；Recovering 阶段通过移除、重优化和指标比较确认撤销是否成立。这个分数是工程实现的接口，具体论文实现可以使用不同的一致性检验和增量数据结构。
 
 ### 7.3 历史回环的重评估流程
 
@@ -693,6 +880,31 @@ RRR 的处理流程包含以下环节。
 #### 第五步 支持增量运行
 
 iRRR 版本关注每次新数据到来后的增量更新。系统不需要每次从零开始处理所有数据，但需要保留足够的历史状态，以便局部重评估。
+
+把一次新回环到达后的处理过程写成伪代码如下。关键点是 history 不会因为某条边暂时被移除而丢弃它。
+
+    输入：历史回环 history，当前有效边 active，新候选 new_loops
+    history ← history ∪ new_loops
+    consensus ← RealizeConsensus(history, current_trajectory)
+    contradicted ← {e ∈ active ∩ history | e 不在 consensus}
+
+    如果 contradicted 为空：
+        active ← active ∪ new_loops
+        X ← IncrementalOptimize(active, X)
+    否则：
+        trial ← active 删除 contradicted
+        X_trial ← OptimizeFromCheckpoint(trial, X)
+        如果 GlobalConsistency(trial, X_trial)
+           > GlobalConsistency(active, X)：
+            active ← trial
+            对每条 e ∈ contradicted：state[e] ← removed
+            X ← X_trial
+        否则：
+            对每条 e ∈ contradicted：state[e] ← monitored
+
+    对 history 中尚未激活的边：
+        如果它重新进入 consensus 且通过局部验证：state[e] ← recovered
+    输出：X、active，以及完整 history
 
 ### 7.4 错误回环的处理位置
 
@@ -749,7 +961,7 @@ RRR 将回环判断放进图的生命周期。迭代剔除也可以被理解为�
 **会议** ICRA 2018  
 **论文链接** [PDF](https://robots.et.byu.edu/jmangelson/pubs/2018/mangelson18icra.pdf) · [DOI](https://doi.org/10.1109/ICRA.2018.8460217)
 
-PCM 把错误回环处理进一步前移。它的重点是候选测量之间的相互一致性，尤其适合多机器人地图合并和多 session 对齐。
+本篇文章简称PCM（Pairwise Consistent Measurement）， PCM 把错误回环处理进一步前移。它的重点是候选测量之间的相互一致性，尤其适合多机器人地图合并和多 session 对齐。
 
 ### 8.1 多地图合并中的集合一致性
 
@@ -818,6 +1030,31 @@ $$
 
 其中 \(T_{ij}\) 表示由两条测量和局部地图关系组合得到的相对变换。具体表达式依赖于 \(SE(2)\) 或 \(SE(3)\) 的节点关系和测量方向。
 
+可以用一个具体的闭环组合来说明这个计算。设候选 \(z_i\) 把局部帧 \(A_i\) 变换到 \(B_i\)，记为 \(Z_i={}^{B_i}T_{A_i}\)；局部轨迹给出
+\(A_{ji}={}^{A_j}T_{A_i}\) 和 \(B_{ji}={}^{B_j}T_{B_i}\)。从 \(A_i\) 到 \(B_j\) 有两条路径
+
+$$
+B_{ji}Z_i
+\quad\text{和}\quad
+Z_jA_{ji}.
+$$
+
+因此两条候选的相容误差可以写成
+
+$$
+r_{ij}
+=
+\operatorname{Log}
+\left(
+(B_{ji}Z_i)^{-1}
+Z_jA_{ji}
+\right),
+\qquad
+d_{ij}=r_{ij}^{T}\Sigma_{ij}^{-1}r_{ij}.
+$$
+
+\(\Sigma_{ij}\) 由两条回环测量和两段局部轨迹的协方差通过一阶误差传播得到。这个写法把“候选之间是否一致”变成一个可以计算的马氏距离，也明确了测量方向；实现时只需要根据自己的 \(T_{ba}\) 约定调整乘法顺序。
+
 当
 
 $$
@@ -845,6 +1082,21 @@ $$
 - 最大团启发式；
 - 近似算法；
 - 根据前端分数或时间窗口先缩小候选集。
+
+一个直接的实现骨架如下。最大团搜索本身可以替换成分支定界或近似算法，前面的两两一致性判定保持不变。
+
+    输入：候选 Z[1..m]，局部轨迹和协方差，阈值 τ_PCM
+    G ← 无向图，包含 m 个顶点
+    对 i = 1 ... m：
+        对 j = i + 1 ... m：
+            r_ij, Σ_ij ← ComposeCycle(Z[i], Z[j], local_trajectory)
+            d_ij ← r_ijᵀ Σ_ij⁻¹ r_ij
+            如果 d_ij < τ_PCM：
+                在 G 中连接 i 和 j
+    C ← MaximumClique(G, vertex_score = frontend_confidence)
+    accepted ← {Z[i] | i ∈ C}
+    deferred ← {Z[i] | i 不在 C}
+    输出 accepted、deferred，以及 consistency graph G
 
 #### 第五步 将选出的候选送入后端
 
@@ -1063,7 +1315,7 @@ $$
 其中
 
 - \(\chi^2_e\) 表示回环的马氏距离；
-- \(s_e\) 表示 SC switch 或 DCS weight；
+- \(s_e\) 表示 SC switch；DCS 则同时记录残差缩放 \(s_e\) 或信息权重 \(w_e=s_e^2\)；
 - \(n_{\text{conflict}}\) 表示与其他候选的冲突数量；
 - \(\Delta \text{cost}\) 表示处理该边前后的全局代价变化。
 
@@ -1094,6 +1346,42 @@ $$
 ### 第七步 确认或恢复
 
 如果地图质量改善，确认边为 `rejected`。如果地图质量下降，恢复该边，记录本轮判断失败，并调整后续观察策略。
+
+把这套策略合并成一个可运行的后端循环，可以写成
+
+    输入：候选回环 loops，里程计边 E_odom，初始状态 X
+    history ← 保存 loops 的测量、协方差、来源和状态
+    active ← E_odom
+
+    对每个新到达的候选 batch：
+        verified ← LocalGeometricVerification(batch)
+        history ← history ∪ verified
+        accepted_set ← PCM(history 中尚未永久拒绝的候选)
+        active ← E_odom ∪ accepted_set
+
+        如果使用 SC：
+            X, switch ← OptimizeWithSwitches(active, X)
+        否则如果使用 DCS：
+            X, scale ← OptimizeWithDCS(active, X)
+        否则如果使用 Max-Mixture：
+            X, component ← OptimizeWithMixtures(active, X)
+
+        对每条回环 e：
+            记录 χ²[e]、可信度、冲突数和全局 cost
+            更新 e 的 monitored / downweighted 计数
+        remove_set ← 满足连续异常条件的候选
+        trial ← active 删除 remove_set
+        X_trial ← Reoptimize(trial, X)
+        如果 GlobalMetrics(trial, X_trial) 改善：
+            active ← trial
+            将 remove_set 标为 rejected
+            X ← X_trial
+        否则：
+            保留 active，并把 remove_set 留在 monitored
+        对 history 中被新证据重新支持的边：
+            重新局部验证后允许 reactivated
+
+    输出：轨迹 X、当前 active 图、完整回环 history 和诊断日志
 
 ## 12. 回环鲁棒性的实验设计
 
@@ -1201,7 +1489,7 @@ $$
 
 这些方法在系统中的组合顺序可以写成
 
-1. 普通 Pose Graph 提供干净数据上的基线；
+1. 普通位姿图后端提供干净数据上的基线；
 2. SC 通过 switch 表达回环可信度；
 3. 观察、剔除和恢复机制将连续权重连接到离散状态；
 4. DCS 作为减少状态变量的轻量化方案；
