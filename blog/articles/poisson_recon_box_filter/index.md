@@ -12,7 +12,7 @@ draft: false
 
 ---
 
-## 🧩 一、背景：Poisson 重建中的卷积思想
+## 一、背景：Poisson 重建中的卷积思想
 
 在 Poisson 重建中，我们要求解一个方程：
 
@@ -38,9 +38,7 @@ B-spline 特点：
 
 ---
 
-## 🧱 二、B-spline 和 box filter 的关系
-
-### ✅ 结论一句话：
+## 二、B-spline 和 box filter 的关系
 
 > **B-spline 核函数是 box filter 的多次自卷积结果。**
 
@@ -50,7 +48,7 @@ $$B_n(x) = \underbrace{(b * b * \cdots * b)}_{n+1 \text{ 次}}$$
 
 其中 $b(x)$ 是 **box filter（单位宽度的矩形函数）**。
 
-### 🧮 举例说明
+### 举例说明
 
 1. **0 阶 B-spline**
 
@@ -84,7 +82,7 @@ $$B_n(x) = \underbrace{(b * b * \cdots * b)}_{n+1 \text{ 次}}$$
 
 ---
 
-## 🧠 三、为什么 Poisson 重建里用 B-spline
+## 三、为什么 Poisson 重建里用 B-spline
 
 
 1. **紧支撑（compact support）**：  
@@ -101,7 +99,7 @@ $$B_n(x) = \underbrace{(b * b * \cdots * b)}_{n+1 \text{ 次}}$$
 
 ---
 
-## ⚙️ 四、数值计算上的意义
+## 四、数值计算上的意义
 
 当你要计算：
 
@@ -117,7 +115,7 @@ $$\int B(\mathbf{x} - \mathbf{x}_i) B(\mathbf{x} - \mathbf{x}_j)\, d\mathbf{x}$$
 
 ---
 
-## 🔍 五、总结对比表
+## 五、总结对比表
 
 | 概念                | 数学定义        | 在 Poisson 重建中的作用      | 与 box filter 的关系      |
 | ------------------- | --------------- | ---------------------------- | ------------------------- |
@@ -128,7 +126,7 @@ $$\int B(\mathbf{x} - \mathbf{x}_i) B(\mathbf{x} - \mathbf{x}_j)\, d\mathbf{x}$$
 
 ---
 
-## 📖 参考文献
+## 参考文献
 
 - Kazhdan, M., Bolitho, M., & Hoppe, H. (2006).  
    _Poisson Surface Reconstruction_.  

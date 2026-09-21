@@ -1,5 +1,5 @@
 ---
-title: "从 IMU 预积分到 VINS、LIO-SAM 与 LVI-SAM"
+title: "使用IMU预积分的三篇文章：VINS、LIO-SAM 与 LVI-SAM"
 date: 2026-09-15
 categories: [state-estimation]
 tags: [IMU, Preintegration, VINS, LIO-SAM, LVI-SAM, VIO, LIO, Factor Graph, Sliding Window]
@@ -7,13 +7,13 @@ excerpt: "沿着关键帧之间的一段数据流，理解 IMU 形成关键帧�
 draft: false
 ---
 
-# 从 IMU 预积分到 VINS、LIO-SAM 与 LVI-SAM
+# 使用IMU预积分的三篇文章：VINS、LIO-SAM 与 LVI-SAM
 
 > 上一篇从运动模型出发，推导了相对旋转、速度、位置增量，说明 bias Jacobian 和协方差的递推过程，并把它们写成 IMU 因子残差。本文沿着一段关键帧之间的 IMU 数据继续往下走，说明这些量进入 VINS、LIO-SAM 和 LVI-SAM 后怎样参与轨迹估计。
 
 **阅读路线：** [IMU 预积分详解：原理、推导与 C++/Eigen 实现](../imu-preintegration/index.html) → 本文。误差状态与噪声约定可参考 [ESKF 系列](../ekf-again/index.html)、[IMU 噪声参数](../imu-noise-allan-variance/index.html) 和 [IMU 零偏可观性](../imu-bias-estimation/index.html)。
 
-## 摘要：从一段 IMU 数据开始
+## 从一段 IMU 数据开始
 
 系统处理完关键帧 $i$ 后，继续接收 IMU 测量。等到相机或激光产生关键帧 $j$，这段时间内的 IMU 样本就有了明确的起点和终点。几十到几百个高频样本，沿着下面的链路汇聚成一条连接两个关键帧的约束：
 

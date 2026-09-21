@@ -3,7 +3,7 @@ title: "关于Poisson重建∂符号的理解"
 date: 2025-10-17T23:04:00+08:00 
 categories: [reconstruction]
 tags: ["Poisson reconstruction", "Surface Reconstruction","3D Reconstruction"]
-excerpt: "初次看到Poisson重建这篇文章的时候，看到他用∂M表示表面，当时很困惑，为什么偏导数表示表面？ 这里我觉得有一个概念理解错误的问题。 作者使用∂M表示“集合 M 的边界”，而不是“偏导数”。 具体说来，  ∂其实是**数学记号上的“边界符号”**（boundary operator），不是偏导数。"
+excerpt: "关于Poisson重建∂符号的理解,∂其实是**数学记号上的“边界符号”**（boundary operator），不是偏导数。"
 draft: false
 ---
 
@@ -14,11 +14,11 @@ draft: false
 
 ## 一、误解的来源
 
-在 Poisson Surface Reconstruction 论文中（Kazhdan et al., 2006），确实有这样的记号：
+在 Poisson Surface Reconstruction 论文中（Kazhdan et al., 2006），有这样的记号：
 
 $$\partial M \equiv \text{surface of the solid model } M$$
 
-很多人第一次看会以为 “∂” 是偏导符号，但其实这里：
+我第一次看会以为 “∂” 是偏导符号，当时蒙了很久，但其实这里：
 
 > $\partial M$ 表示的是**集合 M 的边界（boundary）**，而不是偏导（partial derivative）。
 
@@ -42,7 +42,7 @@ $$\partial M \equiv \text{surface of the solid model } M$$
 
 * * *
 
-## 三、Poisson 重建中为什么要这样写
+## 三、Poisson 重建中的写法
 
 Poisson Surface Reconstruction 的核心思想是：
 
@@ -228,7 +228,7 @@ $$\mathbf{n}(\mathbf{x}) \propto \nabla \chi(\mathbf{x})$$
 
 * * *
 
-### 6.8、总结一句话
+### 6.8、总结
 
 > **等值集（level set）**是标量场中函数值相等的点的集合，  
 > 它是表面的一种隐式表示。  

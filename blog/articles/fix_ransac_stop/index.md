@@ -7,13 +7,14 @@ excerpt: "Fixing the RANSAC Stopping Criterion 论文总结"
 draft: false
 ---
 
-# RANSAC 停止准则的修正：从近似到精确
+# RANSAC 停止准则的修正
 
-## 文章概述
+## 概述
+
 几年以前在自己写RANSAC算法时候， 就发现利用Multi-View Geometry那本圣经中的停止准则来计算迭代次数，似乎不能得到最好的解。 后来面试过一些候选人，他们也发现了这个问题。 但是我从未怀疑过是理论出了问题，况且在读那本Multi-View Geometry一书的时候，我也确信自己是读懂了的。 今年发现这篇文章，真的是有那种感觉，就是发现有问题的地方，应该好好思考，敢于怀疑。好了，说了这么多其实这篇文章很短， 就是修正了RANSAC 算法停止准则中概率的近似计算问题。 文章地址： https://arxiv.org/abs/2503.07829
 
 
-文章题目：Fixing the RANSAC Stopping Criterion， 由 Johannes Schönberger、Viktor Larsson 和 Marc Pollefeys 发表于今年-- 2025 年。 一作是Colmap的作者。 
+文章题目：Fixing the RANSAC Stopping Criterion， 由 Johannes Schönberger、Viktor Larsson 和 Marc Pollefeys 发表于今年-- 2025 年。 
 
 ## 正题
 RANSAC（Random Sample Consensus）自 1981 年由 Fischler 和 Bolles 提出以来，一直是计算机视觉中最常用的鲁棒估计算法之一 。设 s 表示期望我们RANSAC算法的采样中至少能有一次采样点都是内点，也就是能够正确工作的期望概率， 例如0.99。设 P 表示一次采样全部都是内点的概率。我们尝试采样次数N应该满足： 

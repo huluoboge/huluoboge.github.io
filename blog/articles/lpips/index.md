@@ -48,7 +48,7 @@ LPIPS 想解决的问题是：
 
 * * *
 
-## 🎯 特点
+## 特点
 
 | 特性 | 描述 |
 | --- | --- |
@@ -59,7 +59,7 @@ LPIPS 想解决的问题是：
 
 * * *
 
-## 🔍 对比示例
+## 对比示例
 
 | 指标 | 数学意义 | 感知相关性 |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ LPIPS 想解决的问题是：
 
 * * *
 
-## 📦 Python 实现（PyTorch）
+## Python 实现（PyTorch）
 
 ```python
 import lpips
@@ -92,11 +92,11 @@ print('LPIPS distance:', dist.item())
 
 * * *
 
-## 🧩 参考文献
+## 参考文献
 
 > Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shechtman, Oliver Wang.  
 > **"The Unreasonable Effectiveness of Deep Features as a Perceptual Metric"**  
 > _CVPR 2018_  
-> 📄 Paper | [💻 GitHub](https://github.com/richzhang/PerceptualSimilarity)
+> Paper | [💻 GitHub](https://github.com/richzhang/PerceptualSimilarity)
 
 * * *

@@ -61,10 +61,10 @@ def setup_chinese_font(permanent=False):
         "Linux": ["Noto Sans CJK SC", "WenQuanYi Micro Hei", "AR PL UMing CN"]
     }
 
-    # 1️⃣ 获取系统可用字体列表
+    # 1获取系统可用字体列表
     available_fonts = [f.name for f in font_manager.fontManager.ttflist]
     
-    # 2️⃣ 选择系统内可用的中文字体
+    # 2选择系统内可用的中文字体
     candidates = preferred_fonts.get(system, [])  # 当前系统的优先表
     selected_font = None
     for font_name in candidates:
@@ -78,7 +78,7 @@ def setup_chinese_font(permanent=False):
             print("⚠️ 未检测到中文字体，请自行安装字体")
         else:
             selected_font = chinese_fonts[0]
-    # 4️⃣ 最后，如果还没找到，就用默认字体
+    # 4最后，如果还没找到，就用默认字体
     if not selected_font:
         chinese_fonts = list_chinese_fonts()
         selected_font = matplotlib.rcParams['font.sans-serif'][0]
@@ -86,11 +86,11 @@ def setup_chinese_font(permanent=False):
     else:
         print("✅ 使用中文字体：", selected_font)
 
-    # 5️⃣ 应用到 Matplotlib
+    # 5应用到 Matplotlib
     matplotlib.rcParams['font.sans-serif'] = [selected_font]
     matplotlib.rcParams['axes.unicode_minus'] = False  # 让负号正常显示
 
-    # 6️⃣ 可选：写入配置文件（永久生效）
+    # 6可选：写入配置文件（永久生效）
     if permanent:
         rcfile = matplotlib.matplotlib_fname()
         with open(rcfile, 'r', encoding='utf-8') as f:
