@@ -65,7 +65,7 @@ python3 -m http.server 8977 --bind 127.0.0.1
 ```
 
 > 本地预览主页时，Recent Posts 区块为空占位——该区块由 CI 在部署时自动注入
-> 最新 3 篇文章。想本地看效果可手动执行：
+> 最新 8 篇文章。想本地看效果可手动执行：
 > `node scripts/inject-recent-posts.js`（会改写 index.html，看完 `git checkout index.html` 恢复）。
 
 ### 发布

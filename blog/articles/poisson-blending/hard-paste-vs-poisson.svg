@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620">
+<defs>
+  <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+    <path d="M2,2 L10,6 L2,10 z" fill="#6b7280"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="1120" height="620" rx="0" fill="#ffffff" stroke="#ffffff" stroke-width="0"/>
+<text x="560.0" y="42" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="28" fill="#20344d" font-weight="800">直接贴像素与梯度域融合的差别</text>
+<text x="560.0" y="74" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" fill="#6b7280" font-weight="500">左侧保留源图绝对亮度，边界容易断裂；右侧保留源图梯度，边界由目标图约束</text>
+<rect x="48" y="110" width="480" height="460" rx="16" fill="#f8fafc" stroke="#c5ccd6" stroke-width="1.5"/>
+<text x="288" y="148" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22" fill="#20344d" font-weight="800">直接贴像素</text>
+<rect x="90" y="180" width="400" height="210" rx="12" fill="#dce8f8" stroke="#4e8dd8" stroke-width="2"/>
+<text x="290" y="208" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="700">目标图背景</text>
+<text x="290" y="232" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15" fill="#6b7280" font-weight="500">边界亮度已经固定</text>
+<rect x="170" y="250" width="180" height="110" rx="8" fill="#ffe0c8" stroke="#dd8452" stroke-width="2.5"/>
+<text x="260" y="295" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="800">源图块</text>
+<text x="260" y="325" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" fill="#6b7280" font-weight="500">原样写入亮度</text>
+<rect x="90" y="420" width="400" height="110" rx="10" fill="#fde8e8" stroke="#c75b5b" stroke-width="1.5"/>
+<text x="290" y="460" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#c75b5b" font-weight="700">边界处亮度突变</text>
+<text x="290" y="492" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15" fill="#6b7280" font-weight="500">视觉上形成明显接缝或色差环</text>
+<rect x="592" y="110" width="480" height="460" rx="16" fill="#f8fafc" stroke="#c5ccd6" stroke-width="1.5"/>
+<text x="832" y="148" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22" fill="#20344d" font-weight="800">Poisson 融合</text>
+<rect x="634" y="180" width="400" height="210" rx="12" fill="#dce8f8" stroke="#4e8dd8" stroke-width="2"/>
+<text x="834" y="208" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="700">目标图背景</text>
+<text x="834" y="232" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15" fill="#6b7280" font-weight="500">边界亮度作为 Dirichlet 条件</text>
+<rect x="714" y="250" width="180" height="110" rx="8" fill="#dff3e4" stroke="#55a868" stroke-width="2.5"/>
+<text x="804" y="295" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="800">求解区域 Ω</text>
+<text x="804" y="325" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" fill="#6b7280" font-weight="500">内部保留源图梯度</text>
+<rect x="634" y="420" width="400" height="110" rx="10" fill="#e8f6ec" stroke="#55a868" stroke-width="1.5"/>
+<text x="834" y="460" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#55a868" font-weight="700">边界连续，内部结构来自源图</text>
+<text x="834" y="492" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15" fill="#6b7280" font-weight="500">绝对亮度被边界重新锚定</text>
+</svg>

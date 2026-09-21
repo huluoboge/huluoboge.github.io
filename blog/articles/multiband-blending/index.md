@@ -648,6 +648,8 @@ $$
 
 多频段融合擅长处理结构接缝，但不能替代几何配准，也不能单独解决大范围曝光和颜色不一致。理解这一点以后，权值设计、颜色匀色和层数选择就都有了清楚的位置。
 
+图像融合系列的下一篇是 [Poisson 融合](../poisson-blending/)。它改在梯度域中重建局部区域：内部跟随源图梯度，边界跟随目标图亮度，更适合无缝克隆和局部贴图一类任务。
+
 ## 参考
 
 - Peter J. Burt and Edward H. Adelson, “A Multiresolution Spline with Application to Image Mosaics”, ACM Transactions on Graphics, 1983.

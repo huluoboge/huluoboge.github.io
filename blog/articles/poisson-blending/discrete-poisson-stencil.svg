@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560">
+<defs>
+  <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+    <path d="M2,2 L10,6 L2,10 z" fill="#6b7280"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="980" height="560" rx="0" fill="#ffffff" stroke="#ffffff" stroke-width="0"/>
+<text x="490.0" y="42" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="28" fill="#20344d" font-weight="800">离散 Poisson：四点邻域拉普拉斯</text>
+<text x="490.0" y="74" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" fill="#6b7280" font-weight="500">每个内部像素的方程只连接自己和上下左右四个邻居</text>
+<rect x="244" y="282" width="72" height="56" rx="10" fill="#dff3e4" stroke="#55a868" stroke-width="2"/>
+<text x="280" y="316" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="800">f_p</text>
+<rect x="154" y="282" width="72" height="56" rx="10" fill="#d9e9ff" stroke="#4e8dd8" stroke-width="2"/>
+<text x="190" y="316" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="800">f_l</text>
+<rect x="334" y="282" width="72" height="56" rx="10" fill="#d9e9ff" stroke="#4e8dd8" stroke-width="2"/>
+<text x="370" y="316" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="800">f_r</text>
+<rect x="244" y="192" width="72" height="56" rx="10" fill="#d9e9ff" stroke="#4e8dd8" stroke-width="2"/>
+<text x="280" y="226" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="800">f_u</text>
+<rect x="244" y="372" width="72" height="56" rx="10" fill="#d9e9ff" stroke="#4e8dd8" stroke-width="2"/>
+<text x="280" y="406" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="800">f_d</text>
+<line x1="280" y1="310" x2="190" y2="310" stroke="#9aa4b2" stroke-width="2"/>
+<line x1="280" y1="310" x2="370" y2="310" stroke="#9aa4b2" stroke-width="2"/>
+<line x1="280" y1="310" x2="280" y2="220" stroke="#9aa4b2" stroke-width="2"/>
+<line x1="280" y1="310" x2="280" y2="400" stroke="#9aa4b2" stroke-width="2"/>
+<rect x="520" y="160" width="400" height="280" rx="14" fill="#f8fafc" stroke="#c5ccd6" stroke-width="1.5"/>
+<text x="720" y="210" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="20" fill="#20344d" font-weight="800">中心像素方程</text>
+<text x="720" y="260" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#2f3640" font-weight="600">4 f_p − f_l − f_r − f_u − f_d</text>
+<text x="720" y="300" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#2f3640" font-weight="600">= div v |_p</text>
+<text x="720" y="350" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" fill="#6b7280" font-weight="500">边界像素直接写成</text>
+<text x="720" y="385" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" fill="#20344d" font-weight="700">f_q = f*_q</text>
+</svg>
