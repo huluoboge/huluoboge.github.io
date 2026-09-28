@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="360" viewBox="0 0 980 360">
+  <rect width="980" height="360" fill="#fbfcfe"/>
+  <style>
+    text { font-family: 'Noto Sans CJK SC', 'Source Han Sans SC', 'PingFang SC', sans-serif; }
+    .title { font-size: 15px; font-weight: 600; fill: #1f2937; }
+    .label { font-size: 13px; fill: #334155; }
+    .note { font-size: 12px; fill: #64748b; }
+    .box { fill: #eef4fb; stroke: #3b6ea5; stroke-width: 1.4; }
+  </style>
+  <text x="40" y="36" class="title">批优化中的三类残差如何共同约束状态</text>
+
+  <rect class="box" x="40" y="80" width="220" height="120" rx="8"/>
+  <text x="150" y="115" text-anchor="middle" class="title">陀螺残差</text>
+  <text x="150" y="145" text-anchor="middle" class="note">ω_m − ω(t) − b_g</text>
+  <text x="150" y="170" text-anchor="middle" class="note">约束旋转样条与零偏</text>
+
+  <rect class="box" x="300" y="80" width="220" height="120" rx="8"/>
+  <text x="410" y="115" text-anchor="middle" class="title">加速度残差</text>
+  <text x="410" y="145" text-anchor="middle" class="note">a_m − a(t) − b_a</text>
+  <text x="410" y="170" text-anchor="middle" class="note">约束平移样条、重力与零偏</text>
+
+  <rect class="box" x="560" y="80" width="380" height="120" rx="8"/>
+  <text x="750" y="115" text-anchor="middle" class="title">点到曲面片残差</text>
+  <text x="750" y="145" text-anchor="middle" class="note">[p^{L₀}ᵀ , 1] π</text>
+  <text x="750" y="170" text-anchor="middle" class="note">约束外参、整条轨迹与地图一致性</text>
+
+  <rect x="160" y="250" width="660" height="70" rx="8" fill="#f3f7ef" stroke="#4f7a3e"/>
+  <text x="490" y="280" text-anchor="middle" class="title">联合最小二乘</text>
+  <text x="490" y="302" text-anchor="middle" class="note">状态含外参、样条控制点、加速度/陀螺零偏；LM 迭代求解</text>
+</svg>

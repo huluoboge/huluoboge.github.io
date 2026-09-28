@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="420" viewBox="0 0 1080 420">
+  <rect width="1080" height="420" fill="#fbfcfe"/>
+  
+  <style>
+    text { font-family: 'Noto Sans CJK SC', 'Source Han Sans SC', 'PingFang SC', Arial, sans-serif; }
+    .title { font-size: 15px; font-weight: 700; fill: #1f2937; }
+    .lbl { font-size: 13px; font-weight: 600; fill: #374151; }
+    .small { font-size: 12px; font-weight: 500; fill: #4b5563; }
+    .math { font-size: 13px; font-weight: 600; fill: #1f2937;
+            font-family: 'Times New Roman', 'Noto Serif', serif; }
+    .axis { stroke: #9ca3af; stroke-width: 1.2; fill: none; }
+    .grid { stroke: #e5e7eb; stroke-width: 1; fill: none; }
+  </style>
+
+  <defs>
+    <marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 Z" fill="#4b5563"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="540" y="34" text-anchor="middle">标准形式与累积形式：同一条曲线，两种写法</text>
+
+  <!-- Left box -->
+  <rect x="40" y="60" width="480" height="300" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text class="lbl" x="280" y="95" text-anchor="middle">标准形式（欧氏空间）</text>
+  <text class="math" x="280" y="150" text-anchor="middle">p(t) = Σ Bᵢ(t) pᵢ</text>
+  <text class="small" x="280" y="190" text-anchor="middle">对控制点做凸组合加权</text>
+  <text class="small" x="280" y="220" text-anchor="middle">适合 ℝ³ 平移样条</text>
+  <text class="small" x="280" y="260" text-anchor="middle">加法结构清晰，求导即对基函数求导</text>
+  <circle cx="160" cy="310" r="14" fill="#2563eb"/>
+  <circle cx="230" cy="310" r="14" fill="#2563eb"/>
+  <circle cx="300" cy="310" r="14" fill="#2563eb"/>
+  <circle cx="370" cy="310" r="14" fill="#2563eb"/>
+  <text class="small" x="265" y="345" text-anchor="middle">pᵢ 直接相加</text>
+
+  <!-- Right box -->
+  <rect x="560" y="60" width="480" height="300" rx="12" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text class="lbl" x="800" y="95" text-anchor="middle">累积形式（通向李群）</text>
+  <text class="math" x="800" y="145" text-anchor="middle">p(t) = pᵢ + Σ λ̃ⱼ(u) (pᵢ₊ⱼ − pᵢ₊ⱼ₋₁)</text>
+  <text class="small" x="800" y="190" text-anchor="middle">从左侧锚点出发，叠加相邻差分</text>
+  <text class="small" x="800" y="220" text-anchor="middle">差分 ↔ 相对旋转 / 相对位姿</text>
+  <text class="small" x="800" y="260" text-anchor="middle">经 Exp(λ log(·)) 推广到 SO(3)、SE(3)</text>
+  <circle cx="680" cy="310" r="14" fill="#0f766e"/>
+  <text class="math" x="720" y="315" fill="#0f766e">→</text>
+  <circle cx="760" cy="310" r="14" fill="#14b8a6"/>
+  <text class="math" x="800" y="315" fill="#0f766e">→</text>
+  <circle cx="840" cy="310" r="14" fill="#5eead4"/>
+  <text class="math" x="880" y="315" fill="#0f766e">→</text>
+  <circle cx="920" cy="310" r="14" fill="#99f6e4"/>
+  <text class="small" x="800" y="345" text-anchor="middle">连乘相对增量</text>
+
+  <text class="small" x="540" y="395" text-anchor="middle">
+    欧氏空间中两种形式数值等价；旋转几乎总是写累积型，因为控制点不能做普通向量加法
+  </text>
+</svg>

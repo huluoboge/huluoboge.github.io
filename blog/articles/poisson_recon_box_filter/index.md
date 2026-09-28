@@ -10,6 +10,8 @@ draft: false
 ## 前言
 在 Poisson Surface Reconstruction 表面重建文章中， 提到了使用自身 n 次卷积的 box filter 来作为平滑滤波器来说对指示函数进行平滑，生成梯度场。 那么 box filter 自身的 n 次卷积是什么呢？ 文章里面说用一个方差是采样分辨率的高斯函数是合适的，为什么可以用 box filter 自身 n 次卷积来代替高斯函数是合适的呢？ 下面就这个问题详细进行展开讨论。 因为采用的滤波器会直接影响到算法的数值离散化方式和效率。我们需要在理论和实践上都去理解它。
 
+关于 B 样条从 box 自卷积、连续性到离散实现的系统解释，可以参阅 [B 样条的局部平滑曲线构造与应用](../bspline-continuous-time-slam/index.html)。本文继续聚焦 Poisson 重建中的具体用法。
+
 ---
 
 ## 一、背景：Poisson 重建中的卷积思想

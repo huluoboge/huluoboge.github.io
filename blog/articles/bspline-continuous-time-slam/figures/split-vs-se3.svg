@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="440" viewBox="0 0 1080 440">
+  <rect width="1080" height="440" fill="#fbfcfe"/>
+  
+  <style>
+    text { font-family: 'Noto Sans CJK SC', 'Source Han Sans SC', 'PingFang SC', Arial, sans-serif; }
+    .title { font-size: 15px; font-weight: 700; fill: #1f2937; }
+    .lbl { font-size: 13px; font-weight: 600; fill: #374151; }
+    .small { font-size: 12px; font-weight: 500; fill: #4b5563; }
+    .math { font-size: 13px; font-weight: 600; fill: #1f2937;
+            font-family: 'Times New Roman', 'Noto Serif', serif; }
+    .axis { stroke: #9ca3af; stroke-width: 1.2; fill: none; }
+    .grid { stroke: #e5e7eb; stroke-width: 1; fill: none; }
+  </style>
+
+
+  <text class="title" x="540" y="34" text-anchor="middle">刚体轨迹的两种参数化</text>
+
+  <!-- Split -->
+  <rect x="40" y="60" width="480" height="320" rx="12" fill="#eff6ff" stroke="#60a5fa" stroke-width="1.6"/>
+  <text class="lbl" x="280" y="95" text-anchor="middle">拆分表示  ℝ³ × SO(3)</text>
+
+  <rect x="80" y="120" width="180" height="70" rx="8" fill="#dbeafe" stroke="#3b82f6"/>
+  <text class="blk" x="170" y="150" text-anchor="middle" style="font-size:13px;font-weight:700;fill:#1f2937">平移样条</text>
+  <text class="math" x="170" y="172" text-anchor="middle">p(t) ∈ ℝ³</text>
+
+  <rect x="300" y="120" width="180" height="70" rx="8" fill="#dbeafe" stroke="#3b82f6"/>
+  <text class="blk" x="390" y="150" text-anchor="middle" style="font-size:13px;font-weight:700;fill:#1f2937">旋转样条</text>
+  <text class="math" x="390" y="172" text-anchor="middle">R(t) ∈ SO(3)</text>
+
+  <text class="small" x="280" y="230" text-anchor="middle">平移与旋转各自插值，互不强制耦合</text>
+  <text class="small" x="280" y="260" text-anchor="middle">线加速度 = p̈(t)，与姿态解耦</text>
+  <text class="small" x="280" y="290" text-anchor="middle">适合手持、机载、一般自由运动</text>
+  <text class="small" x="280" y="330" text-anchor="middle">Ovrén &amp; Forssén、Haarbach 等均倾向此选择</text>
+
+  <!-- SE3 -->
+  <rect x="560" y="60" width="480" height="320" rx="12" fill="#fff7ed" stroke="#fb923c" stroke-width="1.6"/>
+  <text class="lbl" x="800" y="95" text-anchor="middle">联合表示  SE(3)</text>
+
+  <rect x="670" y="120" width="260" height="70" rx="8" fill="#ffedd5" stroke="#f97316"/>
+  <text class="blk" x="800" y="150" text-anchor="middle" style="font-size:13px;font-weight:700;fill:#1f2937">位姿样条</text>
+  <text class="math" x="800" y="172" text-anchor="middle">T(t) ∈ SE(3)</text>
+
+  <text class="small" x="800" y="230" text-anchor="middle">相对增量是螺旋运动（screw）</text>
+  <text class="small" x="800" y="260" text-anchor="middle">平移方向与瞬时转轴隐式耦合</text>
+  <text class="small" x="800" y="290" text-anchor="middle">更贴近机械臂末端一类“绕轴拧”的运动</text>
+  <text class="small" x="800" y="330" text-anchor="middle">求加速度时姿态会渗入平移通道</text>
+
+  <text class="small" x="540" y="415" text-anchor="middle">
+    连续时间视觉–惯性与多数标定问题中，拆分表示通常更稳、更快、更易解释
+  </text>
+</svg>

@@ -1,0 +1,33 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="460" viewBox="0 0 1080 460">
+  <rect width="1080" height="460" fill="#fbfcfe"/>
+  
+  <style>
+    text { font-family: 'Noto Sans CJK SC', 'Source Han Sans SC', 'PingFang SC', Arial, sans-serif; }
+    .title { font-size: 15px; font-weight: 700; fill: #1f2937; }
+    .lbl { font-size: 13px; font-weight: 600; fill: #374151; }
+    .small { font-size: 12px; font-weight: 500; fill: #4b5563; }
+    .math { font-size: 13px; font-weight: 600; fill: #1f2937;
+            font-family: 'Times New Roman', 'Noto Serif', serif; }
+    .axis { stroke: #9ca3af; stroke-width: 1.2; fill: none; }
+    .grid { stroke: #e5e7eb; stroke-width: 1; fill: none; }
+  </style>
+
+  <text class="title" x="540" y="30" text-anchor="middle">固定区间后，哪些三次基函数会参与计算</text>
+  <text class="small" x="540" y="52" text-anchor="middle">每一行先固定一个基函数编号 i，再画出它的支撑 [t_i, t_{i+4})</text>
+
+  <!-- query interval [t_5,t_6) -->
+  <rect x="565" y="77" width="95" height="258" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text class="lbl" x="612.5" y="91" text-anchor="middle">当前区间</text>
+  <text class="math" x="612.5" y="108" text-anchor="middle">[t_5,t_6)</text>
+  <line x1="612.5" y1="77" x2="612.5" y2="327" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="4 3"/>
+
+  <text class="math" x="55" y="104" text-anchor="end">N_{1,3}</text><line x1="185" y1="99" x2="565" y2="99" stroke="#9ca3af" stroke-width="10" stroke-linecap="butt" opacity="0.55"/><text class="small" x="375.0" y="90" text-anchor="middle">[t_1, t_5)</text><text class="math" x="55" y="142" text-anchor="end">N_{2,3}</text><line x1="280" y1="137" x2="660" y2="137" stroke="#2563eb" stroke-width="10" stroke-linecap="butt" opacity="0.82"/><text class="small" x="470.0" y="128" text-anchor="middle">[t_2, t_6)</text><text class="math" x="55" y="180" text-anchor="end">N_{3,3}</text><line x1="375" y1="175" x2="755" y2="175" stroke="#0f766e" stroke-width="10" stroke-linecap="butt" opacity="0.82"/><text class="small" x="565.0" y="166" text-anchor="middle">[t_3, t_7)</text><text class="math" x="55" y="218" text-anchor="end">N_{4,3}</text><line x1="470" y1="213" x2="850" y2="213" stroke="#d97706" stroke-width="10" stroke-linecap="butt" opacity="0.82"/><text class="small" x="660.0" y="204" text-anchor="middle">[t_4, t_8)</text><text class="math" x="55" y="256" text-anchor="end">N_{5,3}</text><line x1="565" y1="251" x2="945" y2="251" stroke="#7c3aed" stroke-width="10" stroke-linecap="butt" opacity="0.82"/><text class="small" x="755.0" y="242" text-anchor="middle">[t_5, t_9)</text><text class="math" x="55" y="294" text-anchor="end">N_{6,3}</text><line x1="660" y1="289" x2="1040" y2="289" stroke="#9ca3af" stroke-width="10" stroke-linecap="butt" opacity="0.55"/><text class="small" x="850.0" y="280" text-anchor="middle">[t_6, t_10)</text>
+  <line class="axis" x1="90" y1="321" x2="945" y2="321"/>
+  <line x1="90" y1="315" x2="90" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="185" y1="315" x2="185" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="280" y1="315" x2="280" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="375" y1="315" x2="375" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="470" y1="315" x2="470" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="565" y1="315" x2="565" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="660" y1="315" x2="660" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="755" y1="315" x2="755" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="850" y1="315" x2="850" y2="327" stroke="#6b7280" stroke-width="1.3"/> <line x1="945" y1="315" x2="945" y2="327" stroke="#6b7280" stroke-width="1.3"/>
+  <text class="math" x="90" y="347" text-anchor="middle">t_0</text> <text class="math" x="185" y="347" text-anchor="middle">t_1</text> <text class="math" x="280" y="347" text-anchor="middle">t_2</text> <text class="math" x="375" y="347" text-anchor="middle">t_3</text> <text class="math" x="470" y="347" text-anchor="middle">t_4</text> <text class="math" x="565" y="347" text-anchor="middle">t_5</text> <text class="math" x="660" y="347" text-anchor="middle">t_6</text> <text class="math" x="755" y="347" text-anchor="middle">t_7</text> <text class="math" x="850" y="347" text-anchor="middle">t_8</text> <text class="math" x="945" y="347" text-anchor="middle">t_9</text>
+
+  <text class="lbl" x="540" y="370" text-anchor="middle">灰色支撑在区间边界结束或开始；覆盖当前区间的是中间这 4 个基函数</text>
+  <circle cx="280" cy="382" r="7" fill="#f59e0b"/><text class="math" x="280" y="404" text-anchor="middle">c_2</text> <circle cx="375" cy="382" r="7" fill="#f59e0b"/><text class="math" x="375" y="404" text-anchor="middle">c_3</text> <circle cx="470" cy="382" r="7" fill="#f59e0b"/><text class="math" x="470" y="404" text-anchor="middle">c_4</text> <circle cx="565" cy="382" r="7" fill="#f59e0b"/><text class="math" x="565" y="404" text-anchor="middle">c_5</text>
+  <text class="small" x="540" y="445" text-anchor="middle">因此 f(t)=c₂N₂,₃(t)+c₃N₃,₃(t)+c₄N₄,₃(t)+c₅N₅,₃(t)，其余系数在这里权重为 0</text>
+</svg>

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="420" viewBox="0 0 1180 420">
+  <rect width="1180" height="420" fill="#fbfcfe"/>
+  
+  <style>
+    text { font-family: 'Noto Sans CJK SC', 'Source Han Sans SC', 'PingFang SC', Arial, sans-serif; }
+    .title { font-size: 15px; font-weight: 700; fill: #1f2937; }
+    .lbl { font-size: 13px; font-weight: 600; fill: #374151; }
+    .small { font-size: 12px; font-weight: 500; fill: #4b5563; }
+    .math { font-size: 13px; font-weight: 600; fill: #1f2937;
+            font-family: 'Times New Roman', 'Noto Serif', serif; }
+    .axis { stroke: #9ca3af; stroke-width: 1.2; fill: none; }
+    .grid { stroke: #e5e7eb; stroke-width: 1; fill: none; }
+  </style>
+
+  <defs>
+    <marker id="arrp" markerWidth="9" markerHeight="9" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L8,3.5 L0,7 Z" fill="#4b5563"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="590" y="36" text-anchor="middle">样条如何接入连续时间 SLAM / 标定</text>
+
+  <!-- sensors -->
+  <rect x="40" y="80" width="160" height="260" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
+  <text class="lbl" x="120" y="115" text-anchor="middle">传感器</text>
+  <rect x="60" y="140" width="120" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+  <text class="small" x="120" y="165" text-anchor="middle">IMU ω, a</text>
+  <rect x="60" y="200" width="120" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+  <text class="small" x="120" y="225" text-anchor="middle">相机 / 事件</text>
+  <rect x="60" y="260" width="120" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+  <text class="small" x="120" y="285" text-anchor="middle">LiDAR 点</text>
+
+  <line x1="200" y1="210" x2="260" y2="210" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arrp)"/>
+
+  <!-- spline -->
+  <rect x="260" y="80" width="280" height="260" rx="12" fill="#ecfdf5" stroke="#6ee7b7"/>
+  <text class="lbl" x="400" y="115" text-anchor="middle">连续时间轨迹</text>
+  <text class="math" x="400" y="160" text-anchor="middle">p(t), R(t)</text>
+  <text class="small" x="400" y="195" text-anchor="middle">均匀三次 B 样条</text>
+  <text class="small" x="400" y="225" text-anchor="middle">控制点 = 优化变量</text>
+  <text class="small" x="400" y="255" text-anchor="middle">任意 t 求值 / 求导</text>
+  <text class="small" x="400" y="295" text-anchor="middle">ω(t), a(t) 由导数给出</text>
+
+  <line x1="540" y1="160" x2="600" y2="130" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arrp)"/>
+  <line x1="540" y1="210" x2="600" y2="210" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arrp)"/>
+  <line x1="540" y1="260" x2="600" y2="290" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arrp)"/>
+
+  <!-- residuals -->
+  <rect x="600" y="70" width="240" height="280" rx="12" fill="#fff7ed" stroke="#fdba74"/>
+  <text class="lbl" x="720" y="105" text-anchor="middle">残差</text>
+  <rect x="620" y="125" width="200" height="50" rx="6" fill="#ffedd5" stroke="#f97316"/>
+  <text class="small" x="720" y="155" text-anchor="middle">IMU：ω̂−ω(t), â−a(t)</text>
+  <rect x="620" y="195" width="200" height="50" rx="6" fill="#ffedd5" stroke="#f97316"/>
+  <text class="small" x="720" y="225" text-anchor="middle">视觉：重投影 / 卷帘行时</text>
+  <rect x="620" y="265" width="200" height="50" rx="6" fill="#ffedd5" stroke="#f97316"/>
+  <text class="small" x="720" y="295" text-anchor="middle">激光：点到面 / 去畸变</text>
+
+  <line x1="840" y1="210" x2="900" y2="210" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arrp)"/>
+
+  <!-- opt -->
+  <rect x="900" y="130" width="240" height="160" rx="12" fill="#f5f3ff" stroke="#c4b5fd"/>
+  <text class="lbl" x="1020" y="175" text-anchor="middle">批优化 / 滑窗</text>
+  <text class="small" x="1020" y="215" text-anchor="middle">更新控制点</text>
+  <text class="small" x="1020" y="245" text-anchor="middle">外参 · 零偏 · 地图</text>
+
+  <text class="small" x="590" y="390" text-anchor="middle">
+    高频与异步观测不再需要先对齐到同一组关键帧；它们在各自时间戳上约束同一条曲线
+  </text>
+</svg>

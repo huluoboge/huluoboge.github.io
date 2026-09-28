@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="520" viewBox="0 0 1180 520">
+  <rect width="1180" height="520" fill="#fbfcfe"/>
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L8,3.5 L0,7 Z" fill="#4b5563"/>
+    </marker>
+    <marker id="arrd" markerWidth="9" markerHeight="9" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L8,3.5 L0,7 Z" fill="#6b7280"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: 'Noto Sans CJK SC', 'Source Han Sans SC', 'PingFang SC', Arial, sans-serif; }
+    .cap { font-size: 15px; font-weight: 700; fill: #1f2937; }
+    .stg { font-size: 13px; font-weight: 700; fill: #374151; }
+    .blk { font-size: 13px; font-weight: 600; fill: #1f2937; }
+    .math { font-size: 12px; font-weight: 600; fill: #1f2937; font-family: 'Times New Roman', 'Noto Serif', serif; }
+    .sensor { font-size: 14px; font-weight: 700; fill: #1e3a5f; }
+  </style>
+
+  <!-- Sensors -->
+  <circle cx="70" cy="175" r="36" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.6"/>
+  <text class="sensor" x="70" y="180" text-anchor="middle">IMU</text>
+  <circle cx="70" cy="390" r="36" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.6"/>
+  <text class="sensor" x="70" y="395" text-anchor="middle">LiDAR</text>
+
+  <!-- LiDAR odometry (standalone, bottom-left of init area) -->
+  <rect x="150" y="365" width="150" height="50" rx="6" fill="#fde68a" stroke="#b45309" stroke-width="1.3"/>
+  <text class="blk" x="225" y="395" text-anchor="middle">LiDAR 里程计</text>
+
+  <!-- ========== Initialization ========== -->
+  <rect x="150" y="70" width="250" height="230" rx="14" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <text class="stg" x="275" y="95" text-anchor="middle">初始化</text>
+
+  <rect x="175" y="120" width="200" height="48" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.3"/>
+  <text class="blk" x="275" y="149" text-anchor="middle">旋转曲线</text>
+
+  <rect x="175" y="210" width="200" height="58" rx="6" fill="#f59e0b" stroke="#b45309" stroke-width="1.3"/>
+  <text class="blk" x="275" y="233" text-anchor="middle">初始外参旋转</text>
+  <text class="math" x="275" y="254" text-anchor="middle"><tspan baseline-shift="super" font-size="9">I</tspan><tspan baseline-shift="sub" font-size="9">L</tspan>q</text>
+
+  <!-- ========== Data association ========== -->
+  <rect x="440" y="70" width="250" height="230" rx="14" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <text class="stg" x="565" y="95" text-anchor="middle">数据关联</text>
+
+  <rect x="465" y="125" width="200" height="58" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.3"/>
+  <text class="blk" x="565" y="148" text-anchor="middle">带运动预测的</text>
+  <text class="blk" x="565" y="168" text-anchor="middle">LiDAR 里程计</text>
+
+  <rect x="465" y="215" width="200" height="48" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.3"/>
+  <text class="blk" x="565" y="244" text-anchor="middle">曲面片地图</text>
+
+  <!-- ========== Refinement ========== -->
+  <rect x="730" y="55" width="420" height="420" rx="14" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <text class="stg" x="940" y="80" text-anchor="middle">精化</text>
+
+  <rect x="820" y="105" width="240" height="48" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.3"/>
+  <text class="blk" x="940" y="134" text-anchor="middle">关联点</text>
+
+  <rect x="790" y="195" width="300" height="48" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.3"/>
+  <text class="blk" x="940" y="224" text-anchor="middle">连续时间批优化</text>
+
+  <!-- dashed parameter group -->
+  <rect x="790" y="275" width="300" height="110" rx="8" fill="none" stroke="#b45309" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <rect x="810" y="290" width="260" height="36" rx="5" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/>
+  <text class="blk" x="940" y="313" text-anchor="middle">B 样条控制点</text>
+  <rect x="810" y="336" width="260" height="36" rx="5" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/>
+  <text class="blk" x="940" y="351" text-anchor="middle">外参 <tspan class="math"><tspan baseline-shift="super" font-size="9">I</tspan><tspan baseline-shift="sub" font-size="9">L</tspan>q , <tspan baseline-shift="super" font-size="9">I</tspan>p<tspan baseline-shift="sub" font-size="9">L</tspan></tspan></text>
+
+  <rect x="820" y="420" width="240" height="40" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.3"/>
+  <text class="blk" x="940" y="445" text-anchor="middle">精化后的曲面片地图</text>
+
+  <!-- ===== Arrows ===== -->
+  <!-- IMU -> rotation curve -->
+  <path d="M106,175 H150 V144 H175" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- IMU -> batch opt -->
+  <path d="M70,139 V40 H940 V195" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- LiDAR -> lidar odom -->
+  <path d="M106,390 H150" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- LiDAR -> refined surfels -->
+  <path d="M70,426 V490 H940 V460" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- lidar odom -> initial extrinsic -->
+  <path d="M225,365 V268" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- rotation curve -> initial extrinsic -->
+  <path d="M275,168 V210" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- init -> data assoc (to motion-pred odom) -->
+  <path d="M400,239 H440 V154 H465" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- motion-pred odom -> surfels map -->
+  <path d="M565,183 V215" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- surfels map -> associated points (dashed) -->
+  <path d="M665,239 H790 V129 H820" fill="none" stroke="#6b7280" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#arrd)"/>
+  <!-- associated points -> batch opt -->
+  <path d="M940,153 V195" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- batch opt -> control points -->
+  <path d="M940,243 V290" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- params -> refined surfels -->
+  <path d="M940,385 V420" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+  <!-- refined surfels -> associated points (feedback left) -->
+  <path d="M820,440 H760 V129 H820" fill="none" stroke="#4b5563" stroke-width="1.6" marker-end="url(#arr)"/>
+
+  <text class="cap" x="40" y="32">LI-Calib 流程（对照论文 Fig. 2）</text>
+</svg>
