@@ -22,6 +22,8 @@ blog/
 4. 首页提供关键词搜索和分类筛选；构建器还会生成 `categories/index.html` 及每个分类的详情页
 5. 支持：LaTeX 公式（`$...$` / `$$...$$` / equation / align 等）、mermaid 图表（` ```mermaid `）、代码高亮、`.md` 链接互链
 
+基于论文写中文技术博客时，参考 [论文技术博客写作 Skill](skills/write-paper-tech-blog/SKILL.md)。它以 SuperGlue 和重力对齐两篇文章为样例，说明如何组织问题、推导、论文原图与实验解读。
+
 ## 构建与发布
 
 ```bash
