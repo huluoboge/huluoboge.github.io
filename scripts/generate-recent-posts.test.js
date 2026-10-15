@@ -6,7 +6,7 @@ const {
   extractArticles,
   extractFromLatestList,
   normalizeDate,
-} = require("./inject-recent-posts.js");
+} = require("./generate-recent-posts.js");
 
 const currentCard = `
 <div class="article-item" data-article-item data-search="poisson blending" data-category="image-processing">

@@ -22,10 +22,9 @@ fi
 echo "==> 构建博客 (basePath=/blog)"
 node "$RENDERER_DIR/src/cli.js" build --cwd "$BLOG_DIR"
 
-echo "==> 注入最新文章到主页 Recent Posts"
-node "$REPO_ROOT/scripts/inject-recent-posts.js"
+echo "==> 生成独立的 Recent Posts HTML 片段"
+node "$REPO_ROOT/scripts/generate-recent-posts.js"
 
-echo "==> 完成。产物在 blog/ 下（已 gitignore，不提交）。"
-echo "    index.html 的 Recent Posts 已改写，本地预览可见；不要提交该注入结果。"
-echo "    恢复占位：git checkout -- index.html"
+echo "==> 完成。博客 HTML 产物和 Recent Posts 片段均已生成。"
+echo "    片段写入 recent-posts.generated.html（gitignore）；根目录 index.html 保持不变。"
 echo "    push 后由 GitHub Actions 重新构建并发布到 https://huluoboge.top/blog/"

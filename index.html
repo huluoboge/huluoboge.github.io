@@ -58,50 +58,10 @@
           <h2>Recent Posts</h2>
           <p><a href="blog/index.html">View all posts ↗</a></p>
         </div>
-        <div id="recent-posts">
-        <ul class="note-list blog-posts">
-        <li>
-        <time>2026-09-26</time>
-        <a href="blog/articles/li-calib-continuous-time/index.html">LI-Calib 无靶标 LiDAR-IMU 标定中的连续时间批估计</a>
-        <span>LiDAR</span>
-      </li>
-        <li>
-        <time>2026-09-25</time>
-        <a href="blog/articles/bspline-continuous-time-slam/index.html">B 样条的局部平滑曲线构造与应用</a>
-        <span>B-spline</span>
-      </li>
-        <li>
-        <time>2026-09-21</time>
-        <a href="blog/articles/poisson-blending/index.html">图像融合经典算法——Poisson 融合</a>
-        <span>Image Fusion</span>
-      </li>
-        <li>
-        <time>2026-09-21</time>
-        <a href="blog/articles/robust-loop/index.html">SLAM 中的回环鲁棒性</a>
-        <span>SLAM</span>
-      </li>
-        <li>
-        <time>2026-09-17</time>
-        <a href="blog/articles/multiband-blending/index.html">图像融合经典算法——多频段融合</a>
-        <span>Image Fusion</span>
-      </li>
-        <li>
-        <time>2026-09-16</time>
-        <a href="blog/articles/imu-visual-lidar-slam-framework/index.html">带 IMU 的视觉、LiDAR 与视觉激光 SLAM 框架演化</a>
-        <span>IMU</span>
-      </li>
-        <li>
-        <time>2026-09-15</time>
-        <a href="blog/articles/vins-lio-sam-preintegration/index.html">使用IMU预积分的三篇文章：VINS、LIO-SAM 与 LVI-SAM</a>
-        <span>IMU</span>
-      </li>
-        <li>
-        <time>2026-09-13</time>
-        <a href="blog/articles/imu-preintegration/index.html">IMU 预积分详解：原理、推导与 C++/Eigen 实现</a>
-        <span>IMU</span>
-      </li>
-        </ul>
-      </div>
+        <div id="recent-posts" aria-live="polite">
+          <p>Loading recent posts…</p>
+        </div>
+        <noscript><p>Enable JavaScript to load recent posts. <a href="blog/index.html">View all posts</a>.</p></noscript>
       </section>
 
       <section id="focus" class="section">
@@ -164,5 +124,19 @@
       </footer>
     </main>
   </div>
+  <script>
+    fetch("recent-posts.generated.html")
+      .then((response) => {
+        if (!response.ok) throw new Error("Recent posts are unavailable");
+        return response.text();
+      })
+      .then((html) => {
+        document.getElementById("recent-posts").innerHTML = html;
+      })
+      .catch(() => {
+        document.getElementById("recent-posts").innerHTML =
+          '<p>Recent posts are temporarily unavailable. <a href="blog/index.html">View all posts</a>.</p>';
+      });
+  </script>
 </body>
 </html>

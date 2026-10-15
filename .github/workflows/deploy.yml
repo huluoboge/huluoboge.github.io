@@ -39,8 +39,8 @@ jobs:
         run: node tools/blog-renderer/src/cli.js build --cwd blog
         working-directory: ${{ github.workspace }}
 
-      - name: Inject latest posts into homepage
-        run: node scripts/inject-recent-posts.js
+      - name: Generate recent-posts HTML fragment
+        run: node scripts/generate-recent-posts.js
         working-directory: ${{ github.workspace }}
 
       - name: Setup Pages

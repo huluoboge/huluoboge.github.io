@@ -7,7 +7,7 @@
 
 ```
 .
-├── index.html            # 主页简历（手写；Recent Posts 区块由 CI 注入）
+├── index.html            # 主页简历（手写；Recent Posts 通过独立片段加载）
 ├── styles.css            # 主页样式（博客主题与其同设计语言）
 ├── blog/                 # 博客：只存 markdown 源 + 静态资源（html 产物 gitignore）
 │   ├── config.yml        # 博客配置（basePath: /blog, navigation）
@@ -17,8 +17,8 @@
 ├── tools/blog-renderer/  # 渲染器 submodule（gitlink，独立仓库）
 ├── scripts/
 │   ├── build-blog.sh     # 本地构建博客（与 CI 同命令）
-│   └── inject-recent-posts.js  # 注入最新文章到主页（CI 用）
-└── .github/workflows/deploy.yml  # CI：构建 + 注入 + 发布 Pages
+│   └── generate-recent-posts.js  # 生成被 gitignore 的 Recent Posts 片段
+└── .github/workflows/deploy.yml  # CI：构建 + 生成片段 + 发布 Pages
 ```
 
 ## 快速开始
@@ -64,9 +64,8 @@ python3 -m http.server 8977 --bind 127.0.0.1
 #    主页:       http://127.0.0.1:8977/
 ```
 
-> 本地预览主页时，Recent Posts 区块为空占位——该区块由 CI 在部署时自动注入
-> 最新 8 篇文章。想本地看效果可手动执行：
-> `node scripts/inject-recent-posts.js`（会改写 index.html，看完 `git checkout index.html` 恢复）。
+> 本地预览主页时，Recent Posts 从独立的 `recent-posts.generated.html` 加载。
+> 运行构建脚本会生成这个被 gitignore 的片段，不会改写根目录 `index.html`。
 
 ### 发布
 
@@ -84,7 +83,7 @@ push 到 master 时：
 1. checkout（含 submodule）
 2. 渲染器目录 `npm ci`
 3. `node tools/blog-renderer/src/cli.js build --cwd blog`（md → html）
-4. `node scripts/inject-recent-posts.js`（注入最新文章到主页 index.html）
+4. `node scripts/generate-recent-posts.js`（生成独立的 recent-posts HTML 片段）
 5. upload-pages-artifact → deploy-pages 发布
 
 博客 html 产物不提交仓库（`.gitignore`），CI 构建后随仓库内容一起发布。

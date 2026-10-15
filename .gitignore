@@ -3,6 +3,9 @@ blog/**/*.html
 !blog/template.html
 blog/home/home/index.html
 
+# Generated homepage recent-posts fragment (built locally and in CI)
+/recent-posts.generated.html
+
 # 渲染器依赖（submodule 内）
 tools/blog-renderer/node_modules/
 tools/blog-renderer/coverage/

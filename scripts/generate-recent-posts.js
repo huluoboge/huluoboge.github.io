@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 /**
- * 从构建好的博客提取最新文章，注入主页 index.html 的 #recent-posts 区块。
- * 在 blog-renderer build 之后运行（本地脚本与 CI 都用）。
- * 用法: node scripts/inject-recent-posts.js [--limit N] [--blog-dir blog] [--home index.html]
- *
- * 数据来源：优先 blog/index.html 里的 article-item 卡片（按日期排序的完整列表），
- * 解析失败时回退到「最近文章」简表；再回退 blog/articles/index.html。
+ * 从已构建的博客索引生成独立的 Recent Posts HTML 片段。
+ * 生成文件被 gitignore；首页只加载它，不会被本地构建改写。
+ * 用法: node scripts/generate-recent-posts.js [--limit N] [--blog-dir blog] [--output recent-posts.generated.html]
  */
 
 "use strict";
@@ -16,11 +13,11 @@ const path = require("path");
 const REPO_ROOT = path.resolve(__dirname, "..");
 
 function parseArgs(argv) {
-  const opts = { limit: 8, blogDir: "blog", home: "index.html" };
+  const opts = { limit: 8, blogDir: "blog", output: "recent-posts.generated.html" };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--limit" && argv[i + 1]) opts.limit = parseInt(argv[i + 1], 10) || 8;
     else if (argv[i] === "--blog-dir" && argv[i + 1]) opts.blogDir = argv[i + 1];
-    else if (argv[i] === "--home" && argv[i + 1]) opts.home = argv[i + 1];
+    else if (argv[i] === "--output" && argv[i + 1]) opts.output = argv[i + 1];
   }
   return opts;
 }
@@ -36,18 +33,8 @@ function normalizeDate(raw) {
   const m = s.match(/(\w{3}) (\w{3}) (\d{2}) (\d{4})/);
   if (!m) return s;
   const months = {
-    Jan: "01",
-    Feb: "02",
-    Mar: "03",
-    Apr: "04",
-    May: "05",
-    Jun: "06",
-    Jul: "07",
-    Aug: "08",
-    Sep: "09",
-    Oct: "10",
-    Nov: "11",
-    Dec: "12",
+    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
   };
   return `${m[4]}-${months[m[2]]}-${m[3]}`;
 }
@@ -94,27 +81,24 @@ function extractFromLatestList(html) {
   return items;
 }
 
-/**
- * 从博客首页/索引页 HTML 提取文章条目 [{title, href, date, tags}]
- * 卡片列表按日期降序；简表本身已是最新若干篇。
- */
 function extractArticles(html) {
   const fromCards = extractFromArticleItems(html);
-  if (fromCards.length > 0) return fromCards;
-  return extractFromLatestList(html);
+  return fromCards.length > 0 ? fromCards : extractFromLatestList(html);
 }
 
-/** 生成主页 note-list 风格 HTML（与 styles.css .note-list 匹配） */
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[char]);
+}
+
+/** 生成与首页 .note-list 样式匹配的完整 HTML 片段。 */
 function buildListHTML(items) {
-  return items
-    .map(
-      (item) => `<li>
-        <time>${item.date}</time>
-        <a href="blog/articles/${item.href}">${item.title}</a>
-        ${item.tags ? `<span>${item.tags.split(",")[0].trim()}</span>` : ""}
-      </li>`
-    )
-    .join("\n        ");
+  const rows = items.map((item) => {
+    const tag = item.tags ? `\n        <span>${escapeHTML(item.tags.split(",")[0].trim())}</span>` : "";
+    return `      <li>\n        <time>${escapeHTML(item.date)}</time>\n        <a href="blog/articles/${escapeHTML(item.href)}">${escapeHTML(item.title)}</a>${tag}\n      </li>`;
+  });
+  return `<ul class="note-list blog-posts">\n${rows.join("\n")}\n</ul>\n`;
 }
 
 function main() {
@@ -122,42 +106,30 @@ function main() {
   const blogHome = path.join(REPO_ROOT, opts.blogDir, "index.html");
   const legacyIndex = path.join(REPO_ROOT, opts.blogDir, "articles", "index.html");
   const blogIndex = fs.existsSync(blogHome) ? blogHome : legacyIndex;
-  const homePath = path.join(REPO_ROOT, opts.home);
+  const outputPath = path.resolve(REPO_ROOT, opts.output);
 
   if (!fs.existsSync(blogIndex)) {
-    console.error(`[inject] 未找到 ${blogIndex}（先运行构建）`);
-    process.exit(1);
-  }
-  const homeHtml = fs.readFileSync(homePath, "utf8");
-  if (!homeHtml.includes('id="recent-posts"')) {
-    console.error("[inject] 主页缺少 #recent-posts 占位符");
+    console.error(`[recent-posts] 未找到 ${blogIndex}（先运行构建）`);
     process.exit(1);
   }
 
   const items = extractArticles(fs.readFileSync(blogIndex, "utf8")).slice(0, opts.limit);
   if (items.length === 0) {
-    console.error("[inject] 未解析到文章，放弃改写主页");
+    console.error("[recent-posts] 未解析到文章，放弃生成片段");
     process.exit(1);
   }
-  const listHtml = buildListHTML(items);
 
-  const updated = homeHtml.replace(
-    /(<div id="recent-posts">)([\s\S]*?)(<\/div>)/,
-    `$1\n        <ul class="note-list blog-posts">\n        ${listHtml}\n        </ul>\n      $3`
-  );
-
-  fs.writeFileSync(homePath, updated);
-  console.log(`[inject] 主页注入 ${items.length} 篇最新文章`);
+  fs.writeFileSync(outputPath, buildListHTML(items));
+  console.log(`[recent-posts] 已生成 ${items.length} 篇文章到 ${path.relative(REPO_ROOT, outputPath)}`);
 }
 
-if (require.main === module) {
-  main();
-}
+if (require.main === module) main();
 
 module.exports = {
   extractArticles,
   extractFromArticleItems,
   extractFromLatestList,
   buildListHTML,
+  escapeHTML,
   normalizeDate,
 };
