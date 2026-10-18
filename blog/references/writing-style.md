@@ -2,6 +2,10 @@
 
 Use this guide only when writing or revising blog article prose. Do not load it for ordinary site maintenance, link fixes, build checks, or static asset edits.
 
+# 前提
+
+如果是写某篇文章的理解，需要先下载原论文，充分阅读论文，然后再开始写作。
+
 ## Voice
 
 - Write in calm, direct Chinese. Prefer declarative sentences and steady explanation.
@@ -30,7 +34,11 @@ Use this guide only when writing or revising blog article prose. Do not load it 
 - For paper comparisons, explain each paper through state propagation, observation construction, iteration/update location, and feedback to the map or next frame.
 - Reading guidance may appear, but the article body should teach the mechanism rather than only list what to read next.
 
-## Review
+# Review
 写作完成后，需要阅读并检查以下内容：
 - 如果是写某篇文章的理解，需要下载原论文，并逐项对比，是否有错误和偏差
 - 阅读上，是否读起来通顺，流畅，清除，是否去除了AI味。
+
+# 提交
+
+如果提交代码， 下载的pdf请不要提交。
