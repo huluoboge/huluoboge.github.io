@@ -1,163 +1,74 @@
 ---
-title: "LI-Calib 无靶标 LiDAR-IMU 标定中的连续时间批估计"
+title: "LI-Calib 论文解读"
 date: 2026-09-26
 categories: [state-estimation]
 tags: [LiDAR, IMU, Calibration, Continuous-time, B-spline, LI-Calib, Factor Graph]
-excerpt: "围绕 LI-Calib 讲清无靶标 LiDAR-IMU 外参标定：连续时间 B 样条轨迹、旋转外参初始化、曲面片关联，以及 IMU 与点到面残差的联合批优化推导。"
+excerpt: "沿 LI-Calib 的轨迹表示、旋转初始化、曲面片关联与联合批估计，推导原始 IMU 和逐点激光怎样共同约束外参，并结合仿真、重复性与 CAD 对照理解标定精度。"
 draft: false
 ---
 
-# LI-Calib 无靶标 LiDAR-IMU 标定中的连续时间批估计
+# LI-Calib 论文解读
 
-> 本文介绍 Jiajun Lv 等人在 IROS 2020 的工作 *Targetless Calibration of LiDAR-IMU System Based on Continuous-time Batch Estimation*，开源实现通常称为 LI-Calib。文章沿着“为什么离散外参标定不够用 → 连续时间轨迹怎样把 IMU 与逐点激光接到同一条曲线上 → 点到曲面片残差怎样约束外参”展开，并对关键公式做逐步推导。
+> *Targetless Calibration of LiDAR-IMU System Based on Continuous-time Batch Estimation*，Jiajun Lv、Jinhong Xu、Kewei Hu、Yong Liu、Xingxing Zuo，IROS 2020。本文依据 arXiv v1（2020-07-29）。方法称为 LI-Calib，利用连续时间轨迹与自然场景中的局部平面估计 LiDAR–IMU 六自由度空间外参。[论文页面](https://arxiv.org/abs/2007.14759v1) · [PDF](https://arxiv.org/pdf/2007.14759v1) · [官方代码](https://github.com/APRIL-ZJU/lidar_IMU_calib)
 
-**系列位置：** 本文承接 [B 样条的局部平滑曲线构造与应用](../bspline-continuous-time-slam/index.html)（尤其是累积形式、旋转轨迹和连续时间 SLAM 部分）、[IMU 预积分详解](../imu-preintegration/index.html)、[带 IMU 的视觉、LiDAR 与视觉激光 SLAM 框架演化](../imu-visual-lidar-slam-framework/index.html)。样条专文给出均匀三次 B 样条、累积旋转和轨迹导数的通用写法；前序里程计文章处理“已知外参时怎样把 IMU 放进系统”；本文处理更上游的问题——**外参本身怎样在无靶标场景下被估计出来**。
+## 1. 引言
 
-## 先把核心想法说清楚
+LiDAR 与 IMU 固定在同一载体上，分别从环境几何和惯性运动获得信息。两者联合使用前，需要知道它们的坐标系怎样连接：LiDAR 测得的三维点，经过哪个旋转和平移能够表达在 IMU 系中。这份固定刚体变换就是空间外参，包含三个旋转自由度和三个平移自由度。
 
-LiDAR–IMU 外参标定要估计的是一个刚体变换：激光坐标系 $\{L\}$ 相对惯性坐标系 $\{I\}$ 的旋转与平移。记号上写成
+旋转式 LiDAR 的一帧扫描由不同时刻的点组成。载体运动时，各点对应不同的瞬时位姿，直接按同一个扫描位姿拼接便产生运动畸变。IMU 可以提供高频运动信息帮助去畸变，但将 IMU 运动转换到 LiDAR 上又依赖外参。因此，轨迹、去畸变和标定之间存在相互依赖。
 
-$$
-{}^{I}_{L}\mathbf R\in SO(3),\qquad
-{}^{I}\mathbf p_{L}\in\mathbb{R}^{3},
-$$
+LI-Calib 用一段可求导的连续时间轨迹连接这些量。任意 IMU 样本都可以在自己的时间戳与轨迹导数比较；任意激光点也可以在它的采样时刻查询位姿，变换到共同地图中，再与局部平面比较。两类残差共同调整轨迹与外参，改进后的估计又用于重建地图和更新关联。
 
-或等价的四元数 ${}^{I}_{L}\mathbf q$。一旦外参已知，任意时刻的 IMU 位姿都可以把同一时刻（或带时间偏移）的激光点变换到统一坐标系；反过来，若外参未知，激光点云的去畸变、局部建图和外参估计会缠在一起。
+“无靶标”指不需要棋盘格、专用标定板或额外相机。几何约束来自普通人造环境的平面区域，但仍需要可靠的初始配准、足够的场景结构和运动激励。论文实验中的 LiDAR 与 IMU 使用硬件同步，研究重点是六自由度空间外参，不能将连续时间表示本身等同于已经估计了时间偏移。
 
-LI-Calib 的回答可以先压缩成一句话：
+## 2. 相关工作
 
-> **用均匀三次 B 样条把 IMU 的六自由度轨迹写成连续时间函数；陀螺与加速度提供对样条导数的直接观测；激光点在各自采样时刻被变换到首帧激光地图坐标系，并与局部平面（曲面片）构造点到面残差；两类残差在一次批优化里同时约束外参、样条控制点与 IMU 零偏。**
+LiDAR–IMU 标定有两个紧密相关的困难：怎样为扫描内每个点补偿运动，以及怎样找到可靠的环境几何对应。离散时间方法通常在关键时刻估计位姿，再在中间插值。常角速度、常速度或常加速度近似在平稳运动中适用，手持随机晃动或快速机动时则可能引入明显误差。连续时间表示允许直接在每个采样时刻求轨迹，减少对简单插值运动假设的依赖；其准确性仍受轨迹模型与观测约束限制。
 
-它不依赖棋盘格、标定板或额外相机。约束来自常见人造环境中的局部平面结构，以及 IMU 在充分激励下对运动曲线的稠密观测。
+运动式手眼标定先分别恢复两个传感器的轨迹，再求满足刚体关系的外参。它要求两条运动序列都可靠，而消费级 IMU 独立积分的漂移会影响结果。Le Gentil 等人通过高斯过程上采样 IMU，结合预积分因子与点到面因子进行标定。LI-Calib 则将轨迹本身参数化为 B 样条，直接使用原始惯性测量构造残差；[IMU 预积分](../imu-preintegration/index.html)与这里的直接导数观测是不同的测量组织方式。
 
-![LI-Calib 处理流程（对照论文 Fig. 2）](figures/pipeline.svg)
+连续时间批估计此前已用于相机–IMU 标定，并扩展到时间外参、多 IMU 和激光传感器。LI-Calib 沿用时间基函数描述运动的框架，将几何观测改为自然环境中的点到曲面片约束，无需用标定板或相机作为桥梁。
 
-上图按论文 Fig. 2 重绘：左侧 IMU / LiDAR 输入，经初始化与数据关联进入右侧精化闭环；虚线表示首轮由曲面片地图建立关联，实线回路表示用优化后的轨迹与外参重建地图并反复关联。
+## 3. 轨迹表示与记号
 
-**关键词：** LiDAR–IMU 外参；无靶标标定；连续时间批估计；B 样条；点到曲面片；零偏；运动畸变
+### 3.1 坐标系与待估计对象
 
----
-
-## 1. 问题设定与难点
-
-### 1.1 输入、输出与坐标系
-
-标定过程中使用三个坐标系：
-
-- $\{I\}$：IMU 坐标系，轨迹在连续时间下被参数化；
-- $\{L\}$：LiDAR 坐标系，与 $\{I\}$ 刚体连接；
-- $\{M\}=\{L_0\}$：地图坐标系，取标定起始段的第一帧激光坐标系。
-
-论文把 IMU 轨迹的参考帧取为起始时刻的 IMU 坐标系 $\{I_0\}$。重力 ${}^{I_0}\mathbf g$ 也定义在该参考系中。激光地图与曲面片平面都表达在 $\{L_0\}$。
-
-![坐标系与连续时间轨迹](figures/frames-and-trajectory.svg)
-
-一帧机械式激光扫描并不是“同一时刻的一张快照”。扫描内的每个点都有自己的时间戳。载体运动时，这些点相当于在不同瞬时位姿下采样，合在一起就会出现类似 rolling shutter 的运动畸变。IMU 的高频角速度与比力正是用来补这段瞬时位姿的。
-
-### 1.2 为什么离散关键帧外参标定会吃力
-
-若只在若干关键时刻估计位姿，中间每个激光点的位姿只能靠线性插值或常速度/常加速度假设补出来。低速平滑运动下这还能用；手持晃动或机载机动时，插值误差会直接进入点云几何，再进入外参残差。
-
-另一条常见路线是手眼标定：分别估计激光里程计轨迹与 IMU 轨迹，再解相对刚体变换。消费级 IMU 单独积分漂移大，两条轨迹的质量往往不对称，外参解会被较差的那条轨迹拖垮。
-
-连续时间方法把整段轨迹写成时间基函数的线性（或李群上的累积）组合。任意 $t$ 都可以解析求姿态、位置及其导数。陀螺观测对应角速度，加速度观测对应比力；激光点则在自己的采样时刻精确取值。高速率与异步传感器天然落在同一条曲线上。
-
-### 1.3 无靶标意味着什么
-
-有靶标方法通常让观测主动落到已知几何上。无靶标方法必须从自然场景里构造足够多、足够可靠的几何约束。LI-Calib 的选择是：把点云地图切成体素，在局部统计量满足平面性时拟合小平面（surfels / tiny planes），再用点到面距离做残差。小平面比“整面大墙”更碎、更密，能覆盖走廊、桌面、地面等多种结构，也更适合把标定问题在一般人造环境里变得可观。
-
----
-
-## 2. 连续时间轨迹表示
-
-### 2.1 为什么拆成旋转样条与平移样条
-
-刚体轨迹可以在 $SE(3)$ 上用一条样条表示，也可以拆成 $SO(3)$ 上的旋转样条与 $\mathbb{R}^3$ 上的平移样条。LI-Calib 采用后者。原因是：联合 $SE(3)$ 样条里平移与旋转耦合，平移曲线形状不易单独控制；标定问题里外参旋转与平移本身也需要更清晰的可观性结构。拆分表示后，旋转可由陀螺主导初始化，平移与重力、加速度残差更直接相关。
-
-### 2.2 均匀节点下 B 样条何以写成矩阵
-
-本节只保留 LI-Calib 需要的矩阵和累积形式。关于 B 样条如何从 box 卷积构造基函数、如何通过局部支撑得到速度与加速度，以及旋转轨迹如何在 $SO(3)$ 上累积，可参阅 [B 样条的局部平滑曲线构造与应用](../bspline-continuous-time-slam/index.html)。
-
-论文与实现里频繁出现
+记 IMU 系为 $\{I\}$，LiDAR 系为 $\{L\}$。外参旋转为 ${}^{I}_{L}\mathbf q$，对应旋转矩阵 ${}^{I}_{L}\mathbf R$；外参平移为 ${}^{I}\mathbf p_L$，即 LiDAR 原点在 IMU 系中的位置。作用于一个点时，变换为
 
 $$
-\mathbf p(t)=\mathbf u^{\top}\mathbf M\,\mathbf P,
+{}^I\mathbf x
+={}^{I}_{L}\mathbf R\,{}^L\mathbf x+{}^I\mathbf p_L.
 $$
 
-这类写法。它不是另起炉灶的“矩阵样条”，而是 **Cox–de Boor B 样条在均匀节点、固定次数下的等价代数形式**。把前因后果摊开，后面的三次矩阵与累积矩阵就不会显得凭空出现。
+这个方向贯穿全文：先从 LiDAR 变到 IMU。其逆变换需要旋转转置，并对平移做相应变换，不能只将平移取负。
 
-**起点是控制点与基函数的线性组合。** 次数为 $d$ 的 B 样条曲线本来定义为
+IMU 轨迹以初始 IMU 系 $\{I_0\}$ 为参考，记为 ${}^{I_0}_{I}\mathbf R(t)$ 与 ${}^{I_0}\mathbf p(t)$。它们把时刻 $t$ 的 IMU 坐标变到初始 IMU 坐标，参考时刻的旋转为单位矩阵、位置为零。这里规定的是曲线在起点的值，不等于把首个样条控制点直接当成起始位姿。重力 ${}^{I_0}\mathbf g$ 也表达在这一参考系中。激光地图另以第一帧 LiDAR 系 $\{L_0\}$ 为参考，所有曲面片都在该地图系内。
 
-$$
-\mathbf p(t)=\sum_{i}\mathbf p_i\,N_{i,d}(t),
-$$
+因此，随时间改变的是 IMU 轨迹，整段数据共享的是 LiDAR 到 IMU 的固定外参。联合标定需要估计这条运动曲线，也需要估计两个传感器之间的刚性连接。
 
-其中 $\mathbf p_i$ 是控制点，$N_{i,d}(t)$ 是第 $i$ 个 $d$ 次 B 样条基函数。曲线对控制点始终线性；非线性只可能来自基函数随时间的变化。因此，只要在某个时间局部把各 $N_{i,d}(t)$ 写成关于时间的多项式，整段曲线就可以收成“多项式行向量 × 常系数矩阵 × 控制点”的乘积。
+### 3.2 均匀三次平移样条
 
-**基函数由 Cox–de Boor 递推生成。** 零次基是节点区间上的指示函数：
+B 样条用少量控制点表示连续轨迹，并具有局部支撑：某一时刻只依赖邻近若干控制点，更新一个控制点也只影响有限时间范围。这让每条观测只连接少量轨迹变量，批估计仍可保持稀疏。
 
-$$
-N_{i,0}(t)=
-\begin{cases}
-1,& t_i\le t<t_{i+1},\\
-0,& \text{otherwise.}
-\end{cases}
-$$
+论文将旋转与平移分开表示。联合 $\mathrm{SE}(3)$ 样条会耦合旋转和平移，使平移曲线形状更难单独控制；分离的 $\mathrm{SO}(3)$ 与 $\mathbb R^3$ 样条更便于分别处理姿态导数和位置二阶导数。这是轨迹表示的选择，并不意味着测量方程中的旋转和平移也完全解耦。
 
-更高次由低一次线性拼出：
+对均匀节点间隔 $\Delta t$，若 $t\in[t_i,t_{i+1})$，定义局部时间
 
 $$
-N_{i,d}(t)
-=
-\frac{t-t_i}{t_{i+d}-t_i}N_{i,d-1}(t)
-+
-\frac{t_{i+d+1}-t}{t_{i+d+1}-t_{i+1}}N_{i+1,d-1}(t).
+u=\frac{t-t_i}{\Delta t},\qquad
+\mathbf u^{\mathsf T}=[1,u,\ldots,u^d].
 $$
 
-递推带来两个对状态估计至关重要的性质。第一是**局部支撑**：次数 $d$ 的基函数只在 $d+1$ 个节点区间上非零，因而任意时刻 $t$ 只有 $d+1$ 个控制点进入 $\mathbf p(t)$；改动一个控制点也只影响有限时间窗，优化 Hessian 保持稀疏。第二是**分段多项式**：在每个开区间 $(t_k,t_{k+1})$ 上，$N_{i,d}(t)$ 是次数不超过 $d$ 的多项式，整条曲线在节点处保持 $C^{d-1}$ 连续。
-
-**均匀节点把“形状”从绝对时间里抽离出来。** 若节点等间距，记步长为 $\Delta t=t_{i+1}-t_i$，并引入局部归一化坐标
-
-$$
-u=\frac{t-t_i}{\Delta t}\in[0,1),\qquad t\in[t_i,t_{i+1}),
-$$
-
-则每个区间上活跃的那 $d+1$ 个基函数，作为 $u$ 的函数彼此只差一个整数平移，形状与区间下标无关。换言之，均匀 B 样条的局部几何完全由次数 $d$ 决定，不再依赖具体的 $t_i$ 数值。这正是连续时间轨迹实现里可以预先存一张常值基矩阵、运行时只算 $u$ 的原因。
-
-**分段多项式空间有标准单项式基底。** 在单个区间上，任意次数 $\le d$ 的多项式都能唯一写成
-
-$$
-f(u)=\sum_{k=0}^{d}c_k u^k
-=
-\mathbf u^{\top}\mathbf c,
-\qquad
-\mathbf u^{\top}=\begin{bmatrix}1&u&\dots&u^{d}\end{bmatrix}.
-$$
-
-对当前区间里第 $j$ 个活跃基函数 $N_{i+j,d}(t)$，把它在 $u$ 下展开，系数向量记为 $\mathbf M_{(j)}$，便有
-
-$$
-N_{i+j,d}(t)=\mathbf u^{\top}\mathbf M_{(j)}.
-$$
-
-把 $j=0,\ldots,d$ 的系数向量按列排成矩阵 $\mathbf M^{(d+1)}\in\mathbb{R}^{(d+1)\times(d+1)}$，再把对应控制点按列排成
-
-$$
-\mathbf P=\begin{bmatrix}\mathbf p_i&\mathbf p_{i+1}&\dots&\mathbf p_{i+d}\end{bmatrix}\in\mathbb{R}^{3\times(d+1)},
-$$
-
-就得到紧凑写法
+$d$ 是样条次数。论文的矩阵形式为
 
 $$
 \mathbf p(t)
-=\sum_{j=0}^{d}N_{i+j,d}(t)\,\mathbf p_{i+j}
-=\sum_{j=0}^{d}\bigl(\mathbf u^{\top}\mathbf M^{(d+1)}_{(j)}\bigr)\mathbf p_{i+j}
-=\mathbf P\,\mathbf M^{(d+1)\top}\mathbf u.
+=\sum_{j=0}^{d}
+\bigl(\mathbf u^{\mathsf T}\mathbf M^{(d+1)}_{(j)}\bigr)\mathbf p_{i+j}.
+\tag{1}
 $$
 
-论文中的按列求和与此同一回事：$\mathbf M^{(d+1)}_{(j)}$ 是 $\mathbf M^{(d+1)}$ 的第 $j$ 列，$\mathbf u^{\top}\mathbf M^{(d+1)}_{(j)}$ 是作用在 $\mathbf p_{i+j}$ 上的标量权重。矩阵里的数字来自把 Cox–de Boor 递推在均匀节点上展开并收集 $u^k$ 的系数；它们是基函数的固有系数，**不是**额外估计的参数。
-
-**对三次样条，展开结果就是文中那张 $4\times4$ 矩阵。** 取 $d=3$，活跃控制点恰为四个，单项式向量为 $\mathbf u^{\top}=[1,u,u^{2},u^{3}]$。把递推展开后得到经典的均匀三次基矩阵
+$\mathbf M_{(j)}$ 为基矩阵第 $j$ 列，括号内是作用于控制点的标量权重。均匀节点使各区间共用同一组局部多项式系数，因此矩阵只依赖次数，不作为未知参数优化。LI-Calib 取三次，即 $d=3$：
 
 $$
 \mathbf M^{(4)}=\frac16
@@ -167,23 +78,31 @@ $$
 3&-6&3&0\\
 -1&3&-3&1
 \end{bmatrix}.
+\tag{2}
 $$
 
-例如第一列对应 $N_{i,3}$ 在当前区间上的多项式 $\frac16(1-3u+3u^{2}-u^{3})=\frac16(1-u)^{3}$，其余列同理。于是
+例如局部第一个权重是 $\lambda_0(u)=(1-u)^3/6$，最后一个是 $\lambda_3(u)=u^3/6$；另外两项同样由对应列展开。四个权重之和为 1，但曲线通常不经过控制点。若把四个控制点排为 $\mathbf P=[\mathbf p_i,\ldots,\mathbf p_{i+3}]\in\mathbb R^{3\times4}$，矩阵乘法应为 $\mathbf p(t)=\mathbf P(\mathbf M^{(4)})^{\mathsf T}\mathbf u$，维度为 $3\times1$。
+
+为了与旋转表示统一，可以将控制点加权改写为相邻增量的加权。令 $\lambda_j=\mathbf u^{\mathsf T}\mathbf M^{(4)}_{(j)}$，利用 $\sum_j\lambda_j=1$，有
 
 $$
-\mathbf p(t)=\sum_{j=0}^{3}\mathbf u^{\top}\mathbf M^{(4)}_{(j)}\,\mathbf p_{i+j}.
+\begin{aligned}
+\mathbf p(t)=\mathbf p_i
+&+(\lambda_1+\lambda_2+\lambda_3)(\mathbf p_{i+1}-\mathbf p_i)\\
+&+(\lambda_2+\lambda_3)(\mathbf p_{i+2}-\mathbf p_{i+1})
++\lambda_3(\mathbf p_{i+3}-\mathbf p_{i+2}).
+\end{aligned}
 $$
 
-这一步把“查表递推基函数”变成了“算 $u$，再做一次小规模矩阵–向量乘法”，求导也对 $\mathbf u$ 的各次幂逐项进行，便于把角速度、线加速度写成对控制点的解析函数。
-
-**累积矩阵是同一组基的改写，不是另一套曲线。** 利用基函数之和为 $1$，可以把“对控制点加权”改写成“从左侧控制点出发，再叠加相邻控制点差分”：
+展开后，每个控制点前的系数重新回到 $\lambda_0,\ldots,\lambda_3$。这就是论文的累积形式：
 
 $$
-\mathbf p(t)=\mathbf p_i+\sum_{j=1}^{d}\tilde\lambda_j(u)\bigl(\mathbf p_{i+j}-\mathbf p_{i+j-1}\bigr),
+\mathbf p(t)=\mathbf p_i+
+\sum_{j=1}^{d}
+\bigl(\mathbf u^{\mathsf T}\tilde{\mathbf M}^{(d+1)}_{(j)}\bigr)
+(\mathbf p_{i+j}-\mathbf p_{i+j-1}),
+\tag{3}
 $$
-
-其中权重 $\tilde\lambda_j(u)$ 仍是 $u$ 的多项式，收集系数后得到累积基矩阵 $\tilde{\mathbf M}^{(d+1)}$。三次情形下
 
 $$
 \tilde{\mathbf M}^{(4)}=\frac16
@@ -193,411 +112,393 @@ $$
 0&-3&3&0\\
 0&1&-2&1
 \end{bmatrix}.
+\tag{4}
 $$
 
-对欧氏空间中的平移，两种形式数值等价。对 $SO(3)$ 或单位四元数，控制点不能做普通向量加法，累积形式把“差分”解释成相对旋转 $\mathbf q_{i+j-1}^{-1}\otimes\mathbf q_{i+j}$，再经 $\log/\exp$ 回到流形，因此旋转样条几乎总是写累积型。
-
-小结这条因果链：
+求速度与加速度时，只需对局部时间多项式求导，再乘上时间归一化的比例：
 
 $$
-\text{Cox–de Boor 递推}
-\;\Rightarrow\;
-\text{分段多项式 + 局部支撑}
-\;\Rightarrow\;
-\text{均匀节点下局部只依赖 }u
-\;\Rightarrow\;
-\text{基函数 = }\mathbf u^{\top}\text{的列向量}
-\;\Rightarrow\;
-\text{曲线 = }\mathbf u^{\top}\mathbf M\mathbf P.
+\frac{d\mathbf u^{\mathsf T}}{dt}
+=\frac1{\Delta t}[0,1,2u,3u^2],\qquad
+\frac{d^2\mathbf u^{\mathsf T}}{dt^2}
+=\frac1{\Delta t^2}[0,0,2,6u].
 $$
 
-矩阵表示节省的是实现与求导成本；曲线族与原始 B 样条相同。LI-Calib 选用均匀三次，是在轨迹表达能力、局部支撑宽度与 IMU 高频求导需求之间取的折中。
+由此可在任意 IMU 时间戳获得位置二阶导数。均匀三次样条在内部简单节点处为 $C^2$ 连续，适合构造连续加速度。基函数的通用构造见[B 样条的局部平滑曲线构造与应用](../bspline-continuous-time-slam/index.html)；这里的矩阵和累积改写已经给出了后续标定所需的计算关系。
 
-### 2.3 均匀三次平移样条在轨迹中的用法
+### 3.3 四元数累积旋转样条
 
-设节点均匀，样条次数 $d=3$。对 $t\in[t_i,t_{i+1})$，
-
-$$
-u=\frac{t-t_i}{t_{i+1}-t_i}\in[0,1),
-\qquad
-\mathbf u^{\top}=\begin{bmatrix}1&u&u^{2}&u^{3}\end{bmatrix},
-$$
-
-平移由四个控制点 $\mathbf p_i,\mathbf p_{i+1},\mathbf p_{i+2},\mathbf p_{i+3}$ 按上一节的 $\mathbf M^{(4)}$ 组合得到。任意时刻位置是邻近控制点的仿射组合；局部支撑保证单个控制点只影响有限时间段，批优化因此保持稀疏。
-
-等价的累积形式
+旋转控制点为单位四元数 $\mathbf q_i$。旋转不能像位置一样直接作普通向量加权，论文采用相邻旋转增量的累积：
 
 $$
-\mathbf p(t)=\mathbf p_i+\sum_{j=1}^{3}\mathbf u^{\top}\tilde{\mathbf M}^{(4)}_{(j)}\bigl(\mathbf p_{i+j}-\mathbf p_{i+j-1}\bigr)
+\mathbf q(t)=\mathbf q_i\otimes
+\prod_{j=1}^{3}
+\exp\!\left[
+\bigl(\mathbf u^{\mathsf T}\tilde{\mathbf M}^{(4)}_{(j)}\bigr)
+\log(\mathbf q_{i+j-1}^{-1}\otimes\mathbf q_{i+j})
+\right].
+\tag{5}
 $$
 
-为下一节的旋转样条提供同一套权重结构。
+先由 $\mathbf q_{i+j-1}^{-1}\otimes\mathbf q_{i+j}$ 得到相邻控制旋转的差异，log 将其映到切空间，乘累积权重，再用 exp 映回单位四元数，最后按顺序连乘。exp 与 log 在这里采用互逆的四元数约定，不能直接混用未统一角度因子的旋转向量公式。
 
-### 2.4 单位四元数上的累积旋转样条
+平移和旋转因此共享同一套累积权重，但分别在欧氏空间与旋转流形上组合。各权重对时间可求导，旋转曲线的时间导数也随控制四元数确定，从而可以直接预测角速度。
 
-旋转控制点取单位四元数 $\mathbf q_i$。累积 B 样条写为
+### 3.4 样条导数怎样预测 IMU 测量
 
-$$
-\mathbf q(t)=\mathbf q_i\otimes\prod_{j=1}^{3}
-\exp\Bigl(
-\mathbf u^{\top}\tilde{\mathbf M}^{(4)}_{(j)}\,
-\log\bigl(\mathbf q_{i+j-1}^{-1}\otimes\mathbf q_{i+j}\bigr)
-\Bigr).
-$$
-
-这里 $\otimes$ 是四元数乘法；$\log$ 把相对四元数映到切空间（李代数元素），$\exp$ 再映回单位四元数流形。直观上：先取相邻控制点的相对旋转，用与平移样条相同的累积基权重做加权，再把加权后的切向量指数映射回去，最后从左基准 $\mathbf q_i$ 连乘起来。
-
-对 $\mathbf q(t)$ 与 $\mathbf p(t)$ 求时间导数，就能得到机体角速度与加速度——这正是把原始 IMU 测量接进优化的入口。矩阵形式在这里的具体作用是：权重 $\mathbf u^{\top}\tilde{\mathbf M}^{(4)}_{(j)}$ 对 $u$ 可微，从而 $\dot{\mathbf q}$、$\ddot{\mathbf p}$ 都可以解析落到控制点上。
-
-### 2.5 由样条导数得到 IMU 预测
-
-把第一帧 IMU 坐标系 $\{I_0\}$ 作为轨迹参考系。记 ${}_{I}^{I_0}\mathbf R(t)$ 为 $\mathbf q(t)$ 对应的旋转矩阵，${}^{I_0}\mathbf p(t)$ 为平移样条。机体坐标系下的角速度与比力预测为
+简记 $\mathbf R(t)={}^{I_0}_{I}\mathbf R(t)$，$\mathbf p(t)={}^{I_0}\mathbf p(t)$。加速度计测量的是比力，即非重力加速度在机体轴上的表达。论文式（6）为
 
 $$
-{}^{I}\boldsymbol\omega(t)
-={}_{I}^{I_0}\mathbf R^{\top}(t)\,{}_{I}^{I_0}\dot{\mathbf R}(t),
+{}^I\mathbf a(t)
+=\mathbf R^{\mathsf T}(t)
+\bigl(\ddot{\mathbf p}(t)-{}^{I_0}\mathbf g\bigr).
+\tag{6}
 $$
 
+位置二阶导数在参考系 $I_0$ 中，先减去重力，再旋到瞬时 IMU 系。静止时 $\ddot{\mathbf p}=0$，该式仍产生 $-\mathbf R^{\mathsf T}\mathbf g$，符合加速度计静止时感受到重力支撑比力的现象。
+
+角速度则满足刚体运动学 $\dot{\mathbf R}=\mathbf R[{}^I\boldsymbol\omega]_\times$，因此
+
 $$
-{}^{I}\mathbf a(t)
-={}_{I}^{I_0}\mathbf R^{\top}(t)
-\Bigl({}^{I_0}\ddot{\mathbf p}(t)-{}^{I_0}\mathbf g\Bigr).
+[{}^I\boldsymbol\omega(t)]_\times
+=\mathbf R^{\mathsf T}(t)\dot{\mathbf R}(t),\qquad
+{}^I\boldsymbol\omega(t)
+=\operatorname{vee}\!\left(\mathbf R^{\mathsf T}(t)\dot{\mathbf R}(t)\right).
+\tag{7}
 $$
 
-第一式来自刚体姿态运动学：$\dot{\mathbf R}=\mathbf R[\boldsymbol\omega]_{\times}$，左乘 $\mathbf R^{\top}$ 即得机体角速度。第二式来自比力定义：加速度计测量的是非重力加速度在机体轴上的投影；世界系加速度减去重力后再旋到机体系，便得到比力预测。
+$[\omega]_\times$ 是使 $[\omega]_\times x=\omega\times x$ 成立的反对称矩阵，vee 将它恢复为三维向量。由 $\mathbf R^{\mathsf T}\mathbf R=\mathbf I$ 求导可得 $\mathbf R^{\mathsf T}\dot{\mathbf R}$ 为反对称矩阵，因此这一步成立。
 
-这两式说明连续时间表示的一个直接好处：**IMU 残差不需要先做预积分压缩**；每个 IMU 样本都可以在自己的时间戳上，对样条导数提出约束。
+> 原论文式（7）将角速度简写为 $\mathbf R^{\mathsf T}\dot{\mathbf R}$，但右侧实际是 $3\times3$ 矩阵。这里补出叉乘矩阵与 vee，后文与三维陀螺测量相减时均采用向量形式。式（6）的 $\mathbf a(t)$ 则按其公式解释为比力。
 
----
+两种预测都能在原始采样时刻直接计算。批估计由此使用逐样本 IMU 残差，无需先把这些样本压缩为关键帧之间的预积分量。
 
-## 3. 旋转外参初始化
+## 4. 方法
 
-平移外参与重力、加速度耦合，又受二阶导数对样条可控性的影响，论文选择先不初始化平移，只初始化旋转外参 ${}^{I}_{L}\mathbf q$。
+![LI-Calib 的初始化、数据关联与精化流程](figures/paper-figure-2.png)
 
-### 3.1 用陀螺拟合旋转样条
+*原论文图 2。陀螺先拟合旋转曲线，LiDAR 里程计提供相对旋转以初始化旋转外参；随后建立曲面片地图与关联。批估计更新轨迹和外参，结果再用于重新去畸变、建图与关联。*
 
-给定陀螺测量 $\{{}^{I_k}\boldsymbol\omega_m\}_{k=0}^{M}$，先单独拟合旋转样条控制点：
+整个方法先解决“如何得到可用的首轮几何”，再进行完整的联合估计。初始化只求旋转外参；首轮地图来自辅助去畸变后的 NDT 里程计。之后的外层精化重建地图，内层批估计在给定关联下优化连续轨迹与标定参数。
+
+### 4.1 旋转外参初始化
+
+#### 陀螺约束旋转曲线
+
+给定原始陀螺样本 ${}^{I_k}\boldsymbol\omega_m$，论文通过拟合角速度获得四元数控制点，式（8）按原文的范数写法整理为
 
 $$
 \mathbf q_0,\ldots,\mathbf q_N
-=\arg\min\sum_{k=0}^{M}
-\Bigl\|
-{}^{I_k}\boldsymbol\omega_m
--{}_{I}^{I_0}\mathbf R^{\top}(t_k)\,{}_{I}^{I_0}\dot{\mathbf R}(t_k)
-\Bigr\|.
+=\operatorname*{arg\,min}_{\mathbf q_0,\ldots,\mathbf q_N}
+\sum_{k=0}^{M}
+\left\|{}^{I_k}\boldsymbol\omega_m
+-\operatorname{vee}\!\left(\mathbf R^{\mathsf T}(t_k)\dot{\mathbf R}(t_k)\right)\right\|.
+\tag{8}
 $$
 
-优化时固定起点姿态为单位四元数，避免整体姿态的可观测性退化。这里拟合的是**原始角速度**，而不是积分后的相对姿态。积分会把零偏与噪声积累进相对旋转；直接拟合角速度，等价于让样条导数贴近测量，后续零偏仍可在批优化中估计。
+起始曲线姿态 $\mathbf q(t_0)$ 固定为单位四元数，选定旋转参考，避免整体旋转自由度。此处拟合的是角速度，尚未在目标中单独引入陀螺零偏；零偏在后续批估计中处理。直接拟合避免先独立积分一条长姿态轨迹，但原始测量中的偏置并不会因此自动消失。
 
-### 3.2 激光相对旋转与手眼方程
+#### 用两个传感器的相对旋转求固定外参
 
-对激光序列做基于 NDT 的 scan-to-map 配准，得到相邻扫描相对旋转 ${}^{L_k}_{L_{k+1}}\mathbf q$。同一时间间隔上，旋转样条给出 IMU 相对旋转
+NDT scan-to-map 配准给出相邻 LiDAR 扫描的相对旋转 ${}^{L_k}_{L_{k+1}}\mathbf q$。同一时间段的 IMU 相对旋转由曲线求得：
 
 $$
 {}^{I_k}_{I_{k+1}}\mathbf q
-={}_{I}^{I_0}\mathbf q^{-1}(t_k)\otimes{}_{I}^{I_0}\mathbf q(t_{k+1}).
+=\mathbf q^{-1}(t_k)\otimes\mathbf q(t_{k+1}).
 $$
 
-若外参旋转为 ${}^{I}_{L}\mathbf q$，刚体连接要求相对运动共轭一致：
+记固定外参为 ${}^{I}_{L}\mathbf q$，刚体连接要求
 
 $$
 {}^{I_k}_{I_{k+1}}\mathbf q\otimes{}^{I}_{L}\mathbf q
 ={}^{I}_{L}\mathbf q\otimes{}^{L_k}_{L_{k+1}}\mathbf q.
+\tag{9}
 $$
 
-这就是经典的旋转手眼关系：IMU 侧相对旋转“左乘外参”，应等于“外参再左乘”激光侧相对旋转。
+两边都是将时刻 $k+1$ 的 LiDAR 方向变到时刻 $k$ 的 IMU 系：左侧先经外参到当前 IMU，再经 IMU 相对旋转；右侧先经 LiDAR 相对旋转，再经外参。两条路径终点相同，便得到旋转手眼方程。
 
-### 3.3 写成齐次线性方程并求 SVD
-
-把四元数乘法写成左右乘矩阵。对任意四元数 $\mathbf q$，存在矩阵 $[\mathbf q]_{L}$、 $[\mathbf q]_{R}$，使得
+四元数乘法可写成左乘与右乘矩阵，满足 $a\otimes b=[a]_L b=[b]_R a$。将多个运动段堆叠，得到
 
 $$
-\mathbf a\otimes\mathbf b=[\mathbf a]_{L}\mathbf b=[\mathbf b]_{R}\mathbf a.
+\mathbf Q_N\,{}^{I}_{L}\mathbf q=\mathbf0,\qquad
+\mathbf Q_N=
+\begin{bmatrix}
+\vdots\\
+\alpha_k\!\left(
+[{}^{I_k}_{I_{k+1}}\mathbf q]_L
+-[{}^{L_k}_{L_{k+1}}\mathbf q]_R\right)\\
+\vdots
+\end{bmatrix}.
+\tag{10}
 $$
 
-于是手眼方程化为
+实际有噪声时，求单位范数下使 $\|\mathbf Q_Nq\|^2$ 最小的向量。若 $\mathbf Q_N=U\Sigma V^{\mathsf T}$，这个解就是最小奇异值对应的右奇异向量。只绕同一轴旋转会缺少部分约束，因此运动段数多也不能代替旋转方向的充分变化。
+
+权重由两侧相对转角差异确定。令 $q_w$ 为四元数实部，原论文定义
 
 $$
-\Bigl(
-\bigl[{}^{I_k}_{I_{k+1}}\mathbf q\bigr]_{L}
--
-\bigl[{}^{L_k}_{L_{k+1}}\mathbf q\bigr]_{R}
-\Bigr)
-{}^{I}_{L}\mathbf q
-=\mathbf 0.
-$$
-
-堆叠多个时间段，得到
-
-$$
-\mathbf Q_N\,{}^{I}_{L}\mathbf q=\mathbf 0.
-$$
-
-解是 $\mathbf Q_N$ 最小奇异值对应的右奇异向量，再归一化为单位四元数。
-
-为抑制外点，论文用相对转角差异构造 Huber 式权重。令 $q_w$ 为四元数实部，定义
-
-$$
-r_k=\Bigl\|
-2\bigl(
+r_k=\left|2\left[
 \arccos({}^{I_k}_{I_{k+1}}q_w)
--
-\arccos({}^{L_k}_{L_{k+1}}q_w)
-\bigr)
-\Bigr\|,
+-\arccos({}^{L_k}_{L_{k+1}}q_w)
+\right]\right|,
+\tag{11}
 $$
 
 $$
 \alpha_k=
 \begin{cases}
-1,& r_k<\tau,\\
-\tau/r_k,& \text{otherwise.}
+1,&r_k<\mathrm{threshold},\\
+\mathrm{threshold}/r_k,&\text{其他情况}.
 \end{cases}
+\tag{12}
 $$
 
-把 $\alpha_k$ 乘到对应块行上，再做 SVD。实现里对相对转角差超过约 $1^\circ$ 的样本降权，并要求足够多的有效相对运动段，奇异值结构也需满足一定可观性检查。
+同一个刚体转动在不同坐标系中的旋转角应相同，因此转角差可提示不可靠配准；超过阈值的块行被降权。比较前还需统一四元数的等价符号，避免将 $q$ 与 $-q$ 的表示差异当成运动差异。这只是按转角构造的启发式筛选，转角一致并不能证明旋转轴也一定正确。
 
-旋转外参初始化完成后，IMU 旋转样条就能为激光去畸变与 NDT 里程计提供更好的旋转先验，从而改善首轮地图质量。
+#### 平移留给后续联合估计
 
----
-
-## 4. 曲面片地图与数据关联
-
-### 4.1 体素内的平面性系数
-
-把激光点云地图离散成三维体素。对体素内点集计算协方差（二阶矩）并做特征值分解，设
+论文不单独初始化平移外参。原因之一是加速度与重力、姿态耦合；另一个原因是位置二阶导数丢失了常值和一次时间项。任取常向量 $\mathbf c_0,\mathbf c_1$，构造另一条轨迹
 
 $$
-\lambda_0\le\lambda_1\le\lambda_2.
+\tilde{\mathbf p}(t)=\mathbf p(t)+\mathbf c_0+\mathbf c_1t,
 $$
 
-平面性系数取
+则 $\ddot{\tilde{\mathbf p}}(t)=\ddot{\mathbf p}(t)$。仅靠原始加速度，即使姿态和重力已知，也不能确定初始位置与速度。论文所说二阶导数使部分系数无法独立求解，可由这个零空间理解，并非加入激光几何后整个平移问题仍不可解。
+
+初始化得到旋转外参后，IMU 曲线即可将旋转运动传给 LiDAR，先补偿扫描的旋转畸变，为首轮配准和地图提供更好的起点。
+
+### 4.2 曲面片地图与数据关联
+
+首轮用带有旋转预测的 LiDAR 里程计建立点云地图，将地图分为三维体素，并计算体素内点的局部二阶统计量。设特征值为 $\lambda_0\le\lambda_1\le\lambda_2$，论文采用平面性指标
 
 $$
-\mathcal P=2\frac{\lambda_1-\lambda_0}{\lambda_0+\lambda_1+\lambda_2}.
+\mathcal P=2\frac{\lambda_1-\lambda_0}
+{\lambda_0+\lambda_1+\lambda_2}.
+\tag{13}
 $$
 
-若点云近似落在平面上，最小特征值 $\lambda_0$ 远小于另外两个，$\mathcal P$ 接近 $1$；若呈球形散布，三个特征值接近，$\mathcal P$ 变小。超过阈值后，体素内再用 RANSAC 拟合平面
+在近似平面、两个切向分布幅度相近时，$\lambda_0$ 很小且 $\lambda_1\approx\lambda_2$，指标接近 1。近似线状时，前两个特征值都小；近似球形时，三个特征值相近，这两种情况下指标都较小。因此它同时考察离面厚度与切向展开程度，并非所有薄平面点集都会给出接近 1 的数值。
+
+超过阈值的体素用 RANSAC 拟合局部平面
 
 $$
-\boldsymbol\pi=\begin{bmatrix}\mathbf n^{\top}&d\end{bmatrix}^{\top},
-\qquad
-\mathbf n^{\top}\mathbf x+d=0.
+\boldsymbol\pi=[\mathbf n^{\mathsf T},d]^{\mathsf T},\qquad
+\mathbf n^{\mathsf T}\mathbf x+d=0.
 $$
 
-平面与地图都表达在 $\{L_0\}$。室内常用 $0.5\,\mathrm{m}$ 体素，室外常用 $1.0\,\mathrm{m}$；首轮 $\mathcal P$ 阈值约 $0.6$，去畸变后的精化轮次可提到约 $0.7$。
+法向与平面均在地图系 $L_0$ 中。后续将扫描点与对应曲面片关联，拒绝点到面距离过大的匹配，并随机下采样原始点控制计算量。局部平面覆盖自然场景中不同方向的表面，不需要人为找到几块完整的大平面；但若环境中只有单一法向，几何约束仍可能退化。
 
-### 4.2 点到曲面片关联
+### 4.3 连续时间批估计
 
-对原始扫描中的点，在对应时刻位姿下变换到地图系，寻找落入某曲面片包围盒且点面距离足够小的对应。距离过大的对应被拒绝；扫描内点也可随机下采样以控制计算量。
+#### 状态与加权最小二乘
 
-这里的“曲面片”强调的是**局部小平面**，而不是场景中的全局大平面。局部平面数量多、法向分布更丰富，有利于把外参的各自由度都约束起来；大平面过少时，某些平移或旋转分量容易退化。
-
----
-
-## 5. 连续时间批优化
-
-### 5.1 状态变量
-
-批优化状态可写为
+轨迹旋转控制点记为 $\mathbf x_q$，平移控制点记为 $\mathbf x_p$。按残差所涉及的两种零偏，将原文状态整理为
 
 $$
 \mathbf x=
-\bigl[
-{}^{I}_{L}\mathbf q^{\top},\;
-{}^{I}\mathbf p_{L}^{\top},\;
-\mathbf x_q^{\top},\;
-\mathbf x_p^{\top},\;
-\mathbf b_g^{\top},\;
-\mathbf b_a^{\top}
-\bigr]^{\top},
+[({}^{I}_{L}\mathbf q)^{\mathsf T},
+({}^{I}\mathbf p_L)^{\mathsf T},
+\mathbf x_q^{\mathsf T},\mathbf x_p^{\mathsf T},
+\mathbf b_a^{\mathsf T},\mathbf b_g^{\mathsf T}]^{\mathsf T}.
+\tag{14}
 $$
 
-其中 $\mathbf x_q$、$\mathbf x_p$ 分别是旋转与平移样条的全部控制点，$\mathbf b_g$、$\mathbf b_a$ 为陀螺与加速度零偏。重力方向常通过把 $\{I_0\}$ 的 $z$ 轴与重力对齐的低维参数来表示；开源实现里时间偏移也可作为可选项进入状态。论文实验主线聚焦空间外参，时间同步由硬件完成。
+> 原论文式（14）末两项重复写为 $\mathbf b_a$，但随后正文及式（16）、（17）分别定义加速度计零偏和陀螺零偏，此处据此整理。正文另提到描述重力方向的两自由度旋转，却没有在式（14）中列出；阅读该状态表时还需结合式（6）的重力项，不能把印刷列表当成完整实现参数表。
 
-### 5.2 最大似然到加权最小二乘
-
-在测量噪声独立高斯的假设下，
+在独立高斯噪声假设下，联合目标为
 
 $$
-p(\mathbf x\mid\mathcal L,\mathcal A,\mathcal W)
+\hat{\mathbf x}=\operatorname*{arg\,min}_{\mathbf x}
+\left\{
+\sum_{k\in\mathcal A}\|\mathbf r_a^k\|_{\Sigma_a}^2
++\sum_{k\in\mathcal W}\|\mathbf r_\omega^k\|_{\Sigma_\omega}^2
++\sum_{j\in\mathcal L}\|\mathbf r_L^j\|_{\Sigma_L}^2
+\right\}.
+\tag{15}
 $$
 
-的最大似然估计等价于
+$\mathcal A,\mathcal W$ 是加速度计与陀螺样本集合，$\mathcal L$ 是关联后的激光点集合。$\Sigma$ 为相应测量协方差；加权平方范数可理解为 $r^{\mathsf T}\Sigma^{-1}r$。它将不同单位、不同噪声水平的残差转换为可共同最小化的量。原始数据固定，求解器调整外参、轨迹控制点与零偏，使三类预测同时接近观测。
+
+#### IMU 残差约束运动曲线
+
+两种惯性残差为
 
 $$
-\hat{\mathbf x}
-=\arg\min
-\Bigg\{
-\sum_{k\in\mathcal A}\bigl\|\mathbf r_a^{k}\bigr\|_{\boldsymbol\Sigma_a}^{2}
-+
-\sum_{k\in\mathcal W}\bigl\|\mathbf r_\omega^{k}\bigr\|_{\boldsymbol\Sigma_\omega}^{2}
-+
-\sum_{j\in\mathcal L}\bigl\|\mathbf r_{\mathcal L}^{j}\bigr\|_{\boldsymbol\Sigma_{\mathcal L}}^{2}
-\Bigg\}.
-$$
-
-三类残差分别来自加速度计、陀螺与激光点到面约束。求解采用 Levenberg–Marquardt。
-
-![批优化中的三类残差](figures/residuals.svg)
-
-### 5.3 IMU 残差
-
-对时刻 $t_k$ 的原始测量 ${}^{I_k}\mathbf a_m$、${}^{I_k}\boldsymbol\omega_m$，定义
-
-$$
-\mathbf r_a^{k}
-={}^{I_k}\mathbf a_m-{}^{I}\mathbf a(t_k)-\mathbf b_a,
+\mathbf r_a^k
+={}^{I_k}\mathbf a_m-{}^I\mathbf a(t_k)-\mathbf b_a,
+\tag{16}
 $$
 
 $$
-\mathbf r_\omega^{k}
-={}^{I_k}\boldsymbol\omega_m-{}^{I}\boldsymbol\omega(t_k)-\mathbf b_g.
+\mathbf r_\omega^k
+={}^{I_k}\boldsymbol\omega_m-{}^I\boldsymbol\omega(t_k)-\mathbf b_g.
+\tag{17}
 $$
 
-其中 ${}^{I}\mathbf a(t_k)$、${}^{I}\boldsymbol\omega(t_k)$ 由第二节的样条导数给出。
+式（6）、（7）提供预测项。陀螺主要约束旋转曲线的时间变化；加速度计约束位置二阶导数，同时依赖姿态和重力。零偏由整段数据中的观测共同估计。原文状态以每种传感器一组三维零偏表示，没有在这里展开逐时刻随机游走偏置链。
 
-这两条残差的系统含义很直接：
+外参本身不直接出现在这两条 IMU 残差中。它们的作用是约束 IMU 运动，外参则通过下一条激光变换链与这条运动关联。因而 IMU 拟合得好，不代表已经完成 LiDAR–IMU 标定。
 
-- 陀螺残差主要拉动旋转控制点，并吸收常值陀螺零偏；
-- 加速度残差拉动平移控制点，同时与重力、姿态耦合；加速度零偏与重力在短数据段上需要足够线加速度激励才能分开。
+#### 激光点怎样进入地图坐标系
 
-由于每个 IMU 样本都进入代价，样条必须有足够的时间分辨率。论文在高动态数据上取节点间隔约 $0.02\,\mathrm{s}$，使曲线跟得上快速姿态变化。
-
-### 5.4 点到曲面片残差的坐标变换推导
-
-设激光点 ${}^{L_j}\mathbf p_i$ 在时刻 $t_j$ 被测得，并关联到地图平面 $\boldsymbol\pi_j$。需要先把它变到 $\{L_0\}$，再算点面距离。
-
-外参约定为：激光系中的点变换到 IMU 系，
+设原始激光点 ${}^{L_j}\mathbf p_i$ 在时刻 $t_j$ 采得，关联平面为 $\boldsymbol\pi_j$。它需要依次经过
 
 $$
-{}^{I}\mathbf p
-={}^{I}_{L}\mathbf R\,{}^{L}\mathbf p+{}^{I}\mathbf p_{L}.
+L_j\ \longrightarrow\ I_j\ \longrightarrow\ I_0\ \longrightarrow\ L_0.
 $$
 
-于是 $t_j$ 时刻该点在 $\{I_0\}$ 中为
+第一步由固定外参给出；第二步由时刻 $t_j$ 的 IMU 样条给出；最后一步是初始外参的逆变换。具体而言，
 
 $$
 {}^{I_0}\mathbf p_i
-={}_{I_j}^{I_0}\mathbf R
-\bigl({}^{I}_{L}\mathbf R\,{}^{L_j}\mathbf p_i+{}^{I}\mathbf p_{L}\bigr)
+={}^{I_0}_{I_j}\mathbf R
+\bigl({}^{I}_{L}\mathbf R\,{}^{L_j}\mathbf p_i+{}^I\mathbf p_L\bigr)
 +{}^{I_0}\mathbf p_{I_j}.
 $$
 
-地图系是 $\{L_0\}$。起始时刻外参把 $\{I_0\}$ 与 $\{L_0\}$ 联系起来：
+初始参考系中，$I_0$ 原点在 $L_0$ 的位置为 $-({}^{I}_{L}\mathbf R)^{\mathsf T}{}^I\mathbf p_L$。因此
 
 $$
-{}^{L_0}_{I_0}\mathbf R={}^{I}_{L}\mathbf R^{\top},
-\qquad
-{}^{L_0}\mathbf p_{I_0}=-{}^{I}_{L}\mathbf R^{\top}\,{}^{I}\mathbf p_{L}.
-$$
-
-第二式的来源是：IMU 原点在激光系中的坐标，等于把“激光原点在 IMU 系中的坐标”反变换，
-
-$$
-\mathbf 0={}^{I}_{L}\mathbf R\,{}^{L}\mathbf p_{I}+{}^{I}\mathbf p_{L}
-\;\Rightarrow\;
-{}^{L}\mathbf p_{I}=-{}^{I}_{L}\mathbf R^{\top}\,{}^{I}\mathbf p_{L}.
-$$
-
-因此点在地图系中的坐标为
-
-\begin{align}
 {}^{L_0}\mathbf p_i
-&=
-{}^{I}_{L}\mathbf R^{\top}\,{}^{I_0}\mathbf p_i
-+{}^{L_0}\mathbf p_{I_0}\\
-&=
-{}^{I}_{L}\mathbf R^{\top}\,{}_{I_j}^{I_0}\mathbf R\,{}^{I}_{L}\mathbf R\,{}^{L_j}\mathbf p_i
-+
-{}^{L_0}\mathbf p_{L_j},
-\end{align}
+=({}^{I}_{L}\mathbf R)^{\mathsf T}
+\bigl({}^{I_0}\mathbf p_i-{}^I\mathbf p_L\bigr).
+$$
 
-其中激光原点在 $t_j$ 的地图坐标
+代入上一式并展开，得到原论文式（18）的三部分：
 
 $$
+\begin{aligned}
+{}^{L_0}\mathbf p_i
+&=({}^{I}_{L}\mathbf R)^{\mathsf T}
+{}^{I_0}_{I_j}\mathbf R\,{}^{I}_{L}\mathbf R\,{}^{L_j}\mathbf p_i
++{}^{L_0}\mathbf p_{L_j},\\
 {}^{L_0}\mathbf p_{L_j}
-=
-{}^{I}_{L}\mathbf R^{\top}\,{}_{I_j}^{I_0}\mathbf R\,{}^{I}\mathbf p_{L}
-+
-{}^{I}_{L}\mathbf R^{\top}\,{}^{I_0}\mathbf p_{I_j}
--
-{}^{I}_{L}\mathbf R^{\top}\,{}^{I}\mathbf p_{L}.
+&=({}^{I}_{L}\mathbf R)^{\mathsf T}
+{}^{I_0}_{I_j}\mathbf R\,{}^I\mathbf p_L
++({}^{I}_{L}\mathbf R)^{\mathsf T}{}^{I_0}\mathbf p_{I_j}
+-({}^{I}_{L}\mathbf R)^{\mathsf T}{}^I\mathbf p_L,\\
+r_L^j
+&=\begin{bmatrix}({}^{L_0}\mathbf p_i)^{\mathsf T}&1\end{bmatrix}\boldsymbol\pi_j.
+\end{aligned}
+\tag{18}
 $$
 
-把齐次点与平面系数相乘，得到标量残差
+若 $\mathbf n$ 为单位法向，最后一行就是有符号点到面距离，单位为米。原文在这段文字中先将对应平面下标写为 $i$，式（18）又写为 $j$；这里按式（18）使用 $\pi_j$，二者都指该点关联的地图平面。
+
+这条残差同时依赖外参和采样时刻的 IMU 姿态、位置。改变轨迹会改变逐点去畸变，改变外参会改变两传感器运动与观测坐标的连接。求解时平面和对应关系来自当前地图，先固定它们优化状态，下一轮才重建地图。
+
+还可以从展开式看出运动激励的作用。外参平移的贡献可合并为
 
 $$
-\mathbf r_{\mathcal L}^{j}
-=
-\begin{bmatrix}{}^{L_0}\mathbf p_i^{\top}&1\end{bmatrix}\boldsymbol\pi_j.
+({}^{I}_{L}\mathbf R)^{\mathsf T}
+\bigl({}^{I_0}_{I_j}\mathbf R-\mathbf I\bigr){}^I\mathbf p_L.
 $$
 
-若 $\boldsymbol\pi=[\mathbf n^{\top},d]^{\top}$ 且 $\mathbf n$ 为单位法向，该残差就是点到平面的有符号距离。
+若整段只有平移、没有姿态变化，这一项为零，点到面几何就无法借助该项区分传感器之间的固定杆臂。若只绕一根固定轴转动，沿该轴的杆臂分量也可能缺少响应。旋转方向变化与线加速度激励因此都重要，许多点或很低的残差并不能单独证明所有外参分量可观。
 
-这条残差同时依赖：
+批估计使用 Levenberg–Marquardt 最小化式（15）。每个 IMU 样本和激光点只连接它所在时段附近的轨迹控制点，外参和零偏则为全段共享参数，这形成连续时间批问题的稀疏结构。
 
-- 外参旋转与平移；
-- 时刻 $t_j$ 的 IMU 姿态与位置（因而依赖样条控制点）；
-- 平面参数（在关联阶段固定，精化时随地图更新）。
+### 4.4 地图与关联的外层精化
 
-因此，**激光残差是把外参嵌进几何一致性里的主要通道**；IMU 残差则保证整条运动曲线与惯性测量相容，并为去畸变提供时间上的稠密姿态。
+一次优化后，用当前轨迹与外参重新补偿原始扫描的运动畸变，重建曲面片地图、重新关联，再执行批估计。地图本身由同一组数据和当前估计构造，因而外层精化是处理初始畸变与错误关联的重要环节。
 
-### 5.5 两类残差如何互补
+![首轮与第二轮的曲面片地图](figures/paper-figure-3.png)
 
-只有 IMU 时，轨迹可在短时间拟合得很好，但缺少把坐标系“钉”到外部环境的绝对几何；外参平移尤其容易与重力、零偏纠缠。只有激光点到面时，可以约束传感器相对地图的几何，但扫描内每个点的时刻位姿若不准，残差会被运动畸变污染。
+*原论文图 3。上部首轮地图仍有初始运动畸变，下部使用一次批估计后的状态重建，曲面片明显更完整。不同颜色表示不同局部平面。*
 
-联合代价把两者放在同一组状态上：惯性项塑造连续运动，激光项用环境平面校正外参与轨迹。充分的角加速度与线加速度激励，是让旋转外参、平移外参、零偏同时可观的实验条件。
+NDT 里程计只在最开头初始化 LiDAR 位姿与地图，后续精化由估计出的连续轨迹支撑。论文观察到，第一轮到第二轮改进最大，约四轮后参数趋于稳定；这是该实验的经验收敛情况，不保证任意初值或错误关联都能被纠正。
 
----
+这里需要区分两种“迭代”：内层 LM 在固定地图关联下更新参数；外层则改变去畸变结果、地图与关联。实验中展示的第一至第八轮，指后者的精化轮次。
 
-## 6. 精化迭代
+## 5. 实验
 
-首轮优化结束后，用当前最优状态对原始扫描去畸变，重建曲面片地图，更新点到面关联，再进入下一轮批优化。NDT 激光里程计主要出现在最开头，用于给出初始位姿与初始地图；后续轮次改由连续时间轨迹支撑去畸变与关联。
+### 5.1 传感器、同步与参数
 
-论文观察到：第一轮到第二轮的地图质量提升通常最明显，因为初始地图仍带着未校正畸变与粗糙外参；大约四轮后外参趋于稳定。室内平面更干净时，重复性通常优于室外。
+![实验中的 LiDAR 与三台 IMU 装置](figures/paper-figure-1.png)
 
-开源工具链里的操作顺序与上述逻辑一致：初始化 → 数据关联 → 批优化 → 多次精化；也可选择打开时间偏移估计。后端连续时间因子图由 Kontiki 一类工具实现，激光侧常见依赖 NDT 实现做前端与体素统计。
+*原论文图 1。实验装置为 VLP-16 与三台 Xsens IMU，图中相机未参与该标定方法。*
 
----
+仿真和实测使用相应的传感器配置。论文说明 LiDAR 与 IMU 硬件同步，连续时间批估计基于 Kontiki 实现。该文实验验证的是空间标定，没有将未知时间偏移作为实验中的联合评价目标。
 
-## 7. 方法关系与适用边界
+真实数据分别在室内、室外各采集五条 25–30 秒序列。全部序列的平均绝对角速度约为 $47.39^\circ/\mathrm{s}$，平均绝对加速度约为 $0.628\,\mathrm{m/s^2}$。另在 Vicon 场地采集十条约 15 秒序列，用于检查轨迹估计与样条拟合能力。
 
-### 7.1 和预积分因子图标定的关系
+室内体素边长为 0.5 米，室外为 1.0 米；首轮平面性阈值为 0.6，完成第一次批估计并去畸变后升至 0.7。样条节点间隔为 0.02 秒，以表达数据中的快速运动。更小间隔增加轨迹自由度和参数数量，是否合适仍取决于运动频率、观测约束与噪声，不能视为普遍默认值。
 
-Gentil 等人用高斯过程上采样 IMU，再结合预积分因子与点到面因子做标定。LI-Calib 走的是另一条连续时间路线：轨迹本身由 B 样条参数化，IMU 以原始测量残差进入优化，而不是先压缩成关键帧预积分。对标定这种“需要任意时刻精确位姿”的问题，样条直接求值往往更贴切；对在线滑窗里程计，预积分仍更常见。
+### 5.2 仿真中的外参准确度
 
-### 7.2 和 Kalibr 式连续时间标定的关系
+![三正交平面与仿真运动](figures/paper-figure-4.png)
 
-Furgale、Rehder 等在相机–IMU 与激光扩展上建立了连续时间批标定传统，通常依赖标定板或相机桥接。LI-Calib 把对象收窄到 3D LiDAR–IMU，并把外部几何约束换成无靶标曲面片，使流程在一般结构化环境中可运行。
+*原论文图 4。三块平面互相正交，坐标标记为 IMU 轨迹，彩色离散点为带运动畸变的激光扫描，背景网格边长为 2 米。*
 
-### 7.3 局限
+仿真 IMU 为 400 Hz，LiDAR 为 10 Hz，水平视场角 $360^\circ$、垂直 $\pm15^\circ$。IMU 沿正弦轨迹运动，传感器噪声按真实设备特性生成。作者构造十条不同的 10 秒标定序列进行 Monte Carlo 实验。
 
-论文自己指出的主要瓶颈是：首轮依赖 NDT 激光里程计。若初始里程计很差，点到面关联不足，标定会失败或偏差增大。场景缺乏平面、运动激励不足、时间同步很差时，可观性也会变弱。官方实现早期以 VLP-16 为主，扩展到其他激光需要在点云解析与时间戳字段上做适配；工具链也支持估计时间偏移，但论文实验主体是硬件同步下的空间外参。
+相对于已知外参真值，平移误差报告为 $0.0043\pm0.0006$ 米，即 $4.3\pm0.6$ 毫米；旋转误差为 $0.0224\pm0.0026$ 度。这里能够直接评价标定准确度，因为仿真中有真值。结果依赖三正交平面、运动激励和所用噪声设置，不能直接作为所有真实装置的精度承诺。
 
-关于精度，应以论文实验与读者自己的数据为准。论文在仿真中报告了毫米级平移与亚角度级旋转误差量级，并在真实多 IMU 装置上用 CAD 相对位姿与多序列重复性做验证；这些数字是该文实验条件下的结果，不自动外推到任意传感器与场景。
+### 5.3 真实轨迹与测量拟合
 
----
+![Vicon 轨迹对照与惯性测量拟合](figures/paper-figure-5.png)
 
-## 8. 核心认识
+*原论文图 5。上部为对齐后的估计轨迹与真值，颜色表示 ATE；下部展示一条序列的 IMU $x$ 轴测量拟合及误差。*
 
-1. **标定的几何本质**是：把异步、高速率的 IMU 与逐点激光，接到同一条可求导的连续轨迹上，再用环境平面把外参从运动中分离出来。
-2. **B 样条**把轨迹写成控制点与基函数的线性组合；在均匀节点下，局部基函数化为关于 $u$ 的多项式，从而收成常值矩阵 $\mathbf M$ 与 $\mathbf u^{\top}$ 的乘积。任意时刻位姿与解析导数由此可直接计算，陀螺与加速度成为对 $\boldsymbol\omega(t)$、$\mathbf a(t)$ 的稠密观测。
-3. **旋转外参**可先由“陀螺拟合样条 + 激光相对旋转手眼方程”初始化；平移外参更适合留在联合批优化里，与重力、加速度残差一起解。
-4. **点到曲面片残差**通过刚体外参链条把激光点变到 $\{L_0\}$，其推导的关键步骤是 $L_j\to I_j\to I_0\to L_0$。
-5. **精化闭环**用更好的外参与轨迹改善去畸变与地图，再用更好的关联反哺外参，使无靶标约束逐步变硬。
+十条 Vicon 序列的平均 ATE 为 0.0183 米。图中样条导数也能较好拟合陀螺和加速度数据，拟合误差与测量噪声处于相近量级。这验证了所选曲线在这些运动下的表达能力和轨迹估计效果。
 
-若把本文放回更大的 LIO 图谱中：FAST-LIO2、LIO-SAM 一类系统通常假设外参已知或仅在线微调；LI-Calib 处理的是部署前把这条刚体链条标定出来的问题。连续时间批估计在这里服务于离线标定：在一段充分激励的数据上，把外参估准，而把实时里程计留给后续 LIO 系统。
+ATE 检查的是轨迹，不是 LiDAR–IMU 外参的直接真值误差。惯性残差较小同样只说明曲线与测量相容；还需结合不同序列的外参重复性和独立装配参照判断标定结果。
 
----
+### 5.4 多次标定的重复性
+
+![室内外五次标定的统计结果](figures/paper-table-1.png)
+
+*原论文表 I。八轮精化后，各场景五条序列的均值与标准差。这里报告的是 IMU 到 LiDAR 的变换，方向与正文定义的 LiDAR 到 IMU 外参相反；平移单位为米，欧拉角单位为度。*
+
+室内 IMU1 的平移三个方向标准差分别为 2.0、5.3、1.4 毫米，旋转三个欧拉角的标准差为 $0.18^\circ$、$0.28^\circ$、$0.18^\circ$。室外对应的平移 $z$ 方向标准差达到 14.0 毫米，IMU2、IMU3 的该方向也为 11.4、12.0 毫米。作者将室外较差的平移重复性与更复杂、不平整的平面区域联系起来。
+
+标准差衡量多次估计的离散程度，不能代替相对于真实外参的准确度。室内外均值也存在差异，例如 IMU1 的 $z$ 从约 $-0.1453$ 米变为 $-0.1623$ 米；因此“每组内部重复性较好”与“跨场景完全一致”是不同结论。
+
+![精化轮次与参数变化](figures/paper-figure-6.png)
+
+*原论文图 6。以一个平移分量和 yaw 展示不同轮次的估计，红色为室外，蓝色为室内。主要改进发生在第一轮之后，约四轮趋于稳定。*
+
+收敛曲线支持重建地图与更新关联的必要性，也说明首轮粗地图会明显影响参数。参数不再变化只表示该流程在此已稳定，并不自动证明到达真实外参或全局最优。
+
+### 5.5 CAD 相对位姿对照
+
+![三台 IMU 的估计安装位置](figures/paper-figure-7.png)
+
+*原论文图 7。八轮后的俯视与正视结果，矩形表示装配位置，圆点为室外结果，三角为室内结果。*
+
+真实装置缺少独立测量的 LiDAR–IMU 外参真值，论文用 CAD 装配图中的 IMU 间相对位姿作参照。设从两台 IMU 到 LiDAR 的估计为 $T_{L\leftarrow I_1}$、$T_{L\leftarrow I_2}$，则
+
+$$
+T_{I_1\leftarrow I_2}
+=T_{L\leftarrow I_1}^{-1}T_{L\leftarrow I_2}.
+$$
+
+它先由 IMU2 变到 LiDAR，再由 LiDAR 变到 IMU1，从而消去共同 LiDAR 参考系，可与装配图对比。
+
+![IMU 间相对位姿与 CAD 的比较](figures/paper-table-2.png)
+
+*原论文表 II。使用室内数据，以 IMU1 为参考，对照 IMU2、IMU3 的部分相对平移与旋转分量。*
+
+表中平移差值约 0.7–1.7 毫米，旋转分量差值为 $0.07^\circ$–$0.95^\circ$。这提供了装配几何的一致性证据，但 CAD 仍是设计参照，且表格只列出部分分量，并非完整 LiDAR–IMU 外参的直接真值检验。表中 IMU2 的 $z$ 均值为 0.0011 米、CAD 为 0，而 Difference 列写为 0.0012 米，存在显示数值上的小差别；这里保留原表，不据此反推更高精度结果。
+
+![室外与室内的去畸变地图](figures/paper-figure-8.png)
+
+*原论文图 8。由校正后的完整扫描构成地图，上图按高度着色，下图按反射强度着色，展示常见人造场景中的表面结构。*
+
+综合这些实验，仿真提供直接的外参真值对照，Vicon 检查连续轨迹，多序列统计检查重复性，CAD 检查传感器间相对装配关系。它们评价的对象互补，应分别保留各自的含义。
+
+## 6. 结论与后续工作
+
+LI-Calib 用连续运动曲线连接原始惯性测量与逐点激光。样条导数预测角速度与比力，逐点位姿与外参将激光观测变到地图系，局部平面提供环境几何约束。联合估计更新运动与标定参数，外层再更新去畸变、地图和关联，形成无靶标标定的完整迭代过程。
+
+其明确瓶颈是首轮依赖 NDT 里程计。若初始轨迹很差，就难以得到足够可靠的点到曲面片对应，后续精化也可能无法恢复。结构不足、运动方向单一或同步误差还会影响约束质量；连续时间求值的便利并不能代替这些观测条件。
+
+论文提出改进 LiDAR 前端作为后续方向。该工作的贡献集中在离线空间标定：在一段有足够激励、包含适当平面结构且时间同步的数据上，用共享轨迹和几何残差估计传感器连接。它与部署后持续运行的 LIO 系统承担不同任务。
 
 ## 参考文献
 
-1. Jiajun Lv, Jinhong Xu, Kewei Hu, Yong Liu, Xingxing Zuo. *Targetless Calibration of LiDAR-IMU System Based on Continuous-time Batch Estimation*. IROS 2020. [arXiv:2007.14759](https://arxiv.org/abs/2007.14759)
-2. 开源实现：[APRIL-ZJU/lidar_IMU_calib](https://github.com/APRIL-ZJU/lidar_IMU_calib)
-3. Paul Furgale, Timothy Barfoot, Gabe Sibley. *Continuous-time batch estimation using temporal basis functions*. ICRA 2012.
-4. Joern Rehder et al. *Spatio-temporal laser to visual/inertial calibration*. IROS 2014.
-5. Cedric Le Gentil, Teresa Vidal-Calleja, Shoudong Huang. *3D Lidar-IMU Calibration based on Upsampled Preintegrated Measurements*. ICRA 2018.
-6. Myoung-Jun Kim, Myung-Soo Kim, Sung Yong Shin. *A general construction scheme for unit quaternion curves with simple high order derivatives*. SIGGRAPH 1995.
-7. Christiane Sommer et al. *Efficient Derivative Computation for Cumulative B-Splines on Lie Groups*. CVPR 2020.
-8. Joan Solà. *Quaternion kinematics for the error-state Kalman filter*. arXiv:1711.02508, 2017.
+- Jiajun Lv, Jinhong Xu, Kewei Hu, Yong Liu, Xingxing Zuo. *Targetless Calibration of LiDAR-IMU System Based on Continuous-time Batch Estimation*. IROS 2020. [arXiv:2007.14759v1](https://arxiv.org/abs/2007.14759v1) · [PDF](https://arxiv.org/pdf/2007.14759v1)。本文公式编号、原图与实验依据该版本。
+- [LI-Calib 官方实现](https://github.com/APRIL-ZJU/lidar_IMU_calib)。本文以原论文的空间标定模型为主，工具后续功能需按相应代码版本区分。
+- Paul Furgale, Timothy Barfoot, Gabe Sibley. *Continuous-time batch estimation using temporal basis functions*. ICRA 2012。
+- Cédric Le Gentil, Teresa Vidal-Calleja, Shoudong Huang. *3D Lidar-IMU Calibration based on Upsampled Preintegrated Measurements for Motion Distortion Correction*. ICRA 2018。
+- Christiane Sommer 等。*Efficient Derivative Computation for Cumulative B-Splines on Lie Groups*. CVPR 2020。

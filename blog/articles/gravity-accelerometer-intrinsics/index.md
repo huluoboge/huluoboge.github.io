@@ -1,19 +1,19 @@
 ---
-title: "重力方向与加速度计内参的长窗口联合估计"
+title: "Joint On-Manifold Gravity and Accelerometer Intrinsics Estimation 论文解读"
 date: 2026-10-14
 categories: [state-estimation]
 tags: [IMU, Accelerometer, Gravity Alignment, Calibration, Observability, Factor Graph, LiDAR, SLAM]
-excerpt: "围绕 Nemiroff 等人的在线重力与加速度计内参估计方法，推导位置积分中的速度消元、单位球面上的方向更新、慢变量长窗口因子图，以及重力观测对全局地图的反馈。"
+excerpt: "理解重力方向与加速度计内参的长窗口联合估计，推导速度消元、球面方向更新、慢变量因子图及重力观测对地图的反馈。"
 draft: false
 ---
 
-# 重力方向与加速度计内参的长窗口联合估计
+# Joint On-Manifold Gravity and Accelerometer Intrinsics Estimation 论文解读
 
-> 本文介绍 Ryan Nemiroff、Kenny Chen 和 Brett T. Lopez 在 2023 年的工作 *Joint On-Manifold Gravity and Accelerometer Intrinsics Estimation for Inertially Aligned Mapping*。文章沿着“重力与加速度计误差的耦合 → 不依赖速度的观测构造 → 球面重力优化与长窗口联合估计 → 全局地图的重力校正”展开，并对关键公式做逐步推导。
+> *Joint On-Manifold Gravity and Accelerometer Intrinsics Estimation for Inertially Aligned Mapping*（Ryan Nemiroff、Kenny Chen、Brett T. Lopez，2023，arXiv v2）利用里程计位姿和 IMU 读数联合估计重力、偏置与灵敏度，通过消去速度构造长窗口观测，并将重力约束反馈到地图。[论文页面](https://arxiv.org/abs/2303.03505v2) · [PDF](https://arxiv.org/pdf/2303.03505v2)
 
-激光里程计可以把环境拼成一张局部连贯的地图，地图的竖直方向却未必准确。启动时的一次重力标定若受到加速度计零偏污染，地面就可能整体倾斜；运动过程中横滚、俯仰逐渐漂移，不同位置的地面和墙面还会失去一致性。IMU 提供了竖直参考，但要使用这项参考，必须同时理解传感器误差与机器人运动。
+激光里程计的局部几何一致性与地图的竖直对齐是两个相关但不同的问题。启动时的一次重力标定若受到加速度计零偏污染，地面就可能整体倾斜；运动过程中横滚、俯仰逐渐漂移，不同位置的地面和墙面还会失去一致性。IMU 提供了竖直参考，但要使用这项参考，必须同时理解传感器误差与机器人运动。
 
-该方法利用已有里程计的位姿和 IMU 读数，在一个独立模块中联合估计重力方向、加速度计偏置和灵敏度矩阵，再将重力观测用于全局地图校正。本文依据 [arXiv:2303.03505v2](https://arxiv.org/abs/2303.03505v2)，把观测模型、优化结构与地图反馈连成一条主线。
+该方法利用已有里程计的位姿和 IMU 读数，在一个独立模块中联合估计重力方向、加速度计偏置和灵敏度矩阵，再将重力观测用于全局地图校正。重力、内参和地图姿态通过这两层估计相互联系。
 
 这个方法承接了 [IMU 零偏可观性与姿态激励](../imu-bias-estimation/index.html) 中的耦合问题。姿态变化能帮助区分重力与零偏，但实际机器人可能很久才产生一次有效激励。若显式历史很短，间隔较远的观测难以共同约束参数。该方法通过消去速度、只优化缓慢变化的量，以较小状态规模保留一分钟量级的历史。
 
