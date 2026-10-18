@@ -4,7 +4,7 @@ date: 2026-10-18
 categories: [reconstruction, geometry]
 tags: [VGGT, Transformer, Multi-view Geometry, Depth, Point Tracking, SfM]
 excerpt: "围绕三张未标定照片，理解 VGGT 的交替注意力、首相机坐标系、相机与稠密预测、多任务监督，以及前馈重建与几何优化的关系。"
-draft: true
+draft: false
 ---
 
 # VGGT 的多视图联合推理与几何多任务学习
