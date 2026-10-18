@@ -3,6 +3,9 @@ blog/**/*.html
 !blog/template.html
 blog/home/home/index.html
 
+# 文章参考论文 PDF（仅保留在本地）
+/blog/articles/**/*.[pP][dD][fF]
+
 # Generated homepage recent-posts fragment (built locally and in CI)
 /recent-posts.generated.html
 
