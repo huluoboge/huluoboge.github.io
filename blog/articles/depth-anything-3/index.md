@@ -1,7 +1,7 @@
 ---
 title: "Depth Anything 3 论文解读"
 date: 2026-10-18
-categories: [reconstruction, geometry, neural-rendering]
+categories: [paper-reading, reconstruction, geometry, neural-rendering]
 tags: [Depth Anything 3, Depth, Ray Map, Transformer, Multi-view Geometry, 3DGS]
 excerpt: "Depth Anything 3 用深度射线表示和预训练 Transformer 统一多视图几何预测。梳理论文方法、教师学生训练、前馈 3DGS 与实验结果。"
 draft: false

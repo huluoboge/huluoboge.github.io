@@ -1,7 +1,7 @@
 ---
 title: "LingBot-Map 论文解读"
 date: 2026-10-17
-categories: [reconstruction, geometry, state-estimation]
+categories: [paper-reading, reconstruction, geometry, state-estimation]
 tags: [LingBot-Map, Streaming 3D Reconstruction, Visual Odometry, Geometric Context Attention, Transformer]
 excerpt: "沿论文的方法、训练、推理与实验，解释 LingBot-Map 如何分配锚帧、局部窗口与轨迹记忆，怎样将历史特征用于位姿和深度预测，以及长序列能力的适用条件。"
 draft: false

@@ -1,7 +1,7 @@
 ---
 title: "π³ 论文解读"
 date: 2026-10-18
-categories: [reconstruction, geometry]
+categories: [paper-reading, reconstruction, geometry]
 tags: [Pi3, Transformer, Permutation Equivariance, Multi-view Geometry, Point Map]
 excerpt: "理解 π³ 如何通过置换等变架构、尺度不变局部点图和相对位姿监督，消除固定参考视图依赖，并结合原文实验与附录分析训练条件和适用边界。"
 draft: false

@@ -1,7 +1,7 @@
 ---
 title: "Joint On-Manifold Gravity and Accelerometer Intrinsics Estimation 论文解读"
 date: 2026-10-14
-categories: [state-estimation]
+categories: [paper-reading, state-estimation]
 tags: [IMU, Accelerometer, Gravity Alignment, Calibration, Observability, Factor Graph, LiDAR, SLAM]
 excerpt: "理解重力方向与加速度计内参的长窗口联合估计，推导速度消元、球面方向更新、慢变量因子图及重力观测对地图的反馈。"
 draft: false

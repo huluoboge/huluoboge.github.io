@@ -1,7 +1,7 @@
 ---
 title: "SuperGlue 论文解读"
 date: 2026-10-15
-categories: [local-features, geometry]
+categories: [paper-reading, local-features, geometry]
 tags: [SuperGlue, Feature Matching, Attention, Optimal Transport, SLAM]
 excerpt: "理解 SuperGlue 的上下文图神经网络、带 dustbin 的最优传输与 Sinkhorn 求解，连接匹配监督、几何估计和消融证据。"
 draft: false

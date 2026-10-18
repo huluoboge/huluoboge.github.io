@@ -1,7 +1,7 @@
 ---
 title: "DUSt3R 论文解读"
 date: 2026-10-18
-categories: [reconstruction, geometry]
+categories: [paper-reading, reconstruction, geometry]
 tags: [DUSt3R, Pointmap, Transformer, Multi-view Stereo, SfM]
 excerpt: "理解 DUSt3R 如何通过公共参考系中的点图回归恢复双视图几何，并以置信度学习、相机恢复和全局对齐组织多视图重建。"
 draft: false

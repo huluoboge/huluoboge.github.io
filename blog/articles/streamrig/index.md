@@ -1,7 +1,7 @@
 ---
 title: "StreamRig 论文解读"
 date: 2026-10-15
-categories: [state-estimation, geometry]
+categories: [paper-reading, state-estimation, geometry]
 tags: [Visual Odometry, Multi-Camera, Streaming, 3D Foundation Model, Causal Attention, Rig Geometry]
 excerpt: "沿论文的组内感知、特征压缩、因果桥接、位姿预测与两阶段训练，解释 StreamRig 如何利用已知多相机标定和历史观测估计运动，以及换锚如何限制缓存与误差累积。"
 draft: false

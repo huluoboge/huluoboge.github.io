@@ -1,7 +1,7 @@
 ---
 title: "LightGlue 论文解读"
 date: 2026-10-15
-categories: [local-features, geometry]
+categories: [paper-reading, local-features, geometry]
 tags: [LightGlue, Feature Matching, Transformer, SLAM, Efficiency]
 excerpt: "理解 LightGlue 的相对位置编码、双向注意力分数复用与轻量匹配头，以及逐层监督如何支持提前退出和点剪枝。"
 draft: false

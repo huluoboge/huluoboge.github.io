@@ -1,7 +1,7 @@
 ---
 title: "VGGT 论文解读"
 date: 2026-10-18
-categories: [reconstruction, geometry]
+categories: [paper-reading, reconstruction, geometry]
 tags: [VGGT, Transformer, Multi-view Geometry, Depth, Point Tracking, SfM]
 excerpt: "理解 VGGT 的交替注意力、多任务几何预测与规范坐标系，结合原文实验分析前馈重建、可选 BA 和下游特征迁移。"
 draft: false

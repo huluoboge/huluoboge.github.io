@@ -13,6 +13,9 @@ templateFile: template.html
 # 文章分类：文章 front-matter 的 categories 使用这里的 slug。
 # 一篇文章可以属于多个分类；分类页会在构建时自动生成。
 categories:
+  - slug: paper-reading
+    name: "论文解读"
+    description: "围绕具体论文展开的解读、翻译与综述。"
   - slug: state-estimation
     name: "SLAM / 状态估计"
     description: "IMU、ESKF、ESIKF、VIO、LIO 与因子图。"
@@ -34,6 +37,10 @@ categories:
   - slug: engineering
     name: "工具与工程"
     description: "开发工具、绘图、渲染与工程经验。"
+
+  - slug: life
+    name: "生活随记"
+    description: "生活、阅读与个人记录。"
 
 # 文章自动发现：articles/ 下每个子目录的 index.md 自动渲染；
 # front-matter 标 draft: true 的跳过。写文章 = 建目录 + 写 index.md，无需改配置。

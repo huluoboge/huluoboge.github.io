@@ -1,7 +1,7 @@
 ---
 title: "VGGT-Long 论文解读"
 date: 2026-10-18
-categories: [reconstruction, geometry, state-estimation]
+categories: [paper-reading, reconstruction, geometry, state-estimation]
 tags: [VGGT, VGGT-Long, Sim3, Loop Closure, Monocular Reconstruction, SLAM]
 excerpt: "解读 VGGT-Long 的分块重建、置信度加权对齐、回环构造与全局 Sim(3) 优化，结合原论文图表和实验，补充关键推导与实现细节。"
 draft: false

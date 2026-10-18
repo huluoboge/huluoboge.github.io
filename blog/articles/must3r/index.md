@@ -1,7 +1,7 @@
 ---
 title: "MUSt3R 论文解读"
 date: 2026-10-18
-categories: [reconstruction, geometry, state-estimation]
+categories: [paper-reading, reconstruction, geometry, state-estimation]
 tags: [MUSt3R, DUSt3R, Multi-view Geometry, Pointmap, Visual Odometry, Causal Attention]
 excerpt: "MUSt3R 通过共享解码器与逐层记忆预测公共坐标系中的稠密点图，并以双点图恢复相机参数。结合三维反馈、训练损失和实验，理解其在线与离线重建能力。"
 draft: false

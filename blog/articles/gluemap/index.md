@@ -1,7 +1,7 @@
 ---
 title: "GLUEMAP 论文解读"
 date: 2026-10-17
-categories: [geometry, reconstruction]
+categories: [paper-reading, geometry, reconstruction]
 tags: [Structure-from-Motion, SfM, GLUEMAP, Feedforward Reconstruction, Bundle Adjustment]
 excerpt: "理解 GLUEMAP 如何在局部星形图上运行前馈重建，再通过运动平均和增广 BA 合并位姿、尺度与稀疏匹配。"
 draft: false

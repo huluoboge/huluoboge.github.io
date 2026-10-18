@@ -22,6 +22,9 @@ fi
 echo "==> 构建博客 (basePath=/blog)"
 node "$RENDERER_DIR/src/cli.js" build --cwd "$BLOG_DIR"
 
+echo "==> 生成紧凑主题导航与搜索"
+node "$REPO_ROOT/scripts/apply-blog-navigation.js"
+
 echo "==> 生成独立的 Recent Posts HTML 片段"
 node "$REPO_ROOT/scripts/generate-recent-posts.js"
 

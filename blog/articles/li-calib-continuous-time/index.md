@@ -1,7 +1,7 @@
 ---
 title: "LI-Calib 论文解读"
 date: 2026-09-26
-categories: [state-estimation]
+categories: [paper-reading, state-estimation]
 tags: [LiDAR, IMU, Calibration, Continuous-time, B-spline, LI-Calib, Factor Graph]
 excerpt: "沿 LI-Calib 的轨迹表示、旋转初始化、曲面片关联与联合批估计，推导原始 IMU 和逐点激光怎样共同约束外参，并结合仿真、重复性与 CAD 对照理解标定精度。"
 draft: false

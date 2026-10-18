@@ -1,7 +1,7 @@
 ---
 title: "VGGT-Ω 论文解读"
 date: 2026-10-18
-categories: [reconstruction, geometry]
+categories: [paper-reading, reconstruction, geometry]
 tags: [VGGT, VGGT-Omega, Transformer, Register Attention, Dynamic Reconstruction, Self-supervised Learning]
 excerpt: "理解 VGGT-Ω 如何结合寄存器注意力、轻量预测头与大规模几何监督，提升静态和动态重建，并形成可复用的场景表征。"
 draft: false

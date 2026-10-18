@@ -109,6 +109,7 @@
     /* 返回按钮（文章页顶部） */
     .blog-content .back-button { display: inline-block; margin: 0 0 22px; color: var(--muted); font-size: 12px; }
     .blog-content .back-button:hover { color: var(--blue); text-decoration: none; }
+    .article-back-links { display: flex; flex-wrap: wrap; gap: 0 20px; }
 
     /* markdown 嵌入 */
     .blog-content .markdown-embed { margin: 18px 0; border: 1px solid var(--line); border-left: 3px solid var(--blue); padding: 12px 16px; background: var(--soft); }
@@ -127,7 +128,15 @@
 
     /* ===== 文章导航与分类 ===== */
     .article-discovery { margin-top: 12px; }
-    .discovery-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 190px auto; gap: 12px; align-items: end; margin: 20px 0 26px; }
+    .discovery-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; margin: 18px 0 14px; }
+    .topic-navigation { margin: 0 0 20px; }
+    .topic-navigation-label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
+    .topic-buttons { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+    .topic-buttons button { padding: 6px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; }
+    .topic-buttons button[aria-pressed="true"] { border-bottom-color: var(--blue); color: var(--blue); font-weight: bold; }
+    .topic-buttons button:hover { color: var(--blue); }
+    .topic-buttons button:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+    .topic-count { margin-left: 4px; font-size: 11px; font-weight: normal; }
     .discovery-toolbar label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; }
     .discovery-toolbar input, .discovery-toolbar select { width: 100%; min-height: 38px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 0; background: #fff; color: var(--text); font: inherit; }
     .discovery-toolbar input:focus, .discovery-toolbar select:focus { outline: 2px solid rgba(0, 64, 153, .18); border-color: var(--blue); }
