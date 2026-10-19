@@ -173,9 +173,9 @@ $$
 
 #### 从桥接特征读出位姿
 
-桥接完成后，位姿头为查询组的每台相机 $c$ 使用两个可学习查询，分别汇集旋转和平移信息。它们读取的来源是两部分输出的拼接：快照 $\mathbf A_t$ 中相机 0 的 token，以及当前组中相机 $c$ 的 token。前者提供参考端，后者提供待定位相机。两个三层多层感知机（MLP）随后输出六维旋转表示与三维平移。
+桥接完成后，位姿头为查询组的每台相机 $c$ 使用两个可学习查询，分别汇集旋转和平移信息。它们读取的来源是两部分输出的拼接：快照 $\mathbf A_t$ 中相机 0 的 token，以及当前组中相机 $c$ 的 token。前者提供参考端，后者提供待定位相机。两个三层多层感知机（MLP）随后输出六维旋转与三维平移。论文把旋转写成 Zhou 等人的 6D 表示，再用 Gram–Schmidt 正交化 [23]。
 
-六维旋转表示需要转成合法旋转矩阵。若网络输出两个三维向量 $b_1,b_2$，Gram–Schmidt 正交化的关系为
+网络输出两个三维向量 $b_1,b_2$。正交化按照
 
 $$
 r_1=\frac{b_1}{\|b_1\|},\qquad
@@ -184,7 +184,7 @@ r_2=\frac{u_2}{\|u_2\|},\qquad
 r_3=r_1\times r_2.
 $$
 
-在向量非退化的条件下，三个方向构成正交右手基，组合为旋转矩阵。这个表示将网络的连续数值输出转为 $\mathrm{SO}(3)$ 中的旋转，再与平移合成 $\mathrm{SE}(3)$ 位姿。
+两列不共线时，$r_1,r_2,r_3$ 构成正交右手基，与平移合成 $\mathrm{SE}(3)$ 位姿。这个映射放在前向计算中，式（4）直接比较所得旋转矩阵。Zhou 等人说明，$SO(3)$ 在四维及以下的欧氏空间中没有连续表示，四元数和欧拉角都会在部分旋转处断开；保留旋转矩阵的前两列，则存在从 $SO(3)$ 到这六个数的连续映射，Gram–Schmidt 再把网络输出送回旋转矩阵。列向量共线时，归一化或叉积没有定义。定义、5D 对照和他们的回归实验见 [On the Continuity of Rotation Representations in Neural Networks 论文解读](../rotation-representation-continuity/index.html)。
 
 里程计输出只取当前参考相机 $c=0$ 的预测，即 $\hat T_{a\leftarrow t}$。其他相机提供辅助训练目标。其标签由参考相机运动和已知外参导出：
 
@@ -380,4 +380,5 @@ StreamRig 的核心联系在于两种尺度不同的特征处理。组内前端�
 ## 参考文献
 
 - Yufei Wei, Shuhao Ye, Qi Wang, Xin Zheng, Qing Huang, Rong Xiong, and Yue Wang. *StreamRig: Exploiting Intra-Rig Geometry for Streaming Multi-Camera Odometry*. arXiv:2609.40244v1, 2026. [论文页面](https://arxiv.org/abs/2609.40244) · [PDF](https://arxiv.org/pdf/2609.40244v1)。
+- [23] Yi Zhou, Connelly Barnes, Jingwan Lu, Jimei Yang, and Hao Li. *On the Continuity of Rotation Representations in Neural Networks*. CVPR, 2019. [论文解读](../rotation-representation-continuity/index.html)。
 - [StreamRig 官方仓库](https://github.com/WeiYuFei0217/StreamRig)。正文方法与实验依据上述论文版本；相关工作条目详见原论文参考文献。
