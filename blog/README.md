@@ -7,6 +7,7 @@
 ```
 blog/
   config.yml                # 站点配置（basePath: /blog）
+  papers_to_read.md         # 仓库内维护的待读论文清单
   home/home/index.md        # 博客首页（含最新文章占位符）
   articles/<slug>/index.md  # 文章（front-matter: title/date/categories/tags/excerpt）
   categories/                # 构建生成：分类总览与分类页
@@ -15,6 +16,8 @@ blog/
 ```
 
 ## 写文章
+
+待读论文和选题想法记在 [待读论文清单](papers_to_read.md) 中。清单供仓库维护，不属于博客导航或渲染生成的页面；因为仓库是公开的，部署后也可以通过源文件路径访问。
 
 1. 新建目录 `blog/articles/<slug>/index.md`
 2. front-matter 至少写 `title` 和 `date`，建议写 `categories` / `tags` / `excerpt`；`draft: true` 表示草稿不发布

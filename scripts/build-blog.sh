@@ -15,10 +15,10 @@ if [ ! -f "$RENDERER_DIR/package.json" ]; then
 fi
 
 if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-  echo "错误: 未找到 node/npm（需要 Node.js 20+）。任选一种方式安装后重试:"
+  echo "错误: 未找到 node/npm（需要 Node.js 22+）。任选一种方式安装后重试:"
   echo "  # nvm（推荐，无需 sudo）"
   echo "  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash"
-  echo "  nvm install 20 && nvm use 20"
+  echo "  nvm install && nvm use"
   echo "  # 或 Ubuntu/Debian 系统包"
   echo "  sudo apt-get update && sudo apt-get install -y nodejs npm"
   exit 1

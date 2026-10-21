@@ -11,6 +11,7 @@
 ├── styles.css            # 主页样式（博客主题与其同设计语言）
 ├── blog/                 # 博客：只存 markdown 源 + 静态资源（html 产物 gitignore）
 │   ├── config.yml        # 博客配置（basePath: /blog, navigation）
+│   ├── papers_to_read.md # 仓库内维护的待读论文清单
 │   ├── home/home/index.md        # 博客首页
 │   ├── articles/<slug>/index.md  # 技术文章
 │   └── static/           # KaTeX 字体、highlight.js、mermaid（模板引用）
@@ -101,7 +102,7 @@ git push          # CI 用新渲染器重建全站
 ## 故障排查
 
 - **本地构建报"找不到渲染器"**：`git submodule update --init --recursive`
-- **报找不到 node/npm**：先装 Node.js 20+（见脚本报错提示；推荐 nvm）。脚本会在依赖缺失或不完整时自动 `npm install`
+- **报找不到 node/npm**：先装 Node.js 22+（见脚本报错提示；推荐 nvm，并可用 `nvm install` / `nvm use` 读取仓库 `.nvmrc`）。脚本会在依赖缺失或不完整时自动 `npm install`
 - **`Cannot find module '...'`**：直接再跑一次 `./scripts/build-blog.sh`（会检测并补装依赖）；仍失败可 `rm -rf tools/blog-renderer/node_modules` 后重试
 - **构建产物没生成**：先删掉残留 `rm -f blog/**/*.html`（旧产物可能干扰），再跑 build 脚本
 - **线上静态资源偶发 503**：GitHub Pages 冷缓存，稍等重试即可

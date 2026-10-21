@@ -29,14 +29,16 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: Install blog-renderer dependencies
         run: npm ci
         working-directory: tools/blog-renderer
 
       - name: Build blog (markdown -> html)
-        run: ./scripts/build-blog.sh
+        run: |
+          ./scripts/build-blog.sh
+          rm -rf tools/blog-renderer/node_modules
         working-directory: ${{ github.workspace }}
 
       - name: Setup Pages
