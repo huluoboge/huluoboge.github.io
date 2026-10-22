@@ -34,15 +34,23 @@
 | 待评估 | 流式多视图重建 | 最近 11 帧；相邻帧相对位姿；旋转精化 | ABot-Recon: Revisiting Local Context for Long-Horizon Streaming 3D Reconstruction | [arXiv:2608.27529](https://arxiv.org/abs/2608.27529) | 优先级：极高；使用固定局部上下文，逐步组合相对位姿与局部几何 |
 | 待评估 | 视觉 SLAM 与重建 | 学习式匹配更新；Dense Bundle Adjustment；因子图 | DROID-SLAM: Deep Visual SLAM for Monocular, Stereo, and RGB-D Cameras | [arXiv:2108.10869](https://arxiv.org/abs/2108.10869) | 优先级：极高；通过 DBA 迭代更新位姿和深度 |
 | 待评估 | 视觉 SLAM 与重建 | 动态场景；不确定性感知；Differentiable Bundle Adjustment | DROID-SLAM in the Wild | [arXiv:2603.19076](https://arxiv.org/abs/2603.19076) | CVPR 2026；用多视图特征不一致估计逐像素不确定性，增强动态环境下的跟踪与重建 |
-| 待评估 | 视觉里程计与 SLAM | Patch 跟踪；可微 BA；Patch 图；关键帧 | Deep Patch Visual Odometry (DPVO) | [arXiv:2208.04726](https://arxiv.org/abs/2208.04726) | 优先级：很高；学习式 Patch 跟踪结合局部位姿优化 |
+| 已成稿 | 视觉里程计与 SLAM | Patch 跟踪；可微 BA；Patch 图；关键帧 | Deep Patch Visual Odometry (DPVO) | [arXiv:2208.04726](https://arxiv.org/abs/2208.04726) | [论文解读](articles/dpvo/index.md)；待仓库发布 |
 | 待评估 | 视觉 SLAM 与重建 | Pointmap 匹配；几何优化；局部与全局图 | MASt3R-SLAM: Real-Time Dense SLAM with 3D Reconstruction Priors | [arXiv:2412.12392](https://arxiv.org/abs/2412.12392) | CVPR 2025；优先级：很高；融合 Pointmap 匹配与局部、全局几何优化 |
+| 待评估 | 视觉 SLAM 与重建 | 前馈几何；持久因子图；Dense Bundle Adjustment | F²SLAM: Turning Feed-Forward Geometry into Persistent Factors for SLAM | [arXiv:2610.05207](https://arxiv.org/abs/2610.05207) | 将前馈几何转成持久因子图中的优化约束 |
 | 待评估 | 流式多视图重建 | 持久状态；循环 Transformer；在线 Pointmap | Continuous 3D Perception Model with Persistent State (CUT3R) | [arXiv:2501.12387](https://arxiv.org/abs/2501.12387) | CVPR 2025；用持续更新的隐式状态维护场景记忆 |
 | 待评估 | 流式多视图重建 | 空间指针记忆；显式地图；历史融合 | Point3R: Streaming 3D Reconstruction with Explicit Spatial Pointer Memory | [arXiv:2507.02863](https://arxiv.org/abs/2507.02863) | NeurIPS 2025；让新图像特征与带三维位置的空间记忆交互 |
 | 待评估 | 视觉 SLAM 与重建 | 滑动窗口；局部 Pointmap；全局配准 | SLAM3R: Real-Time Dense Scene Reconstruction from Monocular RGB Videos | [arXiv:2412.09401](https://arxiv.org/abs/2412.09401) | CVPR 2025；论文报告 20+ FPS，属于论文测试硬件结果 |
 | 待评估 | 多视图重建 | 循环 Transformer；迭代细化；推理计算 | Déjà View: Looping Transformers for Multi-View 3D Reconstruction | [arXiv:2605.30215](https://arxiv.org/abs/2605.30215) | NeurIPS 2026 Oral；循环共享 Transformer 模块进行多视图重建 |
+| 待评估 | 特征匹配 | 稠密匹配；DINOv3；亚像素精度 | RoMa v2: Harder Better Faster Denser Feature Matching | [arXiv:2511.15706](https://arxiv.org/abs/2511.15706) | 改进困难场景下的鲁棒稠密匹配，并提升速度与匹配密度 |
+| 待评估 | 特征匹配 | 前馈 3D 模型；VGGT-Ω；稠密匹配 | RoMa-Ω: What Feed-Forward 3D Models Know About Image Matching | [arXiv:2609.09507](https://arxiv.org/abs/2609.09507) | 分析前馈 3D 表征的匹配能力，并将 VGGT-Ω 特征用于 RoMa v2 |
+| 待评估 | 特征匹配 | 稠密匹配；核回归；几何估计 | DKM: Dense Kernelized Feature Matching for Geometry Estimation | [CVPR 2023](https://openaccess.thecvf.com/content/CVPR2023/html/Edstedt_DKM_Dense_Kernelized_Feature_Matching_for_Geometry_Estimation_CVPR_2023_paper.html) | 通过核回归全局匹配、warp 细化与稠密置信度估计进行两视图几何匹配 |
+| 待评估 | 特征匹配 | 全景图像；等距柱状投影；球面几何 | EDM: Equirectangular Projection-Oriented Dense Kernelized Feature Matching | [CVPR 2025](https://openaccess.thecvf.com/content/CVPR2025/html/Jung_EDM_Equirectangular_Projection-Oriented_Dense_Kernelized_Feature_Matching_CVPR_2025_paper.html) | 面向全景图像的稠密匹配；以球面相机模型和测地流细化处理投影畸变 |
+| 待评估 | 特征匹配 | ERP 全景匹配；球面一致性；RoMa | SCCM: Spherically Consistent Coarse Matching for ERP Dense Feature Correspondence | [arXiv:2609.36545](https://arxiv.org/abs/2609.36545) | 在粗匹配阶段建模 ERP 的球面拓扑、度量与面积畸变 |
+| 待评估 | 特征匹配 | Detector-free；Transformer；低纹理匹配 | LoFTR: Detector-Free Local Feature Matching with Transformers | [CVPR 2021](https://openaccess.thecvf.com/content/CVPR2021/html/Sun_LoFTR_Detector-Free_Local_Feature_Matching_With_Transformers_CVPR_2021_paper.html) | 通过 Transformer 建立粗到细对应关系，在低纹理区域也能产生稠密匹配 |
+| 待评估 | 特征匹配 | 轻量局部特征；半稠密匹配；实时推理 | XFeat: Accelerated Features for Lightweight Image Matching | [CVPR 2024](https://openaccess.thecvf.com/content/CVPR2024/html/Potje_XFeat_Accelerated_Features_for_Lightweight_Image_Matching_CVPR_2024_paper.html) | 兼顾稀疏与半稠密匹配的轻量特征模型；也是 Tiny RoMa 的基础之一 |
 
 ## 使用方式
 
 - 想法先记在表格里；确定要写后更新状态并补充阅读笔记。
-- 开始写作时，在 `blog/articles/<slug>/index.md` 新建文章，并按 [论文技术博客写作 Skill](skills/write-paper-tech-blog/SKILL.md) 撰写。
+- 开始写作时，在 `blog/articles/<slug>/index.md` 新建文章，并按 [博客写作 Skill](skills/blog-writing/SKILL.md) 中的论文写作要求撰写。
 - 发布完成后，将条目标为已发布或从待写清单移除。

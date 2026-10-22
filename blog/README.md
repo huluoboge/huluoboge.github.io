@@ -25,7 +25,7 @@ blog/
 4. 首页提供搜索和紧凑的主题标签，点击主题直接筛选文章，搜索在选中主题内生效；构建器还会生成 `categories/index.html` 及每个主题的详情页
 5. 支持：LaTeX 公式（`$...$` / `$$...$$` / equation / align 等）、mermaid 图表（` ```mermaid `）、代码高亮、`.md` 链接互链
 
-基于论文写中文技术博客时，参考 [论文技术博客写作 Skill](skills/write-paper-tech-blog/SKILL.md)。它以 SuperGlue 和重力对齐两篇文章为样例，说明如何组织问题、推导、论文原图与实验解读。
+写博客正文时先读[博客写作 Skill](skills/blog-writing/SKILL.md)；单篇论文解读或多篇综述再按其中指引阅读论文写作细则。
 
 ### 主题浏览
 
