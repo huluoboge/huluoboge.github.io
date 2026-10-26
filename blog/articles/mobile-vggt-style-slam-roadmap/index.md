@@ -60,13 +60,12 @@ draft: false
 
 ## 流式重建与端到端 SLAM 解读队列
 
-以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、Spann3R、Point3R、LongStream、WinT3R、HorizonStream 和 TTT3R 均已有站内文章。
+以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、Spann3R、Point3R、LongStream、WinT3R、HorizonStream、TTT3R 和 Mem3R 均已有站内文章。
 
 ### 第一优先级：流式状态与长序列重建
 
-1. **[Mem3R: Streaming 3D Reconstruction with Hybrid Memory via Test-Time Training](https://arxiv.org/abs/2604.07279)** · 将相机跟踪与几何映射分开，并组合显式 token 状态与测试时训练，补充混合记忆路线。
-2. **[Anchor3R: Streaming 3D Reconstruction with Transient Anchors for Long-Horizon Visual Mapping](https://arxiv.org/abs/2606.05035)** · 以短期锚点组织长时视觉地图，补充窗口和历史 token 池之外的锚点记忆设计。
-3. **[InfiniteVGGT: Visual Geometry Grounded Transformer for Endless Streams](https://arxiv.org/abs/2601.02281)** · 用有界自适应 KV cache 处理长时流，并提出约万帧 Long3D 评测。
+1. **[Anchor3R: Streaming 3D Reconstruction with Transient Anchors for Long-Horizon Visual Mapping](https://arxiv.org/abs/2606.05035)** · 以短期锚点组织长时视觉地图，补充窗口和历史 token 池之外的锚点记忆设计。
+2. **[InfiniteVGGT: Visual Geometry Grounded Transformer for Endless Streams](https://arxiv.org/abs/2601.02281)** · 用有界自适应 KV cache 处理长时流，并提出约万帧 Long3D 评测。
 
 ### 第二优先级：流式几何如何接入 SLAM 系统
 
