@@ -59,15 +59,14 @@ draft: false
 
 ## 流式重建与端到端 SLAM 解读队列
 
-以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R 和 VGGT-SLAM 均已有站内文章。
+以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM 和 Spann3R 均已有站内文章。
 
 ### 第一优先级：流式状态与长序列重建
 
-1. **[3D Reconstruction with Spatial Memory（Spann3R）](https://arxiv.org/abs/2408.16061)** · 作为显式空间记忆路线的早期基线，帮助理解后续记忆结构为何演进。
-2. **[Point3R: Streaming 3D Reconstruction with Explicit Spatial Pointer Memory](https://arxiv.org/abs/2507.02863)** · 将场景几何组织为空间指针记忆，便于和递归状态及 KV 缓存比较。
-3. **[LongStream: Long-Sequence Streaming Autoregressive Visual Geometry](https://arxiv.org/abs/2602.13172)** · 用关键帧相对位姿、尺度解耦和缓存刷新处理公里级序列。
-4. **[HorizonStream: Long-Horizon Attention for Streaming 3D Reconstruction](https://arxiv.org/abs/2605.23889)** · 以不同时间尺度传播几何证据，面向超长历史和有界状态。
-5. **[TTT3R: 3D Reconstruction as Test-Time Training](https://arxiv.org/abs/2509.26645)** · 从在线学习角度调节循环状态更新，研究历史记忆与新观测的平衡。
+1. **[Point3R: Streaming 3D Reconstruction with Explicit Spatial Pointer Memory](https://arxiv.org/abs/2507.02863)** · 将场景几何组织为空间指针记忆，便于和递归状态及 KV 缓存比较。
+2. **[LongStream: Long-Sequence Streaming Autoregressive Visual Geometry](https://arxiv.org/abs/2602.13172)** · 用关键帧相对位姿、尺度解耦和缓存刷新处理公里级序列。
+3. **[HorizonStream: Long-Horizon Attention for Streaming 3D Reconstruction](https://arxiv.org/abs/2605.23889)** · 以不同时间尺度传播几何证据，面向超长历史和有界状态。
+4. **[TTT3R: 3D Reconstruction as Test-Time Training](https://arxiv.org/abs/2509.26645)** · 从在线学习角度调节循环状态更新，研究历史记忆与新观测的平衡。
 
 ### 第二优先级：流式几何如何接入 SLAM 系统
 
