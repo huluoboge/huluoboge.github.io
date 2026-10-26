@@ -60,16 +60,16 @@ draft: false
 
 ## 流式重建与端到端 SLAM 解读队列
 
-以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、MASt3R-SLAM、Spann3R、SLAM3R、Point3R、LongStream、WinT3R、HorizonStream、TTT3R、Mem3R、Anchor3R、InfiniteVGGT、VGGT-SLAM 2.0、VGGT-SLAM++、Multi-Agent Monocular Dense SLAM、F²-SLAM、ICE-BA、IncVGGT、OVGGT、[RetrieveVGGT](../retrievevggt/index.md)，以及[StreamCacheVGGT](../streamcachevggt/index.md)、[XStreamVGGT](../xstreamvggt/index.md)均已有站内文章。
+以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LASER、STAC、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、MASt3R-SLAM、Spann3R、SLAM3R、Point3R、LongStream、WinT3R、HorizonStream、TTT3R、Mem3R、Anchor3R、InfiniteVGGT、VGGT-SLAM 2.0、VGGT-SLAM++、Multi-Agent Monocular Dense SLAM、F²-SLAM、ICE-BA、IncVGGT、OVGGT、[RetrieveVGGT](../retrievevggt/index.md)，以及[StreamCacheVGGT](../streamcachevggt/index.md)、[XStreamVGGT](../xstreamvggt/index.md)均已有站内文章。
 
 ### 第一优先级：缓存效率、尺度校正与动态场景
 
 
-1. **[STAC: Plug-and-Play Spatio-Temporal Aware Cache Compression for Streaming 3D Reconstruction](https://arxiv.org/abs/2603.20284)** · 对因果 Transformer 的时空稀疏性做缓存压缩，适合与 XStreamVGGT、StreamCacheVGGT 对照。
-2. **[LASER: Layer-wise Scale Alignment for Training-Free Streaming 4D Reconstruction](https://arxiv.org/abs/2512.13680)** · 聚焦流式重建中的尺度对齐问题。
-3. **[Stream4D: Streaming 4D Reconstruction with Training-free Motion Decoupling via Causal KV-Cache Attention](https://arxiv.org/abs/2610.31320)** · 讨论动态物体对因果注意力和静态地图的干扰。
-4. **[Rethinking the State Update Gate for Long-Sequence Recurrent 3D Reconstruction](https://arxiv.org/abs/2605.16981)** · 在 TTT3R 的逐 token 更新之外增加帧级写入权重，分析循环状态的有效记忆跨度。
-5. **[TTSA3R: Training-Free Temporal-Spatial Adaptive Persistent State for Streaming 3D Reconstruction](https://arxiv.org/abs/2601.22615)** · 从时间状态变化和空间观测质量共同调整记忆写入，补充 TTT3R 的测试时更新路线。
+已完成：[STAC](../stac/index.md)（缓存压缩）与 [LASER](../laser/index.md)（滑窗尺度校正），不再重复写作。后续队列继续围绕缓存、长期状态和动态场景展开。
+
+1. **[Stream4D: Streaming 4D Reconstruction with Training-free Motion Decoupling via Causal KV-Cache Attention](https://arxiv.org/abs/2610.31320)** · 讨论动态物体对因果注意力和静态地图的干扰。
+2. **[Rethinking the State Update Gate for Long-Sequence Recurrent 3D Reconstruction](https://arxiv.org/abs/2605.16981)** · 在 TTT3R 的逐 token 更新之外增加帧级写入权重，分析循环状态的有效记忆跨度。
+3. **[TTSA3R: Training-Free Temporal-Spatial Adaptive Persistent State for Streaming 3D Reconstruction](https://arxiv.org/abs/2601.22615)** · 从时间状态变化和空间观测质量共同调整记忆写入，补充 TTT3R 的测试时更新路线。
 6. **[StreamSplat: Towards Online Dynamic 3D Reconstruction from Uncalibrated Video Streams](https://arxiv.org/abs/2506.08862)** · 动态场景与 3D Gaussian 表示的相邻方向；评测对象与以点图和相机轨迹为主的流式模型不同。
 7. **[Dynamic Visual SLAM using a General 3D Prior](https://openaccess.thecvf.com/content/CVPR2026/html/Zhong_Dynamic_Visual_SLAM_using_a_General_3D_Prior_CVPR_2026_paper.html)** · 将前馈三维先验接入 patch-based 在线 BA，用于动态区域过滤和深度辅助，是学习式几何进入 SLAM 后端的直接案例。
 8. **[StreamGS: Online Generalizable Gaussian Splatting Reconstruction for Unposed Image Streams](https://openaccess.thecvf.com/content/ICCV2025/html/Li_StreamGS_Online_Generalizable_Gaussian_Splatting_Reconstruction_for_Unposed_Image_Streams_ICCV_2025_paper.html)** · 从未定姿图像流逐帧预测、融合高斯；补充流式地图表示方向，与以相机轨迹和点图为重点的 SLAM 系统作边界比较。
