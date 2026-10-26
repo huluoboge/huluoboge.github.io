@@ -31,6 +31,7 @@
 | 待评估 | SfM 与定位 | 大规模 SfM；场景回归；视觉定位 | SAIL-Recon: Large SfM by Augmenting Scene Regression with Localization | [arXiv:2508.17972](https://arxiv.org/abs/2508.17972) | 3DV 2026 Oral；扩展到大规模图像集的场景回归与视觉定位 |
 | 待评估 | 流式多视图重建 | 因果注意力；KV Cache；4D 重建 | StreamVGGT: Streaming Visual Geometry Transformer | [arXiv:2507.11539](https://arxiv.org/abs/2507.11539) | ICLR 2026；通过因果 Transformer 与历史 KV Cache 实现逐帧重建 |
 | 待评估 | 流式多视图重建 | Decoder-only；因果注意力；滑动窗口 | STream3R: Scalable Sequential 3D Reconstruction with Causal Transformer | [arXiv:2508.10893](https://arxiv.org/abs/2508.10893) | ICLR 2026；支持 KV Cache 与滑动窗口推理 |
+| 已发布 | 流式多视图重建 | 时空缓存压缩；体素记忆；KV Cache | STAC: Plug-and-Play Spatio-Temporal Aware Cache Compression for Streaming 3D Reconstruction | [arXiv:2603.20284](https://arxiv.org/abs/2603.20284) | CVPR 2026；[论文解读](articles/stac/index.md)；双缓存压缩与分块推理 |
 | 待评估 | 流式多视图重建 | 最近 11 帧；相邻帧相对位姿；旋转精化 | ABot-Recon: Revisiting Local Context for Long-Horizon Streaming 3D Reconstruction | [arXiv:2608.27529](https://arxiv.org/abs/2608.27529) | 优先级：极高；使用固定局部上下文，逐步组合相对位姿与局部几何 |
 | 待评估 | 视觉 SLAM 与重建 | 学习式匹配更新；Dense Bundle Adjustment；因子图 | DROID-SLAM: Deep Visual SLAM for Monocular, Stereo, and RGB-D Cameras | [arXiv:2108.10869](https://arxiv.org/abs/2108.10869) | 优先级：极高；通过 DBA 迭代更新位姿和深度 |
 | 待评估 | 视觉 SLAM 与重建 | 动态场景；不确定性感知；Differentiable Bundle Adjustment | DROID-SLAM in the Wild | [arXiv:2603.19076](https://arxiv.org/abs/2603.19076) | CVPR 2026；用多视图特征不一致估计逐像素不确定性，增强动态环境下的跟踪与重建 |
