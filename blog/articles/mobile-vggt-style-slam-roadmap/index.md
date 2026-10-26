@@ -60,16 +60,15 @@ draft: false
 
 ## 流式重建与端到端 SLAM 解读队列
 
-以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、MASt3R-SLAM、Spann3R、Point3R、LongStream、WinT3R、HorizonStream、TTT3R、Mem3R、Anchor3R 和 InfiniteVGGT 均已有站内文章。
+以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、MASt3R-SLAM、Spann3R、SLAM3R、Point3R、LongStream、WinT3R、HorizonStream、TTT3R、Mem3R、Anchor3R 和 InfiniteVGGT 均已有站内文章。
 
 ### 第一优先级：流式几何如何接入 SLAM 系统
 
-1. **[SLAM3R: Real-Time Dense Scene Reconstruction from Monocular RGB Videos](https://arxiv.org/abs/2412.09401)** · 通过重叠窗口内重建与跨窗口配准形成全局场景。
-2. **[VGGT-SLAM 2.0: Real-time Dense Feed-forward Scene Reconstruction](https://arxiv.org/abs/2601.19887)** · 跟进子图因子图、回环验证和在线机器人运行。
-3. **[VGGT-SLAM++](https://arxiv.org/abs/2604.06830)** · 重点比较高频局部 BA 与空间校正后端。
-4. **[Multi-Agent Monocular Dense SLAM With 3D Reconstruction Priors](https://arxiv.org/abs/2511.19031)** · 将重建先验 SLAM 扩展到多智能体协同建图，作为系统边界扩展。
-5. **[F²-SLAM: Turning Feed-Forward Geometry into Persistent Factors for SLAM](https://arxiv.org/abs/2610.05207)** · 将前馈几何转成可优化的持久稠密因子，适合作为“学习先验如何进入后端”的近期系统代表。
-6. **[ICE-BA: Incremental, Consistent and Efficient Bundle Adjustment for Visual-Inertial SLAM](https://openaccess.thecvf.com/content_cvpr_2018/html/Liu_ICE-BA_Incremental_Consistent_CVPR_2018_paper.html)** · 提供滑窗之外保留全局约束的经典优化背景。
+1. **[VGGT-SLAM 2.0: Real-time Dense Feed-forward Scene Reconstruction](https://arxiv.org/abs/2601.19887)** · 跟进子图因子图、回环验证和在线机器人运行。
+2. **[VGGT-SLAM++](https://arxiv.org/abs/2604.06830)** · 重点比较高频局部 BA 与空间校正后端。
+3. **[Multi-Agent Monocular Dense SLAM With 3D Reconstruction Priors](https://arxiv.org/abs/2511.19031)** · 将重建先验 SLAM 扩展到多智能体协同建图，作为系统边界扩展。
+4. **[F²-SLAM: Turning Feed-Forward Geometry into Persistent Factors for SLAM](https://arxiv.org/abs/2610.05207)** · 将前馈几何转成可优化的持久稠密因子，适合作为“学习先验如何进入后端”的近期系统代表。
+5. **[ICE-BA: Incremental, Consistent and Efficient Bundle Adjustment for Visual-Inertial SLAM](https://openaccess.thecvf.com/content_cvpr_2018/html/Liu_ICE-BA_Incremental_Consistent_CVPR_2018_paper.html)** · 提供滑窗之外保留全局约束的经典优化背景。
 
 ### 第二优先级：缓存效率、尺度校正与动态场景
 
