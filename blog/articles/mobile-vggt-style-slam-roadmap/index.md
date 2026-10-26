@@ -59,15 +59,15 @@ draft: false
 
 ## 流式重建与端到端 SLAM 解读队列
 
-以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、Spann3R 和 Point3R 均已有站内文章。
+以下顺序按它们对“有限历史如何形成长期稳定几何”这一综述主线的帮助排序，不代表论文质量排名。已完成的单篇解读不重复写：VGGT、VGGT-Long、VGGT-Ω、ABot-Recon、LingBot-Map、StreamRig、DPVO、DROID-SLAM、DPV-SLAM、GLUEMAP、MUSt3R、π³、Depth Anything 3、StreamVGGT、STream3R、CUT3R、LONG3R、VGGT-SLAM、Spann3R、Point3R 和 LongStream 均已有站内文章。
 
 ### 第一优先级：流式状态与长序列重建
 
-1. **[LongStream: Long-Sequence Streaming Autoregressive Visual Geometry](https://arxiv.org/abs/2602.13172)** · 用关键帧相对位姿、尺度解耦和缓存刷新处理公里级序列。
-2. **[WinT3R: Window-Based Streaming Reconstruction with Camera Token Pool](https://arxiv.org/abs/2509.05296)** · 以滑动窗口交换几何信息，并用全局相机 token 池估计位姿；可对照全历史缓存和显式空间记忆。
-3. **[HorizonStream: Long-Horizon Attention for Streaming 3D Reconstruction](https://arxiv.org/abs/2605.23889)** · 以不同时间尺度传播几何证据，面向超长历史和有界状态。
-4. **[TTT3R: 3D Reconstruction as Test-Time Training](https://arxiv.org/abs/2509.26645)** · 从在线学习角度调节循环状态更新，研究历史记忆与新观测的平衡。
-5. **[InfiniteVGGT: Visual Geometry Grounded Transformer for Endless Streams](https://arxiv.org/abs/2601.02281)** · 用有界自适应 KV cache 处理长时流，并提出约万帧 Long3D 评测。
+1. **[WinT3R: Window-Based Streaming Reconstruction with Camera Token Pool](https://arxiv.org/abs/2509.05296)** · 以滑动窗口交换几何信息，并用全局相机 token 池估计位姿；可对照全历史缓存和显式空间记忆。
+2. **[HorizonStream: Long-Horizon Attention for Streaming 3D Reconstruction](https://arxiv.org/abs/2605.23889)** · 以不同时间尺度传播几何证据，面向超长历史和有界状态。
+3. **[TTT3R: 3D Reconstruction as Test-Time Training](https://arxiv.org/abs/2509.26645)** · 从在线学习角度调节循环状态更新，研究历史记忆与新观测的平衡。
+4. **[InfiniteVGGT: Visual Geometry Grounded Transformer for Endless Streams](https://arxiv.org/abs/2601.02281)** · 用有界自适应 KV cache 处理长时流，并提出约万帧 Long3D 评测。
+5. **[LongStream: Long-Sequence Streaming Autoregressive Visual Geometry](https://arxiv.org/abs/2602.13172)** · 用关键帧相对位姿、尺度解耦和缓存刷新处理公里级序列。[站内解读](../longstream/index.md)
 
 ### 第二优先级：流式几何如何接入 SLAM 系统
 
@@ -76,20 +76,22 @@ draft: false
 8. **[VGGT-SLAM 2.0: Real-time Dense Feed-forward Scene Reconstruction](https://arxiv.org/abs/2601.19887)** · 跟进子图因子图、回环验证和在线机器人运行。
 9. **[VGGT-SLAM++](https://arxiv.org/abs/2604.06830)** · 重点比较高频局部 BA 与空间校正后端。
 10. **[Multi-Agent Monocular Dense SLAM With 3D Reconstruction Priors](https://arxiv.org/abs/2511.19031)** · 将重建先验 SLAM 扩展到多智能体协同建图，作为系统边界扩展。
-11. **[ICE-BA: Incremental, Consistent and Efficient Bundle Adjustment for Visual-Inertial SLAM](https://openaccess.thecvf.com/content_cvpr_2018/html/Liu_ICE-BA_Incremental_Consistent_CVPR_2018_paper.html)** · 提供滑窗之外保留全局约束的经典优化背景。
+11. **[F²-SLAM: Turning Feed-Forward Geometry into Persistent Factors for SLAM](https://arxiv.org/abs/2610.05207)** · 将前馈几何转成可优化的持久稠密因子，适合作为“学习先验如何进入后端”的近期系统代表。
+12. **[ICE-BA: Incremental, Consistent and Efficient Bundle Adjustment for Visual-Inertial SLAM](https://openaccess.thecvf.com/content_cvpr_2018/html/Liu_ICE-BA_Incremental_Consistent_CVPR_2018_paper.html)** · 提供滑窗之外保留全局约束的经典优化背景。
 
 ### 第三优先级：缓存效率、尺度校正与动态场景
 
 12. **[IncVGGT: Incremental VGGT for Memory-Bounded Long-Range 3D Reconstruction](https://proceedings.iclr.cc/paper_files/paper/2026/hash/0a4096f09ab230082df548f901d4f79e-Abstract-Conference.html)** · 输入侧重叠帧融合与历史侧缓存裁剪。
 13. **[OVGGT: O(1) Constant-Cost Streaming Visual Geometry Transformer](https://arxiv.org/abs/2603.05959)** · 探索固定推理成本的流式视觉几何状态。
 14. **[RetrieveVGGT: Training-Free Long Context Streaming 3D Reconstruction via Query-Key Similarity Retrieval](https://arxiv.org/abs/2605.09644)** · 以查询键相关性从历史中检索固定数量的帧。
-15. **[XStreamVGGT: KV Cache Compression](https://arxiv.org/abs/2602.21780)** · 对 StreamVGGT 的历史键值做剪枝和量化，研究缓存压缩的精度—速度取舍。
-16. **[STAC: Plug-and-Play Spatio-Temporal Aware Cache Compression for Streaming 3D Reconstruction](https://arxiv.org/abs/2603.20284)** · 对因果 Transformer 的时空稀疏性做缓存压缩，适合与 XStreamVGGT 对照。
-17. **[LASER: Layer-wise Scale Alignment for Training-Free Streaming 4D Reconstruction](https://arxiv.org/abs/2512.13680)** · 聚焦流式重建中的尺度对齐问题。
-18. **[Stream4D: Streaming 4D Reconstruction with Training-free Motion Decoupling via Causal KV-Cache Attention](https://arxiv.org/abs/2610.31320)** · 讨论动态物体对因果注意力和静态地图的干扰。
-19. **[Rethinking the State Update Gate for Long-Sequence Recurrent 3D Reconstruction](https://arxiv.org/abs/2605.16981)** · 在 TTT3R 的逐 token 更新之外增加帧级写入权重，分析循环状态的有效记忆跨度。
-20. **[TTSA3R: Training-Free Temporal-Spatial Adaptive Persistent State for Streaming 3D Reconstruction](https://arxiv.org/abs/2601.22615)** · 从时间状态变化和空间观测质量共同调整记忆写入，补充 TTT3R 的测试时更新路线。
-21. **[StreamSplat: Towards Online Dynamic 3D Reconstruction from Uncalibrated Video Streams](https://arxiv.org/abs/2506.08862)** · 动态场景与 3D Gaussian 表示的相邻方向；评测对象与以点图和相机轨迹为主的流式模型不同。
+15. **[StreamCacheVGGT: Streaming Visual Geometry Transformers with Robust Scoring and Hybrid Cache Compression](https://arxiv.org/abs/2604.15237)** · 用跨层一致性评分与混合保留、合并策略管理固定预算缓存；补充比较不同缓存压缩方案。
+16. **[XStreamVGGT: KV Cache Compression](https://arxiv.org/abs/2602.21780)** · 对 StreamVGGT 的历史键值做剪枝和量化，研究缓存压缩的精度—速度取舍。
+17. **[STAC: Plug-and-Play Spatio-Temporal Aware Cache Compression for Streaming 3D Reconstruction](https://arxiv.org/abs/2603.20284)** · 对因果 Transformer 的时空稀疏性做缓存压缩，适合与 XStreamVGGT、StreamCacheVGGT 对照。
+18. **[LASER: Layer-wise Scale Alignment for Training-Free Streaming 4D Reconstruction](https://arxiv.org/abs/2512.13680)** · 聚焦流式重建中的尺度对齐问题。
+19. **[Stream4D: Streaming 4D Reconstruction with Training-free Motion Decoupling via Causal KV-Cache Attention](https://arxiv.org/abs/2610.31320)** · 讨论动态物体对因果注意力和静态地图的干扰。
+20. **[Rethinking the State Update Gate for Long-Sequence Recurrent 3D Reconstruction](https://arxiv.org/abs/2605.16981)** · 在 TTT3R 的逐 token 更新之外增加帧级写入权重，分析循环状态的有效记忆跨度。
+21. **[TTSA3R: Training-Free Temporal-Spatial Adaptive Persistent State for Streaming 3D Reconstruction](https://arxiv.org/abs/2601.22615)** · 从时间状态变化和空间观测质量共同调整记忆写入，补充 TTT3R 的测试时更新路线。
+22. **[StreamSplat: Towards Online Dynamic 3D Reconstruction from Uncalibrated Video Streams](https://arxiv.org/abs/2506.08862)** · 动态场景与 3D Gaussian 表示的相邻方向；评测对象与以点图和相机轨迹为主的流式模型不同。
 
 ### 第四优先级：移动端资源与通用几何基础
 
