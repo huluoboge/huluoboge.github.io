@@ -37,11 +37,11 @@ SfM、SLAM、NeRF 和 3D Gaussian Splatting 通常为每个场景单独建立或
 
 ### 前馈三维重建
 
-DUSt3R、MASt3R 等方法从图像对预测点图，后续的 Fast3R、VGGT 等扩展到多视图输入。针对动态视频的 MonST3R、SpatialTracker、DeMo 等方法引入运动相关线索或稠密视频对应，提升动态场景重建能力。论文指出，这些模型虽能重建动态场景，却没有显式预测场景将如何演化。
+DUSt3R、MASt3R 等方法从图像对预测点图，后续的 Fast3R、[VGGT](/blog/articles/vggt/) 等扩展到多视图输入。针对动态视频的 MonST3R、SpatialTracker、DeMo 等方法引入运动相关线索或稠密视频对应，提升动态场景重建能力。论文指出，这些模型虽能重建动态场景，却没有显式预测场景将如何演化。
 
 ### 流式前馈三维重建
 
-CUT3R、Point3R、Spann3R、StreamVGGT 等方法面向图像流维护状态或使用因果 Transformer，目标是在新帧到来时连续更新三维理解。论文将 Point4Cast 与这些工作的区别界定为预测能力：它希望查询到任意过去、已观测或未来时刻的三维点图，而不只输出最新帧时刻的几何。
+[CUT3R](/blog/articles/cut3r/)、[Point3R](/blog/articles/point3r/)、Spann3R、[StreamVGGT](/blog/articles/streamvggt/) 等方法面向图像流维护状态或使用因果 Transformer，目标是在新帧到来时连续更新三维理解。论文将 Point4Cast 与这些工作的区别界定为预测能力：它希望查询到任意过去、已观测或未来时刻的三维点图，而不只输出最新帧时刻的几何。
 
 ## 3 方法
 
