@@ -26,7 +26,7 @@
 | 待评估 | 多视图重建 | 测试时训练；线性扩展；视觉几何 | VGG-T³: Offline Feed-Forward 3D Reconstruction at Scale | [arXiv:2602.23361](https://arxiv.org/abs/2602.23361) | CVPR 2026；通过测试时训练扩展离线前馈重建的规模 |
 | 待评估 | 模型压缩与加速 | VGGT；后训练量化；边缘推理 | QVGGT: Post-Training Quantized Visual Geometry Grounded Transformer | [arXiv:2605.31124](https://arxiv.org/abs/2605.31124) | CVPR 2026；报告最高 2.8×硬件加速；未据此声称已实现手机 NPU 部署 |
 | 待评估 | 模型压缩与加速 | 稀疏线性注意力；FP8-aware QAT；代码已公开 | Lite3R: A Model-Agnostic Framework for Efficient Feed-Forward 3D Reconstruction | [arXiv:2605.11354](https://arxiv.org/abs/2605.11354) | 用稀疏线性注意力和 FP8 感知量化训练提升前馈 3D 重建效率 |
-| 待评估 | 多视图重建 | VGGT；训练自由加速；Token Pruning | FastVGGT: Fast Visual Geometry Transformer | [ICLR 2026](https://proceedings.iclr.cc/paper_files/paper/2026/hash/9f5b159f2c1d216d73bc0c289763dbfc-Abstract-Conference.html) | 训练自由地削减 VGGT 全局注意力计算冗余 |
+| 已发布 | 多视图重建 | VGGT；训练自由加速；Token Pruning | FastVGGT: Fast Visual Geometry Transformer | [ICLR 2026](https://proceedings.iclr.cc/paper_files/paper/2026/hash/9f5b159f2c1d216d73bc0c289763dbfc-Abstract-Conference.html) | [论文解读](articles/fastvggt/index.md)；利用 token 合并压缩全局注意力，保留首帧参照与显著 token |
 | 待评估 | 多视图重建 | 几何先验；多任务；前馈模型 | WorldMirror: Universal 3D World Reconstruction with Any-Prior Prompting | [arXiv:2510.10726](https://arxiv.org/abs/2510.10726) | ICML 2026；融合多种几何先验的通用前馈 3D 重建 |
 | 待评估 | SfM 与定位 | 大规模 SfM；场景回归；视觉定位 | SAIL-Recon: Large SfM by Augmenting Scene Regression with Localization | [arXiv:2508.17972](https://arxiv.org/abs/2508.17972) | 3DV 2026 Oral；扩展到大规模图像集的场景回归与视觉定位 |
 | 已发布 | 流式多视图重建 | 因果注意力；KV Cache；4D 重建 | StreamVGGT: Streaming Visual Geometry Transformer | [arXiv:2507.11539](https://arxiv.org/abs/2507.11539) | ICLR 2026；[论文解读](articles/streamvggt/index.md)；通过因果 Transformer 与历史 KV Cache 实现逐帧重建 |
