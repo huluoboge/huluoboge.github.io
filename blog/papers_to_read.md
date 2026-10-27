@@ -23,7 +23,7 @@
 | 待评估 | 图像重建与编辑 | 梯度域；四叉树；图像合成 | Efficient Gradient-Domain Compositing Using Quadtrees | [DOI: 10.1145/1276377.1276495](https://doi.org/10.1145/1276377.1276495) | SIGGRAPH 2007；用四叉树降低梯度域合成的求解规模 |
 | 待评估 | 多视图重建 | 广角相机；鱼眼；相机模型条件化 | Wid3R: Wide Field-of-View 3D Reconstruction via Camera Model Conditioning | [arXiv:2602.05321](https://arxiv.org/abs/2602.05321) | ECCV 2026；广角相机模型条件化的多视图 3D 重建 |
 | 待评估 | 单目重建 | 度量点云；鱼眼；全景相机 | OmniPoint: Universal Monocular Metric Pointcloud from Any Camera | [arXiv:2609.09394](https://arxiv.org/abs/2609.09394) | ECCV 2026；面向多种相机模型的单目度量点云重建 |
-| 待评估 | 多视图重建 | 测试时训练；线性扩展；视觉几何 | VGG-T³: Offline Feed-Forward 3D Reconstruction at Scale | [arXiv:2602.23361](https://arxiv.org/abs/2602.23361) | CVPR 2026；通过测试时训练扩展离线前馈重建的规模 |
+| 已发布 | 多视图重建 | 测试时训练；线性扩展；视觉几何 | VGG-T³: Offline Feed-Forward 3D Reconstruction at Scale | [CVPR 2026](https://openaccess.thecvf.com/content/CVPR2026/html/Elflein_VGG-T3_Offline_Feed-Forward_3D_Reconstruction_at_Scale_CVPR_2026_paper.html) | [论文解读](articles/vgg-t3/index.md)；通过测试时训练扩展离线前馈重建的规模 |
 | 待评估 | 模型压缩与加速 | VGGT；后训练量化；边缘推理 | QVGGT: Post-Training Quantized Visual Geometry Grounded Transformer | [arXiv:2605.31124](https://arxiv.org/abs/2605.31124) | CVPR 2026；报告最高 2.8×硬件加速；未据此声称已实现手机 NPU 部署 |
 | 待评估 | 模型压缩与加速 | 稀疏线性注意力；FP8-aware QAT；代码已公开 | Lite3R: A Model-Agnostic Framework for Efficient Feed-Forward 3D Reconstruction | [arXiv:2605.11354](https://arxiv.org/abs/2605.11354) | 用稀疏线性注意力和 FP8 感知量化训练提升前馈 3D 重建效率 |
 | 已发布 | 多视图重建 | VGGT；训练自由加速；Token Pruning | FastVGGT: Fast Visual Geometry Transformer | [ICLR 2026](https://proceedings.iclr.cc/paper_files/paper/2026/hash/9f5b159f2c1d216d73bc0c289763dbfc-Abstract-Conference.html) | [论文解读](articles/fastvggt/index.md)；利用 token 合并压缩全局注意力，保留首帧参照与显著 token |
