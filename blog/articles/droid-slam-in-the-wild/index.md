@@ -59,9 +59,9 @@ DROID-W 建立在 DROID-SLAM 上。系统从 RGB 图像中抽取关键帧对，D
 
 ### 3.1 DROID-SLAM 预备知识
 
-DROID-SLAM 为每帧维护相机位姿 (G_t\in SE(3)) 和低分辨率逆深度图 (d_t\in\mathbb R^{H/8\times W/8})。帧图 ((\mathcal V,\mathcal E)) 记录哪些帧对有重叠；若 ((i,j)\in\mathcal E)，则在两帧间建立稠密对应约束。
+DROID-SLAM 为每帧维护相机位姿 $G_t\in SE(3)$ 和低分辨率视差图 $d_t\in\mathbb R^{H/8\times W/8}$。论文将其称作 disparity；下文在涉及几何含义时按逆深度理解。帧图 $(\mathcal V,\mathcal E)$ 记录哪些帧对有重叠；若 $(i,j)\in\mathcal E$，则在两帧间建立稠密对应约束。
 
-对帧 (i) 中像素网格点 (p_i)，使用逆投影、相对位姿和投影函数得到在帧 (j) 中由刚体运动预测的位置：
+对帧 $i$ 中像素网格点 $p_i$，使用逆投影、相对位姿和投影函数得到在帧 $j$ 中由刚体运动预测的位置：
 \[
 p_{ij}=\Pi_c\!\left(G'_{ij}\circ\Pi_c^{-1}(p_i,d'_i)\right). \tag{1}
 \]
@@ -263,13 +263,13 @@ E_{\mathrm{uncer}}(u')=
 这里 Softplus 使预测不确定性为正。单个帧对损失对参考帧和目标帧不确定性的导数分别为：
 \[
 \frac{\partial e_{ij}}{\partial u'_i}=-\frac{e_{ij}}{u'_i},\qquad
-\frac{\partial e_{ij}}{\partial u'_j}=-\frac{e_{ij}}{u'_j}\alpha_{ij}. \tag{12}
+\frac{\partial e_{ij}}{\partial u'_j}=-\frac{e_{ij}}{u'_j}\,\varepsilon_{ij}. \tag{12}
 \]
-\(\alpha_{ij}\) 是双线性插值权重矩阵，用于把目标帧插值位置的梯度分配给邻近像素。汇总帧 \(l\) 在所有出边与入边上的贡献，并加入对数先验，可以得到对不确定性的梯度；再乘 Softplus 对参数的导数，得到对 \(\theta\) 的梯度：
+\(u'_{ij}\) 是帧 $j$ 在重投影位置双线性插值得到的不确定性；因此 \(\varepsilon_{ij}\) 表示该插值对帧 $j$ 像素网格的权重矩阵，把目标端梯度分配回相邻像素。汇总帧 \(l\) 在所有出边与入边上的贡献，并加入对数先验，可以得到对不确定性的梯度；再乘 Softplus 对参数的导数，得到对 \(\theta\) 的梯度：
 \[
 \frac{\partial E_{\mathrm{uncer}}}{\partial u'_l}=
 -\sum_{(l,m)\in\mathcal E}\frac{e_{lm}}{u'_l}
--\sum_{(k,l)\in\mathcal E}\frac{e_{kl}}{u'_k}\alpha_{kl}
+ -\sum_{(k,l)\in\mathcal E}\frac{e_{kl}}{u'_k}\varepsilon_{kl}
 +\gamma_{\mathrm{prior}}\frac{1}{u'_l+1.0},
 \]
 \[
