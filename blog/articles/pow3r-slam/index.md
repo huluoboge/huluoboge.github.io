@@ -45,7 +45,7 @@ Pow3R-SLAM 建立在 MASt3R-SLAM 上，把单目点图 SLAM 扩展到 RGB-D。�
 
 ### RGB-D SLAM
 
-RGB-D 系统加入深度传感器，也有只使用深度的方案。KinectFusion 把深度融合到截断符号距离场并在融合表面上跟踪；ElasticFusion 联合使用颜色和深度误差。ORB-SLAM2 扩展了 ORB-SLAM 的深度支持，ORB-SLAM3 进一步支持惯性测量单元和多地图。DROID-SLAM 通过光流估计与束调整联合优化位姿和逐像素深度。
+RGB-D 系统加入深度传感器，也有只使用深度的方案。KinectFusion 把深度融合到截断符号距离场并在融合表面上跟踪；ElasticFusion 联合使用颜色和深度误差。ORB-SLAM2 扩展了 ORB-SLAM 的深度支持，ORB-SLAM3 进一步支持惯性测量单元和多地图。[DROID-SLAM](/blog/articles/droid-slam/) 则通过光流估计与束调整联合优化位姿和逐像素深度。
 
 神经地图也用于 SLAM：iMAP 和 NICE-SLAM 优化隐式场，GS-SLAM 优化三维高斯场景。上述方法要么把深度当作融合几何，要么将其用于监督目标。Pow3R-SLAM 的关注点是把测量深度作为两视图重建网络的输入条件，使网络生成的稠密点图兼顾深度测量和跨视图预测。
 
@@ -53,7 +53,7 @@ RGB-D 系统加入深度传感器，也有只使用深度的方案。KinectFusio
 
 两视图重建先验接收成对图像并输出对齐的稠密三维点云。DUSt3R 可由共同坐标系的点云恢复相机位姿；MASt3R 增加逐像素特征改善匹配；Pow3R 允许深度、相机内参和相对位姿作为可选条件。VGGT 等前馈场景模型则一次处理多帧，预测整组图像的姿态与深度。
 
-MASt3R-SLAM 将 MASt3R 接入实时跟踪和建图，通过投影匹配、Sim(3) 位姿图及 ASMK 检索工作，是 Pow3R-SLAM 的直接基线。VGGT-SLAM 增量对齐 VGGT 子图，SLAM3R 将局部重建融合成全局场景。作者指出，已有重建先验 SLAM 尚未系统研究如何把传感器深度作为网络输入条件；Pow3R-SLAM 正是沿这条路径构造 RGB-D 系统。
+[MASt3R-SLAM](/blog/articles/mast3r-slam/) 将 MASt3R 接入实时跟踪和建图，通过投影匹配、Sim(3) 位姿图及 ASMK 检索工作，是 Pow3R-SLAM 的直接基线。[VGGT-SLAM](/blog/articles/vggt-slam/) 增量对齐 VGGT 子图，[SLAM3R](/blog/articles/slam3r/) 将局部重建融合成全局场景。作者指出，已有重建先验 SLAM 尚未系统研究如何把传感器深度作为网络输入条件；Pow3R-SLAM 正是沿这条路径构造 RGB-D 系统。
 
 ## 三、方法
 
