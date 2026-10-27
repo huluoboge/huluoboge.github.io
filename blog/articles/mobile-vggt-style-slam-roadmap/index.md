@@ -65,33 +65,32 @@ draft: false
 ### 第一优先级：缓存效率、尺度校正与动态场景
 
 
-已完成：[STAC](../stac/index.md)（缓存压缩）、[LASER](../laser/index.md)（滑窗尺度校正）与 [Stream4D](../stream4d/index.md)（动态掩码与 KV 抑制）、[Rethinking the State Update Gate](../rethinking-state-update-gate/index.md)（帧级写入门控）、[TTSA3R](../ttsa3r/index.md)（时空逐 token 写入门控）；按优先级继续处理长期状态和动态场景中的未读工作。
+已完成：[STAC](../stac/index.md)（缓存压缩）、[LASER](../laser/index.md)（滑窗尺度校正）与 [Stream4D](../stream4d/index.md)（动态掩码与 KV 抑制）、[Rethinking the State Update Gate](../rethinking-state-update-gate/index.md)（帧级写入门控）、[TTSA3R](../ttsa3r/index.md)（时空逐 token 写入门控）、[StreamSplat](../streamsplat/index.md)（无标定视频流的动态 Gaussian 重建）；按优先级继续处理长期状态和动态场景中的未读工作。
 
-1. **[StreamSplat: Towards Online Dynamic 3D Reconstruction from Uncalibrated Video Streams](https://arxiv.org/abs/2506.08862)** · 动态场景与 3D Gaussian 表示的相邻方向；评测对象与以点图和相机轨迹为主的流式模型不同。
-2. **[Dynamic Visual SLAM using a General 3D Prior](https://openaccess.thecvf.com/content/CVPR2026/html/Zhong_Dynamic_Visual_SLAM_using_a_General_3D_Prior_CVPR_2026_paper.html)** · 将前馈三维先验接入 patch-based 在线 BA，用于动态区域过滤和深度辅助，是学习式几何进入 SLAM 后端的直接案例。
-3. **[StreamGS: Online Generalizable Gaussian Splatting Reconstruction for Unposed Image Streams](https://openaccess.thecvf.com/content/ICCV2025/html/Li_StreamGS_Online_Generalizable_Gaussian_Splatting_Reconstruction_for_Unposed_Image_Streams_ICCV_2025_paper.html)** · 从未定姿图像流逐帧预测、融合高斯；补充流式地图表示方向，与以相机轨迹和点图为重点的 SLAM 系统作边界比较。
-4. **[St4RTrack: Simultaneous 4D Reconstruction and Tracking in the World](https://openaccess.thecvf.com/content/ICCV2025/html/Feng_St4RTrack_Simultaneous_4D_Reconstruction_and_Tracking_in_the_World_ICCV_2025_paper.html)** · 以世界坐标中的时间相关点图联合表达动态重建与三维点跟踪，适合作为动态场景扩展阅读。
-5. **[SLARM: Streaming and Language-Aligned Reconstruction Model for Dynamic Scenes](https://openaccess.thecvf.com/content/CVPR2026/html/Qiu_SLARM_Streaming_and_Language-Aligned_Reconstruction_Model_for_Dynamic_Scenes_CVPR_2026_paper.html)** · 结合因果窗口推理、动态场景重建与语言对齐语义；属于流式 4D 重建的邻接方向，不是传统定位建图系统。
-6. **[EC3R-SLAM: Efficient and Consistent Monocular Dense SLAM with Feed-Forward 3D Reconstruction](https://arxiv.org/abs/2510.02080)** · 将前馈重建和稀疏跟踪、局部与全局回环结合，关注免标定单目稠密 SLAM 的系统组织。
-7. **[VGGT-GS SLAM: Uncalibrated Monocular Gaussian Splatting SLAM with Feed-Forward Priors](https://arxiv.org/abs/2609.19628)** · 用 VGGT 位姿与深度先验初始化高斯子图，并联合优化相机、内参和镜头畸变，补充高斯地图路线。
-8. **[VGGT-Geo: Probabilistic Geometric Fusion of Visual Geometry Grounded Transformer Priors for Robust Dense Indoor SLAM](https://www.mdpi.com/2220-9964/15/2/85)** · 将 VGGT 先验与置信度加权的特征、点线和深度约束结合，展示前馈先验与几何优化的融合。
-9. **[Pow3R-SLAM: Real-Time RGB-D SLAM with 3D Reconstruction Priors](https://arxiv.org/abs/2609.38054)** · 把测得深度作为 Pow3R 两视图重建的先验而非直接融合几何，补充 RGB-D 输入条件下的 SLAM 设计。
-10. **[MoRe: Motion-aware Feed-forward 4D Reconstruction Transformer](https://arxiv.org/abs/2603.05078)** · 以分组因果注意力和运动感知机制处理动态视频的流式 4D 几何。
-11. **[ZipMap: Linear-Time Stateful 3D Reconstruction via Test-Time Training](https://openaccess.thecvf.com/content/CVPR2026/html/Jin_ZipMap_Linear-Time_Stateful_3D_Reconstruction_via_Test-Time_Training_CVPR_2026_paper.html)** · 用测试时训练把图像集合压进紧凑场景状态，主体是线性时间双向重建，并展示顺序流式扩展。
-12. **[Point4Cast: Streaming Dynamic Scene Reconstruction and Forecasting](https://openaccess.thecvf.com/content/CVPR2026/html/Liu_Point4Cast_Streaming_Dynamic_Scene_Reconstruction_and_Forecasting_CVPR_2026_paper.html)** · 以持续更新的时空隐表示同时支持历史、当前和未来时刻查询，作为动态流式重建的相邻方向阅读。
-13. **[D4RT: Efficiently Reconstructing Dynamic Scenes One Point at a Time](https://openaccess.thecvf.com/content/CVPR2026/html/Zhang_Efficiently_Reconstructing_Dynamic_Scenes_One_D4RT_at_a_Time_CVPR_2026_paper.html)** · 从视频联合估计深度、时空对应和相机参数，补充动态场景中流式几何与跟踪的统一表达。
-14. **[AMB3R: Accurate Feed-forward Metric-scale 3D Reconstruction with Backend](https://openaccess.thecvf.com/content/CVPR2026/html/Wang_AMB3R_Accurate_Feed-forward_Metric-scale_3D_Reconstruction_with_Backend_CVPR_2026_paper.html)** · 将前馈度量重建与后端结合，并展示 VO/SfM 变体；可对照“纯前馈预测”与“预测后继续几何优化”的系统边界。
+1. **[Dynamic Visual SLAM using a General 3D Prior](https://openaccess.thecvf.com/content/CVPR2026/html/Zhong_Dynamic_Visual_SLAM_using_a_General_3D_Prior_CVPR_2026_paper.html)** · 将前馈三维先验接入 patch-based 在线 BA，用于动态区域过滤和深度辅助，是学习式几何进入 SLAM 后端的直接案例。
+2. **[StreamGS: Online Generalizable Gaussian Splatting Reconstruction for Unposed Image Streams](https://openaccess.thecvf.com/content/ICCV2025/html/Li_StreamGS_Online_Generalizable_Gaussian_Splatting_Reconstruction_for_Unposed_Image_Streams_ICCV_2025_paper.html)** · 从未定姿图像流逐帧预测、融合高斯；补充流式地图表示方向，与以相机轨迹和点图为重点的 SLAM 系统作边界比较。
+3. **[St4RTrack: Simultaneous 4D Reconstruction and Tracking in the World](https://openaccess.thecvf.com/content/ICCV2025/html/Feng_St4RTrack_Simultaneous_4D_Reconstruction_and_Tracking_in_the_World_ICCV_2025_paper.html)** · 以世界坐标中的时间相关点图联合表达动态重建与三维点跟踪，适合作为动态场景扩展阅读。
+4. **[SLARM: Streaming and Language-Aligned Reconstruction Model for Dynamic Scenes](https://openaccess.thecvf.com/content/CVPR2026/html/Qiu_SLARM_Streaming_and_Language-Aligned_Reconstruction_Model_for_Dynamic_Scenes_CVPR_2026_paper.html)** · 结合因果窗口推理、动态场景重建与语言对齐语义；属于流式 4D 重建的邻接方向，不是传统定位建图系统。
+5. **[EC3R-SLAM: Efficient and Consistent Monocular Dense SLAM with Feed-Forward 3D Reconstruction](https://arxiv.org/abs/2510.02080)** · 将前馈重建和稀疏跟踪、局部与全局回环结合，关注免标定单目稠密 SLAM 的系统组织。
+6. **[VGGT-GS SLAM: Uncalibrated Monocular Gaussian Splatting SLAM with Feed-Forward Priors](https://arxiv.org/abs/2609.19628)** · 用 VGGT 位姿与深度先验初始化高斯子图，并联合优化相机、内参和镜头畸变，补充高斯地图路线。
+7. **[VGGT-Geo: Probabilistic Geometric Fusion of Visual Geometry Grounded Transformer Priors for Robust Dense Indoor SLAM](https://www.mdpi.com/2220-9964/15/2/85)** · 将 VGGT 先验与置信度加权的特征、点线和深度约束结合，展示前馈先验与几何优化的融合。
+8. **[Pow3R-SLAM: Real-Time RGB-D SLAM with 3D Reconstruction Priors](https://arxiv.org/abs/2609.38054)** · 把测得深度作为 Pow3R 两视图重建的先验而非直接融合几何，补充 RGB-D 输入条件下的 SLAM 设计。
+9. **[MoRe: Motion-aware Feed-forward 4D Reconstruction Transformer](https://arxiv.org/abs/2603.05078)** · 以分组因果注意力和运动感知机制处理动态视频的流式 4D 几何。
+10. **[ZipMap: Linear-Time Stateful 3D Reconstruction via Test-Time Training](https://openaccess.thecvf.com/content/CVPR2026/html/Jin_ZipMap_Linear-Time_Stateful_3D_Reconstruction_via_Test-Time_Training_CVPR_2026_paper.html)** · 用测试时训练把图像集合压进紧凑场景状态，主体是线性时间双向重建，并展示顺序流式扩展。
+11. **[Point4Cast: Streaming Dynamic Scene Reconstruction and Forecasting](https://openaccess.thecvf.com/content/CVPR2026/html/Liu_Point4Cast_Streaming_Dynamic_Scene_Reconstruction_and_Forecasting_CVPR_2026_paper.html)** · 以持续更新的时空隐表示同时支持历史、当前和未来时刻查询，作为动态流式重建的相邻方向阅读。
+12. **[D4RT: Efficiently Reconstructing Dynamic Scenes One Point at a Time](https://openaccess.thecvf.com/content/CVPR2026/html/Zhang_Efficiently_Reconstructing_Dynamic_Scenes_One_D4RT_at_a_Time_CVPR_2026_paper.html)** · 从视频联合估计深度、时空对应和相机参数，补充动态场景中流式几何与跟踪的统一表达。
+13. **[AMB3R: Accurate Feed-forward Metric-scale 3D Reconstruction with Backend](https://openaccess.thecvf.com/content/CVPR2026/html/Wang_AMB3R_Accurate_Feed-forward_Metric-scale_3D_Reconstruction_with_Backend_CVPR_2026_paper.html)** · 将前馈度量重建与后端结合，并展示 VO/SfM 变体；可对照“纯前馈预测”与“预测后继续几何优化”的系统边界。
 
 ### 第二优先级：移动端资源与通用几何基础
 
-15. **[FastVGGT: Fast Visual Geometry Transformer](https://arxiv.org/abs/2509.02560)** · 作为全局视觉几何模型的推理加速参照。
-16. **[VGG-T³: Offline Feed-Forward 3D Reconstruction at Scale](https://research.nvidia.com/labs/dvl/projects/vgg-ttt/)** · 通过测试时训练压缩全局场景表示；虽然不是在线 SLAM，可作为长序列离线推理的效率对照。
-17. **[Lite3R: A Model-Agnostic Framework for Efficient Feed-Forward 3D Reconstruction](https://arxiv.org/abs/2605.11354)** · 关注线性注意力和低成本重建。
-18. **[QVGGT: Post-Training Quantized Visual Geometry Grounded Transformer](https://arxiv.org/abs/2605.31124)** · 关注几何模型的后训练量化和精度影响。
-19. **[GVG-SLAM: GNSS/VGGT-SLAM Integrated Navigation Method for Outdoor Environments](https://www.ion.org/publications/abstract.cfm?articleID=20725)** · 将 GNSS 因子接入 VGGT-SLAM 2.0，作为室外多传感器融合扩展。
+14. **[FastVGGT: Fast Visual Geometry Transformer](https://arxiv.org/abs/2509.02560)** · 作为全局视觉几何模型的推理加速参照。
+15. **[VGG-T³: Offline Feed-Forward 3D Reconstruction at Scale](https://research.nvidia.com/labs/dvl/projects/vgg-ttt/)** · 通过测试时训练压缩全局场景表示；虽然不是在线 SLAM，可作为长序列离线推理的效率对照。
+16. **[Lite3R: A Model-Agnostic Framework for Efficient Feed-Forward 3D Reconstruction](https://arxiv.org/abs/2605.11354)** · 关注线性注意力和低成本重建。
+17. **[QVGGT: Post-Training Quantized Visual Geometry Grounded Transformer](https://arxiv.org/abs/2605.31124)** · 关注几何模型的后训练量化和精度影响。
+18. **[GVG-SLAM: GNSS/VGGT-SLAM Integrated Navigation Method for Outdoor Environments](https://www.ion.org/publications/abstract.cfm?articleID=20725)** · 将 GNSS 因子接入 VGGT-SLAM 2.0，作为室外多传感器融合扩展。
 
 ### 第三优先级：多视图注意力中的相机位置编码
 
-20. **[Cameras as Relative Positional Encoding](https://arxiv.org/abs/2507.10496)** · 对比射线图、相对位姿编码与 PRoPE；关注相机内外参如何共同表达为相对位置关系。
-21. **[RayRoPE: Projective Ray Positional Encoding for Multi-view Attention](https://arxiv.org/abs/2601.15275)** · 在射线上预测深度点并用查询帧投影坐标计算多频相似度；关注几何自适应编码、不确定性处理及其与 PRoPE 的联系。
+19. **[Cameras as Relative Positional Encoding](https://arxiv.org/abs/2507.10496)** · 对比射线图、相对位姿编码与 PRoPE；关注相机内外参如何共同表达为相对位置关系。
+20. **[RayRoPE: Projective Ray Positional Encoding for Multi-view Attention](https://arxiv.org/abs/2601.15275)** · 在射线上预测深度点并用查询帧投影坐标计算多频相似度；关注几何自适应编码、不确定性处理及其与 PRoPE 的联系。
 阅读清单中已有专题文章或足以承担基础背景的内容不再单列为待写论文，例如 VINS-Mono 已在 [IMU 预积分与视觉惯性方法笔记](../vins-lio-sam-preintegration/index.md) 中涉及；DROID-SLAM、DPVO、DPV-SLAM 等也已有独立解读。若后续核对发现论文已被站内文章完整覆盖，将标为已完成，不重复创建。
