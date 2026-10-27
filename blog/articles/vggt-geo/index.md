@@ -33,9 +33,9 @@ DUSt3R、Spann3R、SLAM3R、VGGT 等前馈方法则直接从图像预测稠密�
 
 ### 2.2 学习与几何优化结合的 SLAM
 
-SLAM3R 采用局部预测再全局融合，论文将其归为没有显式 BA 后端的前馈路线；MASt3R-SLAM 则将学习式点匹配接入后端图优化。VGGT-SLAM 在子图之间估计射影变换，并在 SL(4) 流形上做全局优化。VGGT-Geo 选择另一种结合方式：VGGT 只负责提供窗口初值，优化变量仍是相机位姿、共享内参和逐帧逆深度，匹配点、线段与深度先验构成优化残差。
+SLAM3R 采用局部预测再全局融合，论文将其归为没有显式 BA 后端的前馈路线；[MASt3R-SLAM](/blog/articles/mast3r-slam/) 则将学习式点匹配接入后端图优化。[VGGT-SLAM](/blog/articles/vggt-slam/) 在子图之间估计射影变换，并在 SL(4) 流形上做全局优化。VGGT-Geo 选择另一种结合方式：VGGT 只负责提供窗口初值，优化变量仍是相机位姿、共享内参和逐帧逆深度，匹配点、线段与深度先验构成优化残差。
 
-作者对基线的局限有较强判断，例如称 [MASt3R-SLAM](../mast3r-slam/index.md) 在弱纹理区域容易退化、[VGGT-SLAM](../vggt-slam/index.md) 对前端初始化敏感；[SLAM3R](../slam3r/index.md) 则代表局部预测再融合的前馈路线。这些是论文作者的经验陈述；它们的证据范围应限于本文采用的数据、实现和设置，不能泛化成对原系统所有场景的结论。
+作者对基线的局限有较强判断，例如称 [MASt3R-SLAM](/blog/articles/mast3r-slam/) 在弱纹理区域容易退化、[VGGT-SLAM](/blog/articles/vggt-slam/) 对前端初始化敏感；[SLAM3R](/blog/articles/slam3r/) 则代表局部预测再融合的前馈路线。这些是论文作者的经验陈述；它们的证据范围应限于本文采用的数据、实现和设置，不能泛化成对原系统所有场景的结论。
 
 ### 2.3 几何先验与不确定性
 
