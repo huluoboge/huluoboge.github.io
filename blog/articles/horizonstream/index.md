@@ -11,9 +11,9 @@ draft: false
 
 > Chong Cheng、Peilin Tao、Nanjie Yao、Guanzhi Ding、Xianda Chen、Yuansen Du、Xiaoyang Guo、Wei Yin、Weiqiang Ren、Qian Zhang、Zhengqing Chen、Hao Wang，*HorizonStream: Long-Horizon Attention for Streaming 3D Reconstruction*，arXiv:2605.23889v1（2026 年 5 月 22 日）；项目页标注为 NeurIPS 2026。本文依据 arXiv v1 正式阅读 20 页全文与附录。 [arXiv 论文页](https://arxiv.org/abs/2605.23889) · [本文阅读的 v1 PDF](https://arxiv.org/pdf/2605.23889v1) · [项目页](https://3dagentworld.github.io/horizonstream/) · [代码](https://github.com/3DAgentWorld/HorizonStream)
 
-流式重建要持续处理新图像，同时保留足够的历史来估计相机运动、场景几何和尺度。历史线索的有效时间并不相同：相邻帧的局部对应很快会因相机运动而失效，场景结构和尺度却需要跨越许多窗口保持稳定。HorizonStream 将这一差异概括为几何证据影响核，并分别处理窗口内的空间关联、窗口间的长期传播，以及从历史状态中读出尺度和位姿。
+长视频中的历史信息会以不同方式失效：有限窗口可能太早丢弃仍有用的几何，周期性刷新会切断窗口间状态，无门控递归则不断累加陈旧证据；因果 softmax 注意力还可能让早期 token 主导后续计算。与此同时，几何线索的有效时间并不相同：相邻帧的局部对应很快会因相机运动而失效，场景结构和尺度却需要跨越许多窗口保持稳定。
 
-论文强调，长序列退化不只是缓存大小问题。有限窗口可能太早丢弃可复用的几何；周期性刷新会在边界处切断状态；无门控递归会不断累加旧状态；因果 softmax 注意力则可能把越来越多权重花在几何上无关的历史 token 上。HorizonStream 的主干用定长局部窗口做细粒度匹配，用固定维度的递归状态跨窗口传播证据，并学习不同通道各自的保留时间。
+HorizonStream 在定长局部窗口内进行细粒度空间匹配，再用固定维度的递归状态跨窗口传播几何证据，并学习不同通道各自的保留时间。作者将过去几何证据对当前重建的作用称为“几何证据影响核”，再将其分为空间关联与时间传播；Metric Readout Tokens 则从长期状态中读出尺度和位姿。
 
 ![原论文图 1：不同流式记忆机制隐含的证据影响模式](figures/figure-1-evidence-kernel.png)
 

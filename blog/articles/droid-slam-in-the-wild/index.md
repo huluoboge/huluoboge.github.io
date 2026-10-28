@@ -17,7 +17,7 @@ draft: false
 >
 > **补充材料**：CVPR 官方补充 PDF，共 6 页
 >
-> [CVPR 论文页面](https://openaccess.thecvf.com/content/CVPR2026/html/Li_DROID-SLAM_in_the_Wild_CVPR_2026_paper.html) · [论文 PDF](https://openaccess.thecvf.com/content/CVPR2026/papers/Li_DROID-SLAM_in_the_Wild_CVPR_2026_paper.pdf) · [补充材料 PDF](https://openaccess.thecvf.com/content/CVPR2026/supplemental/Li_DROID-SLAM_in_the_Wild_CVPR_2026_supplemental.pdf) · [代码与数据集](https://github.com/MoyangLi00/DROID-W.git)
+> [CVPR 论文页面](https://openaccess.thecvf.com/content/CVPR2026/html/Li_DROID-SLAM_in_the_Wild_CVPR_2026_paper.html) · [论文 PDF](https://openaccess.thecvf.com/content/CVPR2026/papers/Li_DROID-SLAM_in_the_Wild_CVPR_2026_paper.pdf) · [补充材料 PDF](https://openaccess.thecvf.com/content/CVPR2026/supplemental/Li_DROID-SLAM_in_the_CVPR_2026_supplemental.pdf) · [代码与数据集](https://github.com/MoyangLi00/DROID-W.git)
 
 DROID-SLAM in the Wild（论文中简称 DROID-W）把 DROID-SLAM 的可微束调整扩展到动态场景。它在每个低分辨率像素上估计动态不确定性，用该不确定性降低可疑重投影对应对位姿和逆深度更新的影响；不确定性本身则由 DINOv2 特征在相机运动补偿后的跨帧相似度来约束。系统还用 Metric3D 单目深度作为 BA 正则项，并在关键帧局部优化期间交替更新位姿、深度和不确定性。
 
@@ -31,7 +31,7 @@ DROID-SLAM in the Wild（论文中简称 DROID-W）把 DROID-SLAM 的可微束�
 
 已有动态 SLAM 常用物体检测、语义分割或光流来标记运动区域，再屏蔽这些区域；这类方法对未见类别或复杂拥挤场景的适应能力有限。另一类不确定性感知系统从 DINO 特征预测每像素权重，但其不确定性学习通常依赖高质量的静态 NeRF 或 Gaussian 地图。若动态环境中的地图本身不可靠，地图监督也会变得不可靠。
 
-DROID-W 的出发点是把不确定性直接放进 DROID-SLAM 的稠密 BA 残差中，并用跨帧视觉特征一致性学习不确定性，不要求预先提供运动类别或先构造高质量静态地图。作者还提出 DROID-W 户外数据集，包含七段带相机轨迹真值的街区视频，并用 YouTube 视频补充真实世界评测。图 1 概括了输入、重建结果与不确定性估计。
+论文还提出 DROID-W 户外数据集，包含七段带相机轨迹真值的街区视频，并以六段 YouTube 视频补充真实世界评测。后续实验从相机轨迹精度、运行速度、不确定性估计和点云重建几个方面检验方法在动态场景中的表现。
 
 ## 2. 相关工作
 

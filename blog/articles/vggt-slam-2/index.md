@@ -11,7 +11,7 @@ draft: false
 
 > Dominic Rosario Maggio、Luca Carlone，*VGGT-SLAM 2.0: Real-time Dense Feed-forward Scene Reconstruction*，Robotics: Science and Systems XXII（RSS 2026）正式版，论文 11 页，DOI: 10.15607/RSS.2026.XXII.051。[RSS 论文页](https://www.roboticsproceedings.org/rss22/p051.html) · [RSS 正式版 PDF](https://www.roboticsproceedings.org/rss22/p051.pdf) · [arXiv v2](https://arxiv.org/abs/2601.19887) · [官方代码](https://github.com/MIT-SPARK/VGGT-SLAM) · [论文关联演示视频](https://www.youtube.com/watch?v=GBdOvd6p4OU)
 
-[VGGT-SLAM](../vggt-slam/index.md) 将 VGGT 的多视图重建切成互相重叠的子图，再把子图逐步对齐到全局地图。第一版为适应未标定相机，在子图之间估计 15 自由度的射影变换，并在 SL(4) 流形上做因子图优化。这能表达相机内参误差造成的仿射和射影形变，但若只靠稀疏的子图间约束，长时间没有回环时会快速漂移；而在平面场景中，估计一般射影变换还容易退化。
+[VGGT-SLAM](../vggt-slam/index.md) 将多视图重建切成重叠子图，并用射影变换对齐它们；VGGT-SLAM 2.0 的改动重点是重新设计关键帧约束和回环验证，以减少稀疏连接带来的漂移与退化。
 
 VGGT-SLAM 2.0 保留未知内参下的射影建模，同时重新组织图约束：图节点对应每个子图内的关键帧，子图内边用 VGGT 位姿约束旋转和平移，重叠帧之间的边利用“这两帧实际是同一张图像”这一已知事实，约束相机姿态和标定一致，并单独估计尺度。论文的另一项关键改动是从 VGGT 第 22 层注意力中构造回环候选验证分数，用它过滤外观相似但没有真实重叠的帧。作者报告该设计改善了 TUM 和 Clio 场景中的位姿误差，并展示了 Jetson Thor 上的在线建图。
 

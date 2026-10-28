@@ -43,7 +43,9 @@ F_t=\operatorname{Encoder}(I_t),\quad G_t=\operatorname{Decoder}(F_t),\quad (P_t
 
 编码器把第 $t$ 帧变成图像 token $F_t\in\mathbb R^{N\times C}$；解码器融合跨帧信息，得到几何 token $G_t$；预测头再给出逐像素点图 $P_t\in\mathbb R^{3\times H\times W}$ 和置信图 $C_t\in\mathbb R^{H\times W}$。式（1）只定义公共的数据通路，不意味着所有方法都使用相同的信息连接方式。
 
-作者据此把多视图解码策略分为三类。DUSt3R、MASt3R 等成对方法只在两帧间交互：
+StreamVGGT 的数据流是逐帧因果解码：训练时可以并行输入整段序列，通过因果掩码保证每帧只读取自己和此前帧；推理时则逐帧输入，并用缓存复用已处理帧的键和值。缓存避免重新计算历史帧表示，但历史 token 仍参与当前帧的注意力，因此每帧的读取长度和显存不会固定。
+
+作为对照，多视图解码策略还包括三种常见连接方式。DUSt3R、MASt3R 等成对方法只在两帧间交互：
 
 \[
 \{G_1,G_2\}=\operatorname{Decoder}(\operatorname{CrossAttn}(F_1,F_2)). \tag{2}
@@ -61,13 +63,13 @@ Fast3R、VGGT 等全局交互方法让所有图像 token 彼此注意：
 \{G_t\}_{t=1}^{T}=\operatorname{Decoder}(\operatorname{GlobalSelfAttn}(\{F_t\}_{t=1}^{T})). \tag{4}
 \]
 
-这提供了全局上下文，但 token 间的全连接注意力需要随序列增长而重新处理大量历史交互。StreamVGGT 把它替换为时间因果注意力：
+全局交互提供完整序列上下文，但对新帧重复计算历史交互，不适合逐帧更新。StreamVGGT 将其替换为时间因果注意力：
 
 \[
 \{G_t\}_{t=1}^{T}=\operatorname{Decoder}(\operatorname{TemporalSelfAttn}(\{F_t\}_{t=1}^{T})). \tag{5}
 \]
 
-每帧只能读取自己和此前帧，不能读取未来帧。训练时可以并行输入整段序列，通过因果掩码实现这种限制；推理时则按帧输入。论文将式（5）的复杂度优势描述为更适合低时延流式处理。需要把整段训练时的因果注意力与增量推理区分开：在完整序列上，历史 token 仍然参与注意力；在线缓存只避免重新计算已有帧的键和值，并没有让每帧访问的历史长度固定。
+该结构保留历史上下文并遵守视频的时间顺序；在线缓存仅避免重新计算已处理帧的键和值，并不固定每帧可读取的历史长度。3.2 节进一步说明它如何编码当前帧、读取缓存并生成预测。
 
 ### 3.2 带缓存记忆 token 的因果架构
 

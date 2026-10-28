@@ -11,7 +11,7 @@ draft: false
 
 > Zhijie Zheng、Xinhao Xiang、Jiawei Zhang，*TTSA3R: Training-Free Temporal-Spatial Adaptive Persistent State for Streaming 3D Reconstruction*，arXiv:2601.22615v4（2026 年 10 月 16 日）。[arXiv 论文页](https://arxiv.org/abs/2601.22615) · [v4 PDF](https://arxiv.org/pdf/2601.22615v4)
 
-TTSA3R 研究的是固定内存的循环重建模型如何在长视频中保留已可靠的几何，同时继续吸收新观测。CUT3R 用一组持续状态 token 汇总此前帧；每次处理新图像，解码器都会产生一组候选状态。若一律用候选状态替换旧状态，状态可能被低质量观测覆盖；若只依据当前帧注意力控制写入，也难以判断某个 token 的表示是否已经稳定。TTSA3R 为每个状态 token 计算两类信号：TAUM 根据候选状态的跨帧变化调节更新幅度，SCUM 根据该 token 所关注图像区域的特征变化和交叉注意力调节空间相关性，最后相乘后插值更新状态。方法不增加训练或额外前向计算，主要收益出现在长序列，而严重遮挡、低重叠和噪声也会削弱它的判断信号。
+TTSA3R 针对固定内存的循环重建中“保留旧几何”和“吸收新观测”的冲突，为 CUT3R 的持久状态加入逐 token 的自适应写入。它同时考察候选状态的变化幅度，以及对应图像区域是否提供了新证据，再将两者融合为状态更新权重。论文报告其短序列精度与基线接近、长序列稳定性更好；遮挡、低重叠和噪声仍会削弱更新信号。
 
 ![原论文图 1：长序列循环重建中的遗忘现象](figures/figure-1.png)
 
@@ -24,8 +24,6 @@ SfM 和 MVS 通过迭代优化恢复相机与几何，NeRF、3D Gaussian Splatti
 流式系统的历史表示方式各不相同。Spann3R、Point3R 使用空间记忆保存三维位置或几何；STream3R、StreamVGGT 等使用因果注意力缓存历史 Key/Value，序列越长缓存越大。CUT3R 则将历史压进固定数量的持久状态 token，因此状态内存不会随视频长度增长。它的代价是每次新观测都必须与有限状态竞争表示空间：低质量或重复观测若持续覆盖旧状态，早期信息会逐渐遗忘，误差随序列累积。
 
 先前的训练自由方法已经尝试控制状态更新。TTT3R 根据当前状态与图像观测之间的对齐置信度为状态 token 计算更新权重；MUT3R 利用多层自注意力提取运动线索，压低动态区域的影响；Rethinking the State Update Gate 则在逐 token 权重外增加帧级标量。TTSA3R 关注另一问题：一个状态 token 的候选表示在相邻帧间是否仍在变化，以及它所关注的图像区域是否提供了新的视觉证据。前者提示状态内容是否稳定，后者检验这种变化是否与观测中的空间信息相呼应。
-
-因此，TTSA3R 设计 TAUM（Temporal Adaptive Update Module）衡量候选状态的时间变化，并设计 SCUM（Spatial Context Update Module）结合跨注意力和图像特征差异，最后以逐 token 掩码调节持久状态。它在冻结的 CUT3R 基础上运行，无需额外训练；整体机制由 CUT3R 的状态更新、两类信号的计算及其融合组成。
 
 ## 2 相关工作
 

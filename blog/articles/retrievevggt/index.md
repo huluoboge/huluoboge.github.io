@@ -33,7 +33,7 @@ VGGT 使用图像编码器、Transformer 聚合器和多任务预测头联合估
 
 ### 用首层注意力特征构造相关性
 
-在第 $t$ 帧进入模型后，图像编码器与第一层帧内注意力先生成当前帧 token $hat z_t^0$。VGGT 的第一层全局注意力此前还没有融合其他帧的信息，因此其 Query、Key、Value 对应当前图像本身的视觉内容：
+在第 $t$ 帧进入模型后，图像编码器与第一层帧内注意力先生成当前帧 token $\hat z_t^0$。VGGT 的第一层全局注意力此前还没有融合其他帧的信息，因此其 Query、Key、Value 对应当前图像本身的视觉内容：
 
 $$
 Q_t^0,K_t^0,V_t^0=\operatorname{Proj}_{qkv}^0\!\left(\operatorname{LN}^0(\hat z_t^0)\right)\in\mathbb{R}^{H\times P\times d_h},\qquad d_h=d/H.

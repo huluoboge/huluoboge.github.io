@@ -143,12 +143,14 @@ $$
 \tag{11}
 $$
 
-$\mathbf\Sigma_T$ 是通过 Schur 补得到的相机位姿协方差；第一项 $\mathbf C^{-1}$ 描述逆深度自身的不确定性，第二项则把位姿不确定性传播到深度中。第 $j$ 个逆深度的方差为 $\sigma_{d_j}^2=[\operatorname{diag}(\mathbf\Sigma_d)]_j$。由于真实深度 $z_j=1/d_j$，一阶误差传播得到 $\sigma_{z_j}=\sigma_{d_j}/d_j^2$，进一步除以 $z_j$ 后，尺度无关的相对标准差为：
+$\mathbf\Sigma_T$ 是通过 Schur 补得到的相机位姿协方差；第一项 $\mathbf C^{-1}$ 描述逆深度自身的不确定性，第二项则把位姿不确定性传播到深度中。第 $j$ 个逆深度的方差由 $\mathbf\Sigma_d$ 的第 $j$ 个对角元素给出：
 
 $$
 \sigma_{d_j}^2=\left[\operatorname{diag}(\mathbf\Sigma_d)\right]_j.
 \tag{12}
 $$
+
+由于真实深度 $z_j=1/d_j$，一阶误差传播得到 $\sigma_{z_j}=\sigma_{d_j}/d_j^2$，进一步除以 $z_j$ 后，尺度无关的相对标准差为：
 
 $$
 \sigma_{z_j}^{\mathrm{rel}}=\frac{\sigma_{z_j}}{z_j}=\frac{\sigma_{d_j}}{d_j}.

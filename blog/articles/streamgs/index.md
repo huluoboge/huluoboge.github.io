@@ -11,21 +11,17 @@ draft: false
 
 > Yang Li、Jinglu Wang、Lei Chu、Xiao Li、Shiu-Hong Kao、Ying-Cong Chen、Yan Lu，*StreamGS: Online Generalizable Gaussian Splatting Reconstruction for Unposed Image Streams*，ICCV 2025，页码 25841–25850。[CVF 论文页](https://openaccess.thecvf.com/content/ICCV2025/html/Li_StreamGS_Online_Generalizable_Gaussian_Splatting_Reconstruction_for_Unposed_Image_Streams_ICCV_2025_paper.html) · [论文 PDF](https://openaccess.thecvf.com/content/ICCV2025/papers/Li_StreamGS_Online_Generalizable_Gaussian_Splatting_Reconstruction_for_Unposed_Image_Streams_ICCV_2025_paper.pdf) · [官方补充材料 ZIP（内含 PDF 与视频）](https://openaccess.thecvf.com/content/ICCV2025/supplemental/Li_StreamGS_Online_Generalizable_ICCV_2025_supplemental.zip)
 
-StreamGS 研究的是一段没有已知相机内外参的单目图像流，能否随着帧到达，逐步生成可渲染的 3D Gaussian 场景。方法先用预训练 DUSt3R 对相邻帧恢复点图和粗相机，再用内容自适应的跨帧匹配校正点图与位姿，最后把重叠帧中对应的高斯特征融合，减少地图规模。论文强调，它把测试时逐场景优化改成了训练后的一次前馈预测流程。它输出 Gaussian 场景和相机估计，可用于新视角合成；论文没有将其设计成带闭环和全局后端的完整 SLAM 系统。
+StreamGS 接收没有已知相机参数的单目图像流，并在每帧到达时更新可渲染的 3D Gaussian 场景。它先用预训练 DUSt3R 为相邻帧预测点图和粗相机，再以内容自适应的跨帧匹配校正几何与位姿，最后融合重叠帧中对应的高斯特征，控制地图规模。整个流程在训练完成后以前馈方式运行，不做逐场景迭代优化；输出包括 Gaussian 场景和相机估计，可用于新视角合成。论文没有将它设计成带闭环和全局后端的完整 SLAM 系统。
 
 ![原论文图 1：StreamGS 将连续图像流变为 Gaussian 场景并生成新视角](figures/fig1.png)
 
 *原论文 Figure 1。系统从连续输入帧构建 Gaussian 场景，同时展示估计相机位姿与新视角合成结果。*
 
-## 摘要与问题设定
-
-在线 3D Gaussian Splatting 面临三项相互关联的困难。图像流到来时尚未收集完整序列，因而难以先运行 SfM 求出固定相机参数；逐场景优化要求反复处理图像，不适合每帧都要及时更新的场景；相邻帧视野高度重叠，若每帧独立生成高斯并直接累加，内存和渲染成本会不断增长。StreamGS 的摘要将目标概括为把无位姿图像流逐步变成 Gaussian 流：DUSt3R 提供几何初始化，跨帧匹配适应当前场景并改进一致性，匹配又用于合并重复高斯。作者报告其新视角合成质量接近逐场景优化方法，速度最高快 150 倍，并在分布外场景上优于依赖已知位姿的泛化高斯方法。后文实验会限定这些比较的条件。
-
 ## 1 引言
 
 引言先把在线重建与交互应用的即时反馈需求联系起来，再具体说明“无预先相机参数”“泛化重建”“冗余控制”三项约束。标准 SfM 要等图像集合足够完整后才能联合估计相机，这会带来延迟；传统 3DGS 则需要逐场景优化，难以直接处理连续流；若把每帧的高斯集合简单并集起来，重叠视角会重复描述同一表面，位姿误差还可能造成重影。
 
-StreamGS 的处理顺序对应这些困难：对当前帧和前一帧做初始两视图重建；从图像特征中重新寻找可靠对应，联合修正相机和点；从修正后的对应关系出发，将跨帧图像与几何特征对齐并合并，再解码为高斯。论文将贡献归纳为无须预设相机的在线泛化流水线、用于提升跨帧一致性的自适应细化与密度控制，以及跨数据集实验。其“150 倍”来自与优化型 CF-3DGS 的实验比较，不应理解成对所有方法或所有硬件条件都成立的普遍加速比。
+论文将贡献归纳为无须预设相机的在线泛化流水线、用于提升跨帧一致性的自适应细化与密度控制，以及跨数据集实验。其“150 倍”来自与优化型 CF-3DGS 的实验比较，不应理解成对所有方法或所有硬件条件都成立的普遍加速比。
 
 ## 2 相关工作
 
