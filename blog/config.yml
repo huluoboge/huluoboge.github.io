@@ -10,8 +10,8 @@ basePath: "/blog"
 # 外部页面模板：渲染器只提供内容，页面外壳由该模板决定
 templateFile: template.html
 
-# 文章分类：文章 front-matter 的 categories 使用这里的 slug。
-# 一篇文章可以属于多个分类；分类页会在构建时自动生成。
+# 主题页配置：文章 front-matter 的 categories 使用这里的 slug。
+# 新文章用 section/kind 区分工作、生活与论文解读系列；categories 保留技术主题和旧系列页兼容。
 categories:
   - slug: paper-reading
     name: "论文解读"
@@ -37,10 +37,6 @@ categories:
   - slug: engineering
     name: "工具与工程"
     description: "开发工具、绘图、渲染与工程经验。"
-
-  - slug: life
-    name: "生活随记"
-    description: "生活、阅读与个人记录。"
 
 # 文章自动发现：articles/ 下每个子目录的 index.md 自动渲染；
 # front-matter 标 draft: true 的跳过。写文章 = 建目录 + 写 index.md，无需改配置。

@@ -14,8 +14,19 @@ function readArticles(blogDir) {
     if (!entry.isDirectory() || !fs.existsSync(source)) continue;
     const { attributes } = frontMatter(fs.readFileSync(source, 'utf8'));
     const raw = attributes.categories ?? attributes.category ?? [];
+    const categories = Array.isArray(raw) ? raw : [raw];
+    const title = String(attributes.title || entry.name);
+    const inferredPaperReading = categories.some(category => ['paper-reading', '论文解读'].includes(String(category).toLowerCase()))
+      || /(?:论文解读|论文翻译|文章翻译|论文总结|论文综述)$/.test(title);
+    const isPaperReading = attributes.kind === 'paper-reading'
+      || (!attributes.kind && inferredPaperReading);
     articles.set(entry.name, {
-      categories: Array.isArray(raw) ? raw : [raw],
+      title,
+      date: attributes.date,
+      categories,
+      section: attributes.section === 'life' ? 'life' : 'work',
+      kind: isPaperReading ? 'paper-reading' : 'technical',
+      pinned: attributes.pinned === true,
       draft: attributes.draft === true,
     });
   }
@@ -28,6 +39,26 @@ function escapeHTML(value) {
   })[char]);
 }
 
+function formatDate(value) {
+  const raw = String(value || '').trim();
+  const iso = raw.match(/^\d{4}-\d{2}-\d{2}/);
+  if (iso) return iso[0];
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? raw : parsed.toISOString().slice(0, 10);
+}
+
+function buildRecentTechnicalList(articles, limit = 5) {
+  const recent = [...articles.entries()]
+    .map(([slug, article]) => ({ slug, ...article }))
+    .filter(article => !article.draft && article.section === 'work' && article.kind === 'technical' && article.date)
+    .sort((a, b) => Number(b.pinned) - Number(a.pinned) || new Date(b.date) - new Date(a.date))
+    .slice(0, limit);
+  const rows = recent.map(article =>
+    `<li><a href="articles/${escapeHTML(article.slug)}/index.html">${escapeHTML(article.title)}</a> - ${escapeHTML(formatDate(article.date))}</li>`
+  ).join('\n');
+  return `<h2 id="近期技术文章">近期技术文章</h2>\n<ul>${rows}</ul>`;
+}
+
 function decorateHTML(html, articles, scriptPath, topics) {
   // 共享渲染器的卡片仅内置旧主题名称，补齐站点新增主题的显示名称。
   for (const topic of topics) {
@@ -37,6 +68,7 @@ function decorateHTML(html, articles, scriptPath, topics) {
     '<a class="back-button" href="../index.html">← 返回文章分类</a>',
     '<nav class="article-back-links" aria-label="返回导航"><a class="back-button" href="../../index.html">← 博客首页</a><a class="back-button" href="../index.html">文章分类</a></nav>'
   );
+  html = html.replace(/<h2[^>]*id="(?:最近文章|近期技术文章)"[^>]*>[\s\S]*?<\/h2>\s*<ul>[\s\S]*?<\/ul>/, buildRecentTechnicalList(articles));
   if (!html.includes('data-article-discovery') || html.includes('data-topic-navigation')) return html;
 
   const discovery = /<section class="article-discovery"[\s\S]*?<\/section>\s*<script>[\s\S]*?<\/script>/;
@@ -51,28 +83,55 @@ function decorateHTML(html, articles, scriptPath, topics) {
     if (!article || article.draft) throw new Error(`列表文章缺少有效元数据: ${match[1]}`);
     return article;
   });
-  const known = new Set(topics.map(topic => topic.slug));
-  const extras = new Set(listed.flatMap(article => article.categories.length ? article.categories : ['uncategorized']).filter(slug => !known.has(slug)));
-  const definitions = [
-    { slug: '', name: '全部' }, ...topics,
-    ...[...extras].map(slug => ({ slug, name: slug === 'uncategorized' ? '未分类' : slug })),
-  ];
-  const buttons = definitions.map(topic => {
-    const count = !topic.slug ? listed.length : listed.filter(article =>
+  const workArticles = listed.filter(article => article.section === 'work');
+  const lifeArticles = listed.filter(article => article.section === 'life');
+  const technicalArticles = workArticles.filter(article => article.kind === 'technical');
+  const topicDefinitions = [{ slug: '', name: '全部主题' }, ...topics.filter(topic => !['paper-reading', 'life'].includes(topic.slug))];
+  const sectionButtons = [
+    { slug: 'work', name: '工作', count: workArticles.length },
+    { slug: 'life', name: '生活', count: lifeArticles.length },
+  ].map(section =>
+    `<button type="button" data-article-section="${section.slug}" aria-pressed="${section.slug === 'work'}">${section.name}<span class="topic-count">${section.count}</span></button>`
+  ).join('\n');
+  const kindButtons = [
+    { slug: 'technical', name: '技术文章' },
+    { slug: 'paper-reading', name: '论文解读' },
+  ].map(kind => {
+    const count = workArticles.filter(article => article.kind === kind.slug).length;
+    return `<button type="button" data-article-kind="${kind.slug}" aria-pressed="${kind.slug === 'technical'}">${kind.name}<span class="topic-count">${count}</span></button>`;
+  }).join('\n');
+  const topicButtons = topicDefinitions.map(topic => {
+    const count = !topic.slug ? technicalArticles.length : technicalArticles.filter(article =>
       (article.categories.length ? article.categories : ['uncategorized']).includes(topic.slug)).length;
     return `<button type="button" data-article-topic="${escapeHTML(topic.slug)}" aria-pressed="${!topic.slug}">${escapeHTML(topic.name)}<span class="topic-count">${count}</span></button>`;
   }).join('\n');
+  let articleIndex = 0;
+  const articleList = list[1].replace(/<div class="article-item\b[^>]*data-article-item[^>]*>/g, opening => {
+    const article = listed[articleIndex++];
+    if (!article) throw new Error('文章卡片与元数据数量不一致');
+    const hidden = article.section !== 'work' || article.kind !== 'technical' ? ' hidden' : '';
+    return `${opening.slice(0, -1)} data-section="${escapeHTML(article.section)}" data-kind="${escapeHTML(article.kind)}"${hidden}>`;
+  });
+  if (articleIndex !== listed.length) throw new Error('文章元数据与卡片数量不一致');
 
   return html.replace(discovery, `<section class="article-discovery" data-article-discovery>
     <div class="discovery-toolbar">
       <label class="discovery-search"><span>搜索文章</span><input type="search" data-article-search placeholder="标题、摘要、标签" autocomplete="off"></label>
-      <span class="discovery-count" data-article-count aria-live="polite">${listed.length} 篇文章</span>
+      <span class="discovery-count" data-article-count aria-live="polite">${technicalArticles.length} 篇文章</span>
     </div>
+    <nav class="topic-navigation" aria-label="按内容分类">
+      <span class="topic-navigation-label">内容分类</span>
+      <div class="topic-buttons" role="group" aria-label="工作或生活">${sectionButtons}</div>
+    </nav>
+    <nav class="topic-navigation" data-kind-navigation aria-label="按文章类型">
+      <span class="topic-navigation-label">工作内容</span>
+      <div class="topic-buttons" role="group" aria-label="技术文章或论文解读">${kindButtons}</div>
+    </nav>
     <nav class="topic-navigation" data-topic-navigation aria-label="按主题浏览">
       <span class="topic-navigation-label">按主题浏览</span>
-      <div class="topic-buttons" role="group" aria-label="筛选主题">${buttons}</div>
+      <div class="topic-buttons" role="group" aria-label="筛选主题">${topicButtons}</div>
     </nav>
-    <div class="article-list" data-article-list>${list[1]}</div>
+    <div class="article-list" data-article-list>${articleList}</div>
     <p class="discovery-empty" data-article-empty hidden>没有匹配的文章。</p>
   </section>
   <script src="${scriptPath}" defer></script>`);

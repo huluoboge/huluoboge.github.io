@@ -9,6 +9,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const frontMatter = require("../tools/blog-renderer/node_modules/front-matter");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 
@@ -59,6 +60,8 @@ function extractFromArticleItems(html) {
       href: articleHref(m[1]),
       date: normalizeDate(date ? date[1] : ""),
       tags: tags ? tags[1].trim() : "",
+      categories: (m[0].match(/\bdata-category="([^"]*)"/)?.[1] || "").split(/\s+/).filter(Boolean),
+      kind: m[0].match(/\bdata-kind="([^"]*)"/)?.[1] || "",
     });
   }
   return items;
@@ -76,6 +79,8 @@ function extractFromLatestList(html) {
       href: articleHref(m[1]),
       date: normalizeDate(m[3]),
       tags: "",
+      categories: [],
+      kind: "",
     });
   }
   return items;
@@ -84,6 +89,23 @@ function extractFromLatestList(html) {
 function extractArticles(html) {
   const fromCards = extractFromArticleItems(html);
   return fromCards.length > 0 ? fromCards : extractFromLatestList(html);
+}
+
+/** Recent Posts 只展示原创博客；论文解读保留在博客文章列表中。 */
+function isOriginalPost(item) {
+  if (item.kind) return item.kind === "technical";
+  const categories = item.categories || [];
+  return !categories.some((category) => ["paper-reading", "论文解读"].includes(category))
+    && !/论文解读/.test(item.title);
+}
+
+function isPinnedPost(item, blogDir) {
+  const slug = String(item.href || "").split(/[/?#]/)[0];
+  if (!slug) return false;
+  const source = path.join(blogDir, "articles", slug, "index.md");
+  if (!fs.existsSync(source)) return false;
+  const { attributes } = frontMatter(fs.readFileSync(source, "utf8"));
+  return attributes.pinned === true;
 }
 
 function escapeHTML(value) {
@@ -104,6 +126,7 @@ function buildListHTML(items) {
 function main() {
   const opts = parseArgs(process.argv.slice(2));
   const blogHome = path.join(REPO_ROOT, opts.blogDir, "index.html");
+  const blogDir = path.resolve(REPO_ROOT, opts.blogDir);
   const legacyIndex = path.join(REPO_ROOT, opts.blogDir, "articles", "index.html");
   const blogIndex = fs.existsSync(blogHome) ? blogHome : legacyIndex;
   const outputPath = path.resolve(REPO_ROOT, opts.output);
@@ -113,7 +136,11 @@ function main() {
     process.exit(1);
   }
 
-  const items = extractArticles(fs.readFileSync(blogIndex, "utf8")).slice(0, opts.limit);
+  const items = extractArticles(fs.readFileSync(blogIndex, "utf8"))
+    .filter(isOriginalPost)
+    .map((item) => ({ ...item, pinned: isPinnedPost(item, blogDir) }))
+    .sort((a, b) => Number(b.pinned) - Number(a.pinned))
+    .slice(0, opts.limit);
   if (items.length === 0) {
     console.error("[recent-posts] 未解析到文章，放弃生成片段");
     process.exit(1);
@@ -127,6 +154,8 @@ if (require.main === module) main();
 
 module.exports = {
   extractArticles,
+  isOriginalPost,
+  isPinnedPost,
   extractFromArticleItems,
   extractFromLatestList,
   buildListHTML,

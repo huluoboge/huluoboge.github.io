@@ -37,7 +37,7 @@ if [ "$deps_ok" -ne 1 ]; then
 fi
 
 echo "==> 构建博客 (basePath=/blog)"
-node "$RENDERER_DIR/src/cli.js" build --cwd "$BLOG_DIR"
+node "$REPO_ROOT/scripts/build-blog-cached.js"
 
 echo "==> 生成紧凑主题导航与搜索"
 node "$REPO_ROOT/scripts/apply-blog-navigation.js"

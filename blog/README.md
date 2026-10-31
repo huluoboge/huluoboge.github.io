@@ -9,7 +9,7 @@ blog/
   config.yml                # 站点配置（basePath: /blog）
   papers_to_read.md         # 仓库内维护的待读论文清单
   home/home/index.md        # 博客首页（含最新文章占位符）
-  articles/<slug>/index.md  # 文章（front-matter: title/date/categories/tags/excerpt）
+  articles/<slug>/index.md  # 文章（front-matter: title/date/section/kind/categories/tags/excerpt）
   categories/                # 构建生成：分类总览与分类页
   static/                   # 静态资源（KaTeX 字体、highlight.js、mermaid）
   *.html                    # 构建产物（gitignore，发布时由 CI 生成）
@@ -20,22 +20,18 @@ blog/
 待读论文和选题想法记在 [待读论文清单](papers_to_read.md) 中。清单供仓库维护，不属于博客导航或渲染生成的页面；因为仓库是公开的，部署后也可以通过源文件路径访问。
 
 1. 新建目录 `blog/articles/<slug>/index.md`
-2. front-matter 至少写 `title` 和 `date`，建议写 `categories` / `tags` / `excerpt`；`draft: true` 表示草稿不发布
-3. `categories` 使用 `config.yml` 中的分类 slug，例如 `categories: [state-estimation]`；一篇文章可以写多个分类
-4. 首页提供搜索和紧凑的主题标签，点击主题直接筛选文章，搜索在选中主题内生效；构建器还会生成 `categories/index.html` 及每个主题的详情页
+2. front-matter 至少写 `title` 和 `date`；`section` 默认为 `work`，生活文章写 `section: life`；`kind` 默认为 `technical`，论文解读系列写 `kind: paper-reading`；`draft: true` 表示草稿不发布
+3. `categories` 记录技术主题，使用 `config.yml` 中的主题 slug，例如 `categories: [state-estimation, reconstruction]`；一篇文章可以写多个主题
+4. 首页按“工作 / 生活”区分；工作内容再分“技术文章 / 论文解读”，并可继续按技术主题筛选。列表按时间倒序，近期技术文章单独展示
 5. 支持：LaTeX 公式（`$...$` / `$$...$$` / equation / align 等）、mermaid 图表（` ```mermaid `）、代码高亮、`.md` 链接互链
 
 写博客正文时先读[博客写作 Skill](skills/blog-writing/SKILL.md)；单篇论文解读或多篇综述再按其中指引阅读论文写作细则。
 
-### 主题浏览
+### 文章组织
 
-主题统一由 `config.yml` 的 `categories` 定义，文章使用同名字段选择一个或多个主题，不另设文章类型字段：
+文章按两个维度组织：`section` 表示工作或生活，`kind` 表示工作内容属于技术文章还是论文解读系列，`categories` 表示技术主题。论文解读可以同时标注一个或多个技术主题。旧文章中的 `paper-reading` 分类会被兼容识别；新文章应使用 `kind: paper-reading`。
 
-- 论文解读、翻译或围绕具体论文的综述：加入 `paper-reading`，同时保留技术主题，例如 `categories: [paper-reading, local-features, geometry]`。
-- 原理推导、专题补充与工程经验：选择相关技术主题。例如 B 样条使用 `[state-estimation, reconstruction]`。
-- 生活文章：使用 `life`（生活随记），以后可按实际内容补充主题。
-
-首页展示配置中的全部主题（包括暂时为零的生活随记），允许一篇文章计入多个主题。主题数量表示该主题全部公开文章的数量；搜索后的实际结果数量单独显示。详细关键词留在 `tags`，可被搜索。
+近期技术文章按时间展示，完整列表也按时间倒序；主题标签用于交叉浏览，详细关键词留在 `tags` 并可被搜索。
 
 `scripts/apply-blog-navigation.js` 在渲染后生成紧凑主题导航，交互脚本位于 `blog/static/js/article-discovery.js`，不改动共享渲染器 submodule。
 

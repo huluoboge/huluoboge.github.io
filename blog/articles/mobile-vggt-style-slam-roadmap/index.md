@@ -1,7 +1,7 @@
 ---
 title: "Awesome Mobile VGGT-style SLAM"
 date: 2026-10-27
-categories: [life]
+categories: [state-estimation, reconstruction]
 tags: [SLAM, VGGT, Mobile, Visual Odometry, Reading List]
 excerpt: "围绕移动端、位姿估计与流式三维重建整理的 VGGT-style SLAM 阅读清单，按重要程度列出论文与站内笔记。"
 draft: false
