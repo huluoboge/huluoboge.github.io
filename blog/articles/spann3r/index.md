@@ -9,7 +9,7 @@ draft: false
 
 # Spann3R 论文解读
 
-> Hengyi Wang、Lourdes Agapito，*3D Reconstruction with Spatial Memory*，发表于 3DV 2025，页码 78–89。下文依据作者在 UCL Discovery 存档的正式录用稿，共 14 页，包含补充材料。[论文项目页](https://hengyiwang.github.io/projects/spanner) · [正式录用稿 PDF](https://discovery.ucl.ac.uk/id/eprint/10215490/1/2408.16061v1.pdf) · [UCL 论文记录](https://discovery.ucl.ac.uk/id/eprint/10215490/) · [官方代码](https://github.com/HengyiWang/spann3r)
+> Hengyi Wang、Lourdes Agapito，*3D Reconstruction with Spatial Memory*，发表于 3DV 2025，页码 78–89。下文依据 arXiv v1（2024-08-30，共 14 页，含附录）。[论文项目页](https://hengyiwang.github.io/projects/spanner) · [论文页面](https://arxiv.org/abs/2408.16061v1) · [PDF](https://arxiv.org/pdf/2408.16061v1) · [UCL 论文记录](https://discovery.ucl.ac.uk/id/eprint/10215490/) · [官方代码](https://github.com/HengyiWang/spann3r)
 
 DUSt3R 从两张图像直接回归点图，避免了传统重建管线中匹配、三角化和深度估计等步骤。但每对图像的点图属于各自局部坐标系；要合并多对图像，仍要构建图关系，再通过逐场景优化把结果对齐。Spann3R 改变了跨帧几何的表达方式：每次预测都把点图放在以首帧为参考的共同坐标系中，并把此前的几何与特征写进空间记忆，供后续帧查询。
 
@@ -18,6 +18,12 @@ DUSt3R 从两张图像直接回归点图，避免了传统重建管线中匹配�
 ![原论文图 2：DUSt3R 的局部点图与 Spann3R 的共同坐标系重建](figures/figure-2-motivation.png)
 
 *原论文图 2。DUSt3R 先为图像对生成局部点图，再进行全局对齐；Spann3R 则用空间记忆连接历史预测，直接在共同坐标系中递增重建。*
+
+## 相关工作
+
+传统 SfM 通过特征匹配、几何验证、相机注册、三角化和束调整逐步恢复场景；视觉 SLAM 则强调实时估计与地图更新。学习方法可以改进这条管线中的特征、匹配或深度估计，但系统仍要串联多个步骤，误差也会沿流程传播。神经渲染能生成细致场景，却通常需要较长的逐场景优化时间。
+
+DUSt3R 改用图像对直接回归点图，但每对图像仍处于局部坐标系，扩展到多张图像时需要先建立稠密图像对关系，再通过全局优化对齐。Spann3R 沿用点图表示，将这个按场景优化的对齐步骤换成逐帧网络推理：模型从空间记忆读取过去的几何与特征，在首帧坐标系中预测新点图。记忆网络则提供了读取长时历史的机制，Spann3R 把记忆键和值设计成视觉特征与预测几何的组合。
 
 ## 两个解码器怎样接上空间记忆
 
