@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" role="img" aria-labelledby="title desc">
+  <title id="title">WinT3R 的两条记忆通路与重叠窗口</title>
+  <desc id="desc">示意 WinT3R 如何用固定数量的 State Token 递归传递场景上下文，用 Camera Token Pool 逐窗口累计位姿上下文，并用半重叠窗口重新预测旧帧。</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#d97706"/>
+    </marker>
+    <marker id="arrow-dark" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#475569"/>
+    </marker>
+    <style>
+      text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif; fill: #172033; }
+      .title { font-size: 38px; font-weight: 700; }
+      .subtitle { font-size: 21px; fill: #526176; }
+      .panel-title { font-size: 25px; font-weight: 700; }
+      .label { font-size: 20px; font-weight: 600; }
+      .body { font-size: 18px; }
+      .small { font-size: 16px; fill: #526176; }
+      .tiny { font-size: 15px; fill: #526176; }
+      .panel { fill: #ffffff; stroke: #d7e0ea; stroke-width: 2; }
+      .blue-card { fill: #eff6ff; stroke: #60a5fa; stroke-width: 2; }
+      .orange-card { fill: #fff7ed; stroke: #fb923c; stroke-width: 2; }
+      .neutral-card { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; }
+      .muted-card { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 2; }
+      .blue-line { fill: none; stroke: #2563eb; stroke-width: 3; marker-end: url(#arrow-blue); }
+      .orange-line { fill: none; stroke: #d97706; stroke-width: 3; marker-end: url(#arrow-orange); }
+      .dark-line { fill: none; stroke: #475569; stroke-width: 3; marker-end: url(#arrow-dark); }
+      .dash { stroke-dasharray: 9 8; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1120" fill="#f5f8fc"/>
+  <text x="58" y="66" class="title">WinT3R：两条记忆通路，三种不同的更新</text>
+  <text x="60" y="104" class="subtitle">State 传递场景上下文；Camera Token Pool 组织相机位姿；重叠窗口重估旧帧。</text>
+
+  <!-- Scene state path -->
+  <rect x="50" y="140" width="735" height="485" rx="22" class="panel"/>
+  <rect x="50" y="140" width="12" height="485" rx="6" fill="#3b82f6"/>
+  <text x="82" y="184" class="panel-title" fill="#1d4ed8">① State：定长的场景记忆</text>
+  <text x="84" y="218" class="small">每个窗口读入旧 State，输出更新后的 State。</text>
+
+  <rect x="82" y="258" width="205" height="82" rx="14" class="blue-card"/>
+  <text x="184" y="291" text-anchor="middle" class="label">上一窗口 State</text>
+  <text x="184" y="321" text-anchor="middle" class="body">Sₜ₋₁ · 固定数量 Token</text>
+
+  <rect x="82" y="420" width="205" height="94" rx="14" class="neutral-card"/>
+  <text x="184" y="455" text-anchor="middle" class="label">当前窗口</text>
+  <text x="184" y="485" text-anchor="middle" class="body">Image + Camera Tokens</text>
+
+  <rect x="354" y="278" width="270" height="230" rx="18" fill="#eef2ff" stroke="#818cf8" stroke-width="2.5"/>
+  <text x="489" y="317" text-anchor="middle" class="label">Dual-Branch Decoder</text>
+  <line x1="383" y1="337" x2="595" y2="337" stroke="#c7d2fe" stroke-width="2"/>
+  <rect x="381" y="355" width="216" height="48" rx="12" fill="#ffffff" stroke="#c7d2fe"/>
+  <text x="489" y="386" text-anchor="middle" class="body">State ← 当前图像特征</text>
+  <rect x="381" y="420" width="216" height="48" rx="12" fill="#ffffff" stroke="#c7d2fe"/>
+  <text x="489" y="451" text-anchor="middle" class="body">图像特征 ← 历史 State</text>
+  <text x="489" y="491" text-anchor="middle" class="tiny">窗口内部另做 VGGT 式交替注意力</text>
+
+  <path d="M287 299 H325 V360 H354" class="blue-line"/>
+  <path d="M287 466 H322 V450 H354" class="dark-line"/>
+
+  <rect x="653" y="258" width="105" height="82" rx="14" class="blue-card"/>
+  <text x="705" y="290" text-anchor="middle" class="label">新 State</text>
+  <text x="705" y="321" text-anchor="middle" class="body">Sₜ</text>
+  <path d="M624 320 H653" class="blue-line"/>
+  <text x="704" y="366" text-anchor="middle" class="small">送往下一窗口</text>
+  <path d="M705 340 V354" class="blue-line dash"/>
+
+  <rect x="653" y="420" width="105" height="94" rx="14" class="neutral-card"/>
+  <text x="705" y="454" text-anchor="middle" class="label">更新特征</text>
+  <text x="705" y="484" text-anchor="middle" class="body">Fₜ / Gₜ</text>
+  <path d="M624 465 H653" class="dark-line"/>
+  <text x="420" y="565" class="small">State 被递归改写；它不是按帧编号保存的显式路标表。</text>
+
+  <!-- Camera token path -->
+  <rect x="815" y="140" width="735" height="485" rx="22" class="panel"/>
+  <rect x="815" y="140" width="12" height="485" rx="6" fill="#f59e0b"/>
+  <text x="847" y="184" class="panel-title" fill="#b45309">② Camera Token Pool：增长的位姿记忆</text>
+  <text x="849" y="218" class="small">它与 State 分工不同：相机 Token 池不直接写入 State。</text>
+
+  <rect x="850" y="260" width="235" height="78" rx="14" class="orange-card"/>
+  <text x="967" y="291" text-anchor="middle" class="label">当前窗口相机 Token</text>
+  <text x="967" y="320" text-anchor="middle" class="body">解码后 G′ₜ</text>
+
+  <rect x="850" y="400" width="235" height="78" rx="14" class="orange-card"/>
+  <text x="967" y="431" text-anchor="middle" class="label">历史 Camera Token Pool</text>
+  <text x="967" y="460" text-anchor="middle" class="body">Poolₜ₋₁</text>
+
+  <rect x="1150" y="326" width="160" height="98" rx="16" fill="#fff7ed" stroke="#fb923c" stroke-width="2.5"/>
+  <text x="1230" y="365" text-anchor="middle" class="label">Camera Head</text>
+  <text x="1230" y="396" text-anchor="middle" class="small">当前 + 历史 Token</text>
+  <path d="M1085 299 H1120 V356 H1150" class="orange-line"/>
+  <path d="M1085 439 H1120 V395 H1150" class="orange-line"/>
+
+  <rect x="1370" y="337" width="145" height="78" rx="14" class="neutral-card"/>
+  <text x="1442" y="369" text-anchor="middle" class="label">相机位姿</text>
+  <text x="1442" y="397" text-anchor="middle" class="body">每帧预测</text>
+  <path d="M1310 375 H1370" class="orange-line"/>
+
+  <rect x="927" y="516" width="493" height="58" rx="14" fill="#ffedd5" stroke="#fb923c" stroke-width="2"/>
+  <text x="1173" y="553" text-anchor="middle" class="label">Poolₜ = Poolₜ₋₁ + 当前窗口 Token</text>
+  <path d="M967 338 V500 H1010 V516" class="orange-line"/>
+  <path d="M967 478 V516" class="orange-line"/>
+  <text x="850" y="600" class="tiny">按窗口追加；重叠帧会带来新上下文下的 Token，不按帧 ID 原位覆盖或去重。</text>
+
+  <!-- Overlapping window behavior -->
+  <rect x="50" y="660" width="1500" height="410" rx="22" class="panel"/>
+  <rect x="50" y="660" width="12" height="410" rx="6" fill="#8b5cf6"/>
+  <text x="82" y="707" class="panel-title" fill="#6d28d9">③ 半重叠窗口：旧帧再看一次，输出重新选择</text>
+  <text x="84" y="740" class="small">论文默认窗口长度 4、步长 2；重叠让新帧能帮助修正局部预测。</text>
+
+  <text x="90" y="797" class="label">窗口 1</text>
+  <g>
+    <rect x="185" y="762" width="74" height="58" rx="10" class="muted-card"/><text x="222" y="799" text-anchor="middle" class="label">1</text>
+    <rect x="270" y="762" width="74" height="58" rx="10" class="muted-card"/><text x="307" y="799" text-anchor="middle" class="label">2</text>
+    <rect x="355" y="762" width="74" height="58" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/><text x="392" y="799" text-anchor="middle" class="label">3</text>
+    <rect x="440" y="762" width="74" height="58" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/><text x="477" y="799" text-anchor="middle" class="label">4</text>
+  </g>
+  <path d="M535 791 H600" class="dark-line"/>
+  <text x="565" y="774" text-anchor="middle" class="tiny">步长 2</text>
+  <text x="625" y="797" class="label">窗口 2</text>
+  <g>
+    <rect x="720" y="762" width="74" height="58" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/><text x="757" y="799" text-anchor="middle" class="label">3</text>
+    <rect x="805" y="762" width="74" height="58" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/><text x="842" y="799" text-anchor="middle" class="label">4</text>
+    <rect x="890" y="762" width="74" height="58" rx="10" class="muted-card"/><text x="927" y="799" text-anchor="middle" class="label">5</text>
+    <rect x="975" y="762" width="74" height="58" rx="10" class="muted-card"/><text x="1012" y="799" text-anchor="middle" class="label">6</text>
+  </g>
+  <text x="520" y="846" text-anchor="middle" class="small" fill="#6d28d9">紫色：同一帧在新窗口里重新编码、重新预测</text>
+
+  <rect x="1090" y="758" width="400" height="58" rx="13" class="blue-card"/>
+  <text x="1115" y="795" class="label" fill="#1d4ed8">位姿</text>
+  <text x="1180" y="795" class="body">采用新窗口的预测</text>
+  <rect x="1090" y="830" width="400" height="58" rx="13" class="neutral-card"/>
+  <text x="1115" y="867" class="label">点图</text>
+  <text x="1180" y="867" class="body">选择置信度更高的版本</text>
+
+  <rect x="85" y="910" width="1405" height="112" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="112" y="950" class="label">关键区别</text>
+  <text x="250" y="950" class="body">新窗口能更新重叠帧的输出；State 继续递归传递，Camera Token Pool 继续追加。</text>
+  <text x="250" y="986" class="body">因此“输出覆盖”不等于“历史隐藏表示被全局回写”；模型也没有显式位姿图来校正旧状态。</text>
+</svg>

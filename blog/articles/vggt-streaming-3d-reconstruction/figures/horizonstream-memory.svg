@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">HorizonStream 的短期 KV Cache 与长期 GLA State</title>
+  <desc id="desc">近期 Patch KV 缓存追加新帧并淘汰最旧帧，现存条目不被重写。GLA 固定大小状态按通道衰减旧信息、吸收当前 Key 和 Value，同时由当前各类 Token 的 Query 读取。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#475569"/></marker>
+    <marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+    <marker id="purple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#7c3aed"/></marker>
+    <style>
+      text{font-family:"Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif;fill:#172033}.title{font-size:40px;font-weight:700}.sub{font-size:23px;fill:#526176}.head{font-size:27px;font-weight:700}.label{font-size:23px;font-weight:650}.body{font-size:21px}.small{font-size:19px;fill:#526176}.panel{fill:#fff;stroke:#d7e0ea;stroke-width:2}.bluebox{fill:#eff6ff;stroke:#60a5fa;stroke-width:2}.purplebox{fill:#f5f3ff;stroke:#a78bfa;stroke-width:2}.gray{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}.redbox{fill:#fee2e2;stroke:#f87171;stroke-width:2}.bline{fill:none;stroke:#2563eb;stroke-width:3;marker-end:url(#blue)}.pline{fill:none;stroke:#7c3aed;stroke-width:3;marker-end:url(#purple)}.line{fill:none;stroke:#475569;stroke-width:2.5;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="760" fill="#f5f8fc"/>
+  <text x="38" y="58" class="title">两种历史：近期 KV 与长期状态</text>
+  <text x="40" y="96" class="sub">一边保存最近帧的细节，一边用定长状态概括更早的证据。</text>
+
+  <rect x="32" y="135" width="552" height="575" rx="20" class="panel"/>
+  <rect x="32" y="135" width="11" height="575" rx="5" fill="#2563eb"/>
+  <text x="62" y="180" class="head" fill="#1d4ed8">① GWA：近期 Patch KV Cache</text>
+  <text x="64" y="215" class="small">只保留有限窗口，供当前帧匹配邻近历史。</text>
+  <text x="64" y="281" class="label">窗口原有条目</text>
+  <rect x="65" y="300" width="130" height="66" rx="12" class="gray"/><text x="130" y="342" text-anchor="middle" class="label">帧 t−2</text>
+  <rect x="216" y="300" width="130" height="66" rx="12" class="gray"/><text x="281" y="342" text-anchor="middle" class="label">帧 t−1</text>
+  <rect x="367" y="300" width="130" height="66" rx="12" class="bluebox"/><text x="432" y="342" text-anchor="middle" class="label">帧 t</text>
+  <path d="M281 380 V424" class="line"/>
+  <text x="302" y="414" class="small">追加新帧</text>
+  <text x="64" y="471" class="label">窗口向前滚动</text>
+  <rect x="65" y="490" width="130" height="66" rx="12" class="redbox"/><text x="130" y="532" text-anchor="middle" class="label" fill="#b91c1c">帧 t−2</text>
+  <path d="M72 496 L188 550 M188 496 L72 550" stroke="#dc2626" stroke-width="4"/>
+  <rect x="216" y="490" width="130" height="66" rx="12" class="gray"/><text x="281" y="532" text-anchor="middle" class="label">帧 t−1</text>
+  <rect x="367" y="490" width="130" height="66" rx="12" class="bluebox"/><text x="432" y="532" text-anchor="middle" class="label">帧 t+1</text>
+  <text x="64" y="615" class="body">最旧条目淘汰；保留条目不重算。</text>
+  <text x="64" y="653" class="small">持久缓存主要保留 Patch K/V。</text>
+  <text x="64" y="681" class="small">Pose Token 用于当前窗口的位姿交互。</text>
+
+  <rect x="616" y="135" width="552" height="575" rx="20" class="panel"/>
+  <rect x="616" y="135" width="11" height="575" rx="5" fill="#7c3aed"/>
+  <text x="646" y="180" class="head" fill="#6d28d9">② GLA：定长递归状态</text>
+  <text x="648" y="215" class="small">不是历史 KV 列表，而是数值持续变化的矩阵。</text>
+  <rect x="650" y="267" width="205" height="78" rx="13" class="purplebox"/><text x="752" y="301" text-anchor="middle" class="label">旧状态 Sₜ₋₁</text><text x="752" y="329" text-anchor="middle" class="small">矩阵大小固定</text>
+  <rect x="930" y="267" width="205" height="78" rx="13" class="gray"/><text x="1032" y="301" text-anchor="middle" class="label">通道保留率 γ</text><text x="1032" y="329" text-anchor="middle" class="small">不同通道不同遗忘速度</text>
+  <rect x="650" y="382" width="205" height="78" rx="13" class="bluebox"/><text x="752" y="416" text-anchor="middle" class="label">当前 Key / Value</text><text x="752" y="444" text-anchor="middle" class="small">写入新证据</text>
+  <rect x="930" y="376" width="205" height="90" rx="14" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/><text x="1032" y="414" text-anchor="middle" class="label" fill="#6d28d9">门控状态更新</text><text x="1032" y="444" text-anchor="middle" class="small">衰减旧项 + 累积新项</text>
+  <path d="M752 345 V365 H900 V410 H921" class="pline"/><path d="M1032 345 V369" class="pline"/><path d="M855 421 H921" class="bline"/><path d="M650 306 H635 V535 H642" class="pline"/>
+  <rect x="930" y="500" width="205" height="70" rx="13" class="purplebox"/><text x="1032" y="544" text-anchor="middle" class="label">新状态 Sₜ</text>
+  <path d="M1032 466 V493" class="pline"/>
+  <rect x="650" y="500" width="205" height="70" rx="13" class="gray"/><text x="752" y="530" text-anchor="middle" class="label">当前各类 Query</text><text x="752" y="555" text-anchor="middle" class="small">Patch / Pose / MRT</text>
+  <text x="648" y="622" class="body">Query 读取历史；MRT 专门读取尺度。</text>
+  <text x="648" y="660" class="small">固定大小状态可以跨较长视频持续传递。</text>
+</svg>

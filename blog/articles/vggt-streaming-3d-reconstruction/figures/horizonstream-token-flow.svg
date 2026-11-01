@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">HorizonStream 的 Token 与注意力数据流</title>
+  <desc id="desc">每帧包含 Patch、Pose 和度量读出 MRT Token。帧内注意力更新同帧表示，Gated Window Attention 在近期窗口中做匹配，当前 Token 通过 GLA 读取并更新固定大小长期状态。位姿、深度和尺度头生成输出。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#475569"/></marker>
+    <marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+    <marker id="purple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#7c3aed"/></marker>
+    <style>
+      text{font-family:"Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif;fill:#172033}.title{font-size:40px;font-weight:700}.sub{font-size:23px;fill:#526176}.head{font-size:27px;font-weight:700}.label{font-size:24px;font-weight:650}.body{font-size:22px}.small{font-size:19px;fill:#526176}.panel{fill:#fff;stroke:#d7e0ea;stroke-width:2}.bluebox{fill:#eff6ff;stroke:#60a5fa;stroke-width:2}.orangebox{fill:#fff7ed;stroke:#fb923c;stroke-width:2}.purplebox{fill:#f5f3ff;stroke:#a78bfa;stroke-width:2}.greenbox{fill:#ecfdf5;stroke:#34d399;stroke-width:2}.gray{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}.line{fill:none;stroke:#475569;stroke-width:3;marker-end:url(#arrow)}.bline{fill:none;stroke:#2563eb;stroke-width:3;marker-end:url(#blue)}.pline{fill:none;stroke:#7c3aed;stroke-width:3;marker-end:url(#purple)}.dash{stroke-dasharray:8 7}
+    </style>
+  </defs>
+  <rect width="1200" height="800" fill="#f5f8fc"/>
+  <text x="38" y="58" class="title">HorizonStream：当前 Token 如何读写历史</text>
+  <text x="40" y="96" class="sub">24 层主干交替处理局部匹配与长期状态；GLA 在中间层多次介入。</text>
+
+  <rect x="32" y="135" width="260" height="455" rx="20" class="panel"/>
+  <text x="58" y="179" class="head" fill="#1d4ed8">每帧三类 Token</text>
+  <rect x="58" y="218" width="208" height="82" rx="14" class="bluebox"/><text x="162" y="252" text-anchor="middle" class="label">Patch</text><text x="162" y="280" text-anchor="middle" class="small">图像与局部几何</text>
+  <rect x="58" y="322" width="208" height="82" rx="14" class="orangebox"/><text x="162" y="356" text-anchor="middle" class="label">Pose</text><text x="162" y="384" text-anchor="middle" class="small">相机运动线索</text>
+  <rect x="58" y="426" width="208" height="82" rx="14" class="purplebox"/><text x="162" y="460" text-anchor="middle" class="label">MRT</text><text x="162" y="488" text-anchor="middle" class="small">专用尺度读出</text>
+  <text x="60" y="548" class="small">三类 Token 都会逐层更新</text>
+
+  <rect x="318" y="135" width="385" height="455" rx="20" class="panel"/>
+  <text x="344" y="179" class="head" fill="#1d4ed8">从同帧到近期窗口</text>
+  <path d="M292 360 H316" class="line"/>
+  <rect x="350" y="218" width="320" height="105" rx="15" class="gray"/>
+  <text x="510" y="257" text-anchor="middle" class="label">帧内注意力</text>
+  <text x="510" y="290" text-anchor="middle" class="small">同一帧 Patch 交换上下文</text>
+  <rect x="350" y="350" width="320" height="132" rx="15" class="bluebox"/>
+  <text x="510" y="393" text-anchor="middle" class="label" fill="#1d4ed8">GWA：近期窗口匹配</text>
+  <text x="510" y="430" text-anchor="middle" class="body">当前帧 ↔ 邻近历史帧</text>
+  <text x="510" y="461" text-anchor="middle" class="small">门控筛选可靠的时空注意力</text>
+  <path d="M510 323 V345" class="line"/>
+  <rect x="350" y="510" width="320" height="48" rx="12" class="purplebox"/>
+  <text x="510" y="542" text-anchor="middle" class="small">24 层中交错插入 GWA 与 GLA</text>
+  <path d="M670 416 H706" class="bline"/>
+
+  <rect x="725" y="135" width="443" height="455" rx="20" class="panel"/>
+  <text x="751" y="179" class="head" fill="#6d28d9">GLA：跨窗口状态读写</text>
+  <rect x="765" y="218" width="362" height="65" rx="13" class="purplebox"/>
+  <text x="946" y="259" text-anchor="middle" class="label">旧状态 Sₜ₋₁ · 固定大小</text>
+  <rect x="765" y="315" width="362" height="65" rx="13" class="gray"/>
+  <text x="946" y="356" text-anchor="middle" class="label">当前 Patch / Pose / MRT</text>
+  <path d="M946 283 V310" class="pline"/><path d="M946 380 V402" class="line"/>
+  <rect x="765" y="410" width="362" height="92" rx="15" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/>
+  <text x="946" y="448" text-anchor="middle" class="label" fill="#6d28d9">当前 Query 读取状态</text>
+  <text x="946" y="481" text-anchor="middle" class="body">当前 Key / Value 写入状态</text>
+  <path d="M946 502 V519" class="pline"/>
+  <rect x="765" y="526" width="362" height="42" rx="11" class="purplebox"/>
+  <text x="946" y="554" text-anchor="middle" class="small">形成新状态 Sₜ，供后续帧读取</text>
+
+  <rect x="32" y="625" width="1136" height="125" rx="20" class="greenbox"/>
+  <text x="62" y="670" class="head" fill="#047857">当前预测头</text>
+  <text x="62" y="714" class="body">Pose Tokens → 相机位姿</text>
+  <text x="450" y="714" class="body">Patch 特征 → 深度与置信度</text>
+  <text x="865" y="714" class="body">MRT → 度量尺度</text>
+  <text x="62" y="738" class="small">MRT 是专门的尺度读出 Token；它不是唯一能查询 GLA 长期状态的 Token。</text>
+</svg>

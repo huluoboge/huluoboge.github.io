@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1190" viewBox="0 0 1600 1190" role="img" aria-labelledby="title desc">
+  <title id="title">TTSA3R 的时空门控、候选状态比较与记忆写入</title>
+  <desc id="desc">示意连续两帧分别由不同历史状态生成候选 State；TAUM 比较两个候选，SCUM 用 State 到当前图像的注意力加权同索引图像 Patch 特征变化，再把两个门控相乘后更新全局状态。当前帧输出先于状态写回生成，Pose Retriever 记忆按独立规则更新。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#526176"/></marker>
+    <marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+    <marker id="orange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#d97706"/></marker>
+    <marker id="green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#059669"/></marker>
+    <style>
+      text{font-family:"Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif;fill:#172033}.title{font-size:32px;font-weight:700}.subtitle{font-size:20px;fill:#526176}.head{font-size:23px;font-weight:700}.label{font-size:19px;font-weight:650}.body{font-size:17px}.small{font-size:15px;fill:#526176}.tiny{font-size:13px;fill:#526176}.panel{fill:#fff;stroke:#d7e0ea;stroke-width:2}.bluebox{fill:#eff6ff;stroke:#60a5fa;stroke-width:2}.orangebox{fill:#fff7ed;stroke:#fb923c;stroke-width:2}.greenbox{fill:#ecfdf5;stroke:#34d399;stroke-width:2}.purplebox{fill:#f5f3ff;stroke:#a78bfa;stroke-width:2}.graybox{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}.warnbox{fill:#fff7ed;stroke:#fdba74;stroke-width:1.6}.line{fill:none;stroke:#526176;stroke-width:2.3;marker-end:url(#arrow)}.bline{fill:none;stroke:#2563eb;stroke-width:2.6;marker-end:url(#blue)}.oline{fill:none;stroke:#d97706;stroke-width:2.6;marker-end:url(#orange)}.gline{fill:none;stroke:#059669;stroke-width:2.6;marker-end:url(#green)}
+    </style>
+  </defs>
+  <rect width="1600" height="1190" fill="#f5f8fc"/>
+  <text x="40" y="48" class="title">TTSA3R：先预测，再用时空信号控制 State 写入</text>
+  <text x="42" y="80" class="subtitle">继承 CUT3R 的逐帧递归结构；TAUM 与 SCUM 只改变送入下一帧的全局 State。</text>
+
+  <rect x="28" y="105" width="1544" height="300" rx="18" class="panel"/>
+  <text x="52" y="143" class="head">① 时间门控比较的是连续两帧的候选 State</text>
+  <rect x="62" y="165" width="194" height="64" rx="12" class="bluebox"/>
+  <text x="159" y="192" text-anchor="middle" class="label">旧 State Sₜ₋₂</text>
+  <text x="159" y="216" text-anchor="middle" class="tiny">生成前一帧候选时的输入</text>
+  <rect x="288" y="165" width="176" height="64" rx="12" class="orangebox"/>
+  <text x="376" y="192" text-anchor="middle" class="label">图像特征 Fₜ₋₁</text>
+  <text x="376" y="216" text-anchor="middle" class="tiny">前一帧</text>
+  <rect x="510" y="165" width="156" height="64" rx="12" class="graybox"/>
+  <text x="588" y="204" text-anchor="middle" class="label">Decoder</text>
+  <rect x="713" y="165" width="214" height="64" rx="12" class="greenbox"/>
+  <text x="820" y="192" text-anchor="middle" class="label">前一候选状态 S̃ₜ₋₁</text>
+  <text x="820" y="216" text-anchor="middle" class="tiny">缓存一帧，供 TAUM 比较</text>
+  <path d="M256 197 H278" class="bline"/><path d="M464 197 H500" class="oline"/><path d="M666 197 H703" class="line"/>
+
+  <rect x="62" y="260" width="194" height="64" rx="12" class="bluebox"/>
+  <text x="159" y="287" text-anchor="middle" class="label">门控后的 State Sₜ₋₁</text>
+  <text x="159" y="311" text-anchor="middle" class="tiny">前一帧写回后的状态</text>
+  <rect x="288" y="260" width="176" height="64" rx="12" class="orangebox"/>
+  <text x="376" y="287" text-anchor="middle" class="label">图像特征 Fₜ</text>
+  <text x="376" y="311" text-anchor="middle" class="tiny">当前帧</text>
+  <rect x="510" y="260" width="156" height="64" rx="12" class="graybox"/>
+  <text x="588" y="299" text-anchor="middle" class="label">Decoder</text>
+  <rect x="713" y="260" width="214" height="64" rx="12" class="greenbox"/>
+  <text x="820" y="287" text-anchor="middle" class="label">当前候选状态 S̃ₜ</text>
+  <text x="820" y="311" text-anchor="middle" class="tiny">供本帧读出，也供门控</text>
+  <path d="M256 292 H278" class="bline"/><path d="M464 292 H500" class="oline"/><path d="M666 292 H703" class="line"/>
+  <rect x="713" y="337" width="214" height="46" rx="10" class="orangebox"/>
+  <text x="820" y="366" text-anchor="middle" class="small">同一 Decoder 输出先预测本帧几何</text>
+  <path d="M588 324 V360 H703" class="oline"/>
+
+  <rect x="1002" y="190" width="268" height="105" rx="14" class="purplebox"/>
+  <text x="1136" y="225" text-anchor="middle" class="label">TAUM：逐 Token 比较</text>
+  <text x="1136" y="255" text-anchor="middle" class="body">‖S̃ₜ − S̃ₜ₋₁‖₂</text>
+  <text x="1136" y="280" text-anchor="middle" class="tiny">归一化后得到 Mₜₑₘₚ</text>
+  <path d="M927 197 H965 V220 H992" class="gline"/><path d="M927 292 H965 V265 H992" class="gline"/>
+  <rect x="1302" y="168" width="236" height="178" rx="14" class="warnbox"/>
+  <text x="1420" y="200" text-anchor="middle" class="label">比较基底改变</text>
+  <text x="1320" y="232" class="small">S̃ₜ₋₁ = Decoder(Fₜ₋₁, Sₜ₋₂)</text>
+  <text x="1320" y="261" class="small">S̃ₜ = Decoder(Fₜ, Sₜ₋₁)</text>
+  <text x="1320" y="296" class="tiny">变化量混入了新帧差异，</text>
+  <text x="1320" y="318" class="tiny">也混入递归输入 State 的变化。</text>
+
+  <rect x="28" y="425" width="1544" height="355" rx="18" class="panel"/>
+  <text x="52" y="463" class="head">② 空间门控把当前 State→图像注意力与 Patch 特征变化相乘</text>
+  <rect x="62" y="492" width="258" height="94" rx="13" class="orangebox"/>
+  <text x="191" y="526" text-anchor="middle" class="label">相邻帧同索引 Patch</text>
+  <text x="191" y="555" text-anchor="middle" class="body">Dₜ(p) = 1 − cos(Fₜ(p), Fₜ₋₁(p))</text>
+  <text x="191" y="576" text-anchor="middle" class="tiny">比较二维网格相同位置的特征</text>
+  <rect x="62" y="612" width="258" height="94" rx="13" class="bluebox"/>
+  <text x="191" y="647" text-anchor="middle" class="label">Decoder 的 State→Image</text>
+  <text x="191" y="675" text-anchor="middle" class="body">Aₜ(i,p) = |mean(logit)|</text>
+  <text x="191" y="697" text-anchor="middle" class="tiny">State 作 Query，当前图像作 Key/Value</text>
+  <rect x="378" y="548" width="208" height="105" rx="13" class="graybox"/>
+  <text x="482" y="586" text-anchor="middle" class="label">逐 Patch 相乘</text>
+  <text x="482" y="619" text-anchor="middle" class="body">Aₜ(i,p) × Dₜ(p)</text>
+  <path d="M320 539 H352 V575 H368" class="oline"/><path d="M320 659 H352 V628 H368" class="bline"/>
+  <rect x="633" y="548" width="218" height="105" rx="13" class="purplebox"/>
+  <text x="742" y="586" text-anchor="middle" class="label">沿当前图像 Patch 取最大值</text>
+  <text x="742" y="619" text-anchor="middle" class="body">maxₚ → sigmoid</text>
+  <path d="M586 600 H623" class="line"/>
+  <rect x="891" y="548" width="230" height="105" rx="13" class="purplebox"/>
+  <text x="1006" y="586" text-anchor="middle" class="label">空间掩码 Mₛₚₐₜ</text>
+  <text x="1006" y="619" text-anchor="middle" class="body">0.5 ≤ Mₛₚₐₜ &lt; 1</text>
+  <path d="M851 600 H881" class="gline"/>
+  <rect x="1163" y="500" width="375" height="203" rx="14" class="warnbox"/>
+  <text x="1350" y="536" text-anchor="middle" class="label">“Spatial” 的实际含义</text>
+  <text x="1190" y="573" class="small">注意力把当前图像 Patch 的变化</text>
+  <text x="1190" y="599" class="small">分配给 State Token；没有用位姿、</text>
+  <text x="1190" y="625" class="small">深度、光流做跨帧重投影或 3D 对应。</text>
+  <text x="1190" y="664" class="tiny">因此它提供的是特征关联线索，不是显式空间一致性。</text>
+
+  <rect x="28" y="800" width="1544" height="340" rx="18" class="panel"/>
+  <text x="52" y="838" class="head">③ 两个掩码相乘后，只写回全局 State；相机记忆另走一条路</text>
+  <rect x="82" y="872" width="248" height="78" rx="13" class="purplebox"/>
+  <text x="206" y="905" text-anchor="middle" class="label">时间掩码 Mₜₑₘₚ</text>
+  <text x="206" y="932" text-anchor="middle" class="tiny">当前与上一候选的变化幅度</text>
+  <text x="369" y="922" text-anchor="middle" class="head">×</text>
+  <rect x="414" y="872" width="248" height="78" rx="13" class="purplebox"/>
+  <text x="538" y="905" text-anchor="middle" class="label">空间掩码 Mₛₚₐₜ</text>
+  <text x="538" y="932" text-anchor="middle" class="tiny">当前图像变化与 State 注意力</text>
+  <path d="M330 911 H357" class="line"/><path d="M662 911 H695" class="line"/>
+  <rect x="704" y="872" width="226" height="78" rx="13" class="greenbox"/>
+  <text x="817" y="905" text-anchor="middle" class="label">Mfinal = Mtemp × Mspat</text>
+  <text x="817" y="932" text-anchor="middle" class="tiny">逐 State Token 一个权重</text>
+  <path d="M930 911 H965" class="gline"/>
+  <rect x="974" y="858" width="326" height="105" rx="14" class="bluebox"/>
+  <text x="1137" y="896" text-anchor="middle" class="label">Sₜ = Mfinal·S̃ₜ + (1−Mfinal)·Sₜ₋₁</text>
+  <text x="1137" y="931" text-anchor="middle" class="small">新旧候选混合，供后续帧继续读取</text>
+  <rect x="1340" y="858" width="198" height="105" rx="14" class="orangebox"/>
+  <text x="1439" y="896" text-anchor="middle" class="label">当前帧输出</text>
+  <text x="1439" y="926" text-anchor="middle" class="tiny">由门控前 Decoder 读出</text>
+  <path d="M1300 911 H1330" class="oline"/>
+
+  <rect x="147" y="996" width="544" height="91" rx="13" class="graybox"/>
+  <text x="419" y="1031" text-anchor="middle" class="label">独立的 Pose Retriever 记忆 mem</text>
+  <text x="419" y="1060" text-anchor="middle" class="small">用图像级特征读写；不乘 Mfinal</text>
+  <rect x="817" y="996" width="544" height="91" rx="13" class="warnbox"/>
+  <text x="1089" y="1031" text-anchor="middle" class="label">门控控制写入，不等于后端优化</text>
+  <text x="1089" y="1060" text-anchor="middle" class="small">没有显式地点检索、回环因子或历史位姿回写</text>
+  <text x="800" y="1120" text-anchor="middle" class="tiny">自绘实现解释图：按论文公式与官方代码整理；不代表论文原图。</text>
+</svg>

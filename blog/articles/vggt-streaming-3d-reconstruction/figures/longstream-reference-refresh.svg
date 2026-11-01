@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1120" viewBox="0 0 1440 1120" role="img" aria-labelledby="title desc">
+  <title id="title">LongStream 的关键帧相对位姿与周期性缓存刷新</title>
+  <desc id="desc">关键帧每隔一段时间更换相对位姿参考，但 KV 缓存继续保留；到达刷新边界时，旧段先输出并记录边界关键帧相对上一关键帧的位姿，然后清空缓存，将同一关键帧重新编码为新段起点，之后的新位姿仍可通过已记录的关键帧位姿接回整条轨迹。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#475569"/></marker>
+    <marker id="blueArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+    <marker id="orangeArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#d97706"/></marker>
+    <marker id="greenArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#059669"/></marker>
+    <style>
+      text{font-family:"Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif;fill:#172033}.title{font-size:37px;font-weight:700}.sub{font-size:21px;fill:#526176}.head{font-size:26px;font-weight:700}.label{font-size:21px;font-weight:650}.body{font-size:20px}.small{font-size:18px;fill:#526176}.tiny{font-size:17px;fill:#526176}.panel{fill:#fff;stroke:#d7e0ea;stroke-width:2}.bluebox{fill:#eff6ff;stroke:#60a5fa;stroke-width:2}.orangebox{fill:#fff7ed;stroke:#fb923c;stroke-width:2}.greenbox{fill:#ecfdf5;stroke:#34d399;stroke-width:2}.redbox{fill:#fff1f2;stroke:#fb7185;stroke-width:2}.gray{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}.line{fill:none;stroke:#475569;stroke-width:2.7;marker-end:url(#arrow)}.bline{fill:none;stroke:#2563eb;stroke-width:3;marker-end:url(#blueArrow)}.oline{fill:none;stroke:#d97706;stroke-width:3;marker-end:url(#orangeArrow)}.gline{fill:none;stroke:#059669;stroke-width:3;marker-end:url(#greenArrow)}.dash{stroke-dasharray:9 8}
+    </style>
+  </defs>
+  <rect width="1440" height="1120" fill="#f5f8fc"/>
+  <text x="42" y="54" class="title">LongStream：相对参考会换，KV 缓存不会跟着每次重置</text>
+  <text x="44" y="89" class="sub">关键帧切换与缓存刷新是两套节奏：前者组织局部位姿，后者限制历史特征的有效范围。</text>
+
+  <rect x="30" y="116" width="1380" height="292" rx="20" class="panel"/>
+  <text x="58" y="155" class="head">① 每帧相对最近关键帧预测，再把局部变换接成轨迹</text>
+  <text x="70" y="202" class="small">局部参照</text>
+  <rect x="175" y="174" width="154" height="52" rx="12" class="orangebox"/><text x="252" y="207" text-anchor="middle" class="label">K0 · 参考</text>
+  <path d="M329 200 H360" class="oline"/>
+  <rect x="368" y="174" width="225" height="52" rx="12" class="gray"/><text x="480" y="207" text-anchor="middle" class="label">F1 … F7 · 相对 K0</text>
+  <path d="M593 200 H624" class="line"/>
+  <rect x="632" y="174" width="207" height="52" rx="12" class="bluebox"/><text x="735" y="207" text-anchor="middle" class="label">K8 · 输出 T₈←₀</text>
+  <path d="M839 200 H870" class="line"/>
+  <rect x="878" y="174" width="225" height="52" rx="12" class="gray"/><text x="990" y="207" text-anchor="middle" class="label">F9 … F15 · 相对 K8</text>
+  <path d="M1103 200 H1134" class="line"/>
+  <rect x="1142" y="174" width="207" height="52" rx="12" class="bluebox"/><text x="1245" y="207" text-anchor="middle" class="label">K16 · 输出 T₁₆←₈</text>
+  <text x="252" y="250" text-anchor="middle" class="tiny">下一关键帧成为新参照</text>
+  <text x="735" y="250" text-anchor="middle" class="tiny">K8 输出后，后续帧改为相对 K8</text>
+  <text x="1245" y="250" text-anchor="middle" class="tiny">K16 输出后，后续帧改为相对 K16</text>
+  <path d="M252 269 V289 H1245" fill="none" stroke="#059669" stroke-width="2.5"/>
+  <path d="M1245 269 V289" class="gline"/>
+  <rect x="190" y="307" width="1030" height="66" rx="14" class="greenbox"/>
+  <text x="705" y="337" text-anchor="middle" class="label">全局轨迹由关键帧间的相对变换逐段组合</text>
+  <text x="705" y="362" text-anchor="middle" class="small">W2C 约定下：Tᵢ = Tᵢ←ₖ Tₖ · 新参照改变，已累积的关键帧位姿仍提供连接点</text>
+
+  <rect x="30" y="430" width="1380" height="255" rx="20" class="panel"/>
+  <text x="58" y="470" class="head">② 相对参考每 8 帧切换；KV 到更晚的刷新边界才清空</text>
+  <text x="76" y="523" class="small">参考关键帧</text>
+  <rect x="220" y="493" width="190" height="58" rx="13" class="orangebox"/><text x="315" y="529" text-anchor="middle" class="label">K0 → K8</text>
+  <path d="M410 522 H465" class="oline"/>
+  <rect x="473" y="493" width="190" height="58" rx="13" class="orangebox"/><text x="568" y="529" text-anchor="middle" class="label">K8 → K16</text>
+  <path d="M663 522 H718" class="oline"/>
+  <rect x="726" y="493" width="190" height="58" rx="13" class="orangebox"/><text x="821" y="529" text-anchor="middle" class="label">K16 → K24</text>
+  <path d="M916 522 H971" class="line"/>
+  <rect x="979" y="493" width="190" height="58" rx="13" class="redbox"/><text x="1074" y="529" text-anchor="middle" class="label">K24 · 刷新边界</text>
+  <text x="1200" y="517" class="tiny">当前公开默认：</text><text x="1200" y="541" class="tiny">stride=8，refresh=4</text>
+  <text x="76" y="609" class="small">KV 缓存</text>
+  <rect x="220" y="579" width="949" height="54" rx="12" class="bluebox"/>
+  <text x="694" y="613" text-anchor="middle" class="label">历史 KV 持续复用，跨过 K8、K16；不因每次 Reference 切换而清空</text>
+  <path d="M1170 606 H1213" class="oline"/>
+  <rect x="1220" y="579" width="132" height="54" rx="12" class="redbox"/><text x="1286" y="613" text-anchor="middle" class="label">清缓存</text>
+  <text x="220" y="660" class="tiny">示意按官方默认 keyframe_stride=8、refresh=4：refresh_intervals=3，因此示例在 K24（约每 24 帧）触发刷新。</text>
+
+  <rect x="30" y="708" width="1380" height="374" rx="20" class="panel"/>
+  <text x="58" y="748" class="head">③ 刷新边界：旧段先落位，新段再用同一关键帧重建缓存</text>
+  <rect x="58" y="785" width="286" height="148" rx="16" class="orangebox"/>
+  <circle cx="91" cy="819" r="20" fill="#fb923c"/><text x="91" y="826" text-anchor="middle" fill="#fff" class="label">1</text>
+  <text x="125" y="825" class="label">旧段终点</text>
+  <text x="82" y="866" class="body">K24 仍相对 K16 预测</text>
+  <text x="82" y="899" class="small">记录 T₂₄←₁₆，接上旧轨迹</text>
+
+  <path d="M344 859 H382" class="line"/>
+  <rect x="390" y="785" width="250" height="148" rx="16" class="redbox"/>
+  <circle cx="423" cy="819" r="20" fill="#fb7185"/><text x="423" y="826" text-anchor="middle" fill="#fff" class="label">2</text>
+  <text x="457" y="825" class="label">清空旧 KV</text>
+  <text x="414" y="866" class="body">丢弃旧段缓存</text>
+  <text x="414" y="899" class="small">不是把缓存坐标变换过去</text>
+
+  <path d="M640 859 H678" class="line"/>
+  <rect x="686" y="785" width="300" height="148" rx="16" class="bluebox"/>
+  <circle cx="719" cy="819" r="20" fill="#3b82f6"/><text x="719" y="826" text-anchor="middle" fill="#fff" class="label">3</text>
+  <text x="753" y="825" class="label">重编码 K24</text>
+  <text x="710" y="866" class="body">作为新段自参考起点</text>
+  <text x="710" y="899" class="small">streaming_refresh 中再次前向，</text>
+  <text x="710" y="922" class="small">只为新 KV 预热，不重复记输出</text>
+
+  <path d="M986 859 H1024" class="gline"/>
+  <rect x="1032" y="785" width="320" height="148" rx="16" class="greenbox"/>
+  <circle cx="1065" cy="819" r="20" fill="#10b981"/><text x="1065" y="826" text-anchor="middle" fill="#fff" class="label">4</text>
+  <text x="1099" y="825" class="label">继续在线预测</text>
+  <text x="1056" y="866" class="body">K25 … 相对 K24</text>
+  <text x="1056" y="899" class="small">沿已记录的 T₂₄ 接回全局轨迹</text>
+
+  <rect x="58" y="958" width="1294" height="88" rx="14" class="gray"/>
+  <text x="82" y="992" class="label">默认是 batch_refresh：</text>
+  <text x="307" y="992" class="body">每批 25 帧、前进 24 帧，重叠 K24；下一批从 K24 重新开始，重复输出被丢弃。</text>
+  <text x="82" y="1025" class="small">逐帧 streaming_refresh 也可用：边界帧先作为旧段终点，再清缓存并二次前向作为新段起点。二者都保留轨迹连接，但清空神经 KV。</text>
+</svg>

@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="920" viewBox="0 0 1440 920" role="img" aria-labelledby="title desc">
+  <title id="title">WinT3R 与 LingBot-Map 的历史 Token 记忆对照</title>
+  <desc id="desc">WinT3R 将递归 State 与 Camera Token Pool 分开；LingBot-Map 对离开局部窗口的帧保留 Camera、Anchor 和四个 Register Token，共六个上下文 Token。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5d6b82"/></marker>
+    <style>
+      text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; fill: #1f2d43; }
+      .title { font-size: 30px; font-weight: 700; }
+      .head { font-size: 24px; font-weight: 700; }
+      .label { font-size: 19px; font-weight: 600; }
+      .body { font-size: 17px; }
+      .small { font-size: 15px; fill: #526176; }
+      .tiny { font-size: 13px; fill: #526176; }
+      .panel { fill: #ffffff; stroke: #d7dfeb; stroke-width: 2; }
+      .box { fill: #f4f7fb; stroke: #d1dbe8; stroke-width: 1.5; }
+      .patch { fill: #dcecff; stroke: #8eb7e8; stroke-width: 1; }
+      .cam { fill: #ffe3c2; stroke: #e7a65d; stroke-width: 1; }
+      .anchor { fill: #e8ddff; stroke: #ad91e2; stroke-width: 1; }
+      .reg { fill: #e6ebf1; stroke: #bbc6d4; stroke-width: 1; }
+      .line { stroke: #66758b; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke: #95a1b1; stroke-width: 2; stroke-dasharray: 7 7; fill: none; }
+    </style>
+  </defs>
+  <rect width="1440" height="920" fill="#f5f7fb"/>
+  <text x="720" y="52" text-anchor="middle" class="title">两种紧凑历史记忆：保留什么，怎样被读取？</text>
+
+  <rect x="36" y="82" width="666" height="766" rx="20" class="panel"/>
+  <rect x="738" y="82" width="666" height="766" rx="20" class="panel"/>
+  <text x="369" y="124" text-anchor="middle" class="head">WinT3R：两条记忆通路</text>
+  <text x="1071" y="124" text-anchor="middle" class="head">LingBot-Map / GCT：六 Token 轨迹记忆</text>
+
+  <!-- WinT3R path -->
+  <text x="74" y="168" class="label">当前重叠窗口</text>
+  <g transform="translate(74 185)">
+    <rect x="0" y="0" width="132" height="86" rx="12" class="box"/>
+    <text x="66" y="27" text-anchor="middle" class="small">图像帧</text>
+    <rect x="18" y="42" width="96" height="12" rx="5" class="patch"/>
+    <rect x="18" y="60" width="96" height="12" rx="5" class="patch"/>
+    <rect x="146" y="0" width="132" height="86" rx="12" class="box"/>
+    <text x="212" y="27" text-anchor="middle" class="small">图像帧</text>
+    <rect x="164" y="42" width="96" height="12" rx="5" class="patch"/>
+    <rect x="164" y="60" width="96" height="12" rx="5" class="patch"/>
+    <rect x="292" y="0" width="132" height="86" rx="12" class="box"/>
+    <text x="358" y="27" text-anchor="middle" class="small">图像帧</text>
+    <rect x="310" y="42" width="96" height="12" rx="5" class="patch"/>
+    <rect x="310" y="60" width="96" height="12" rx="5" class="patch"/>
+    <text x="462" y="51" class="small">…</text>
+  </g>
+  <path d="M369 276 V315" class="line"/>
+  <rect x="174" y="320" width="390" height="80" rx="15" fill="#edf3fb" stroke="#b9c8dc" stroke-width="2"/>
+  <text x="369" y="352" text-anchor="middle" class="label">Dual-Branch Decoder</text>
+  <text x="369" y="379" text-anchor="middle" class="small">当前窗口特征交互与预测</text>
+
+  <path d="M278 402 C252 438 209 439 209 475" class="line"/>
+  <path d="M462 402 C492 438 536 439 536 475" class="line"/>
+  <rect x="74" y="480" width="270" height="164" rx="16" fill="#eff8f4" stroke="#a8d3bf" stroke-width="2"/>
+  <text x="209" y="515" text-anchor="middle" class="label">递归 State Tokens</text>
+  <text x="209" y="547" text-anchor="middle" class="body">固定数量，逐窗口更新</text>
+  <text x="209" y="577" text-anchor="middle" class="small">承载场景上下文</text>
+  <path d="M74 560 C56 560 54 543 54 520 V378 C54 362 77 360 168 360" class="dashed" marker-end="url(#arrow)"/>
+  <text x="65" y="690" class="tiny">State 传给下一窗口</text>
+
+  <rect x="380" y="480" width="278" height="164" rx="16" fill="#fff7ec" stroke="#edc58f" stroke-width="2"/>
+  <text x="519" y="515" text-anchor="middle" class="label">Camera Token Pool</text>
+  <g transform="translate(405 536)">
+    <rect x="0" y="0" width="40" height="34" rx="8" class="cam"/><text x="20" y="23" text-anchor="middle" class="tiny">C₁</text>
+    <rect x="52" y="0" width="40" height="34" rx="8" class="cam"/><text x="72" y="23" text-anchor="middle" class="tiny">C₂</text>
+    <text x="108" y="23" class="small">…</text>
+    <rect x="139" y="0" width="48" height="34" rx="8" class="cam"/><text x="163" y="23" text-anchor="middle" class="tiny">Cₜ</text>
+  </g>
+  <text x="519" y="601" text-anchor="middle" class="small">累积相机 Token，上送 Camera Head</text>
+  <path d="M519 647 V712" class="line"/>
+  <rect x="417" y="718" width="204" height="62" rx="14" fill="#fff0d9" stroke="#e7b36f" stroke-width="2"/>
+  <text x="519" y="756" text-anchor="middle" class="label">Camera Head</text>
+
+  <!-- GCT path -->
+  <text x="776" y="168" class="label">保留完整特征的上下文</text>
+  <rect x="776" y="185" width="274" height="146" rx="14" fill="#f1f6ff" stroke="#aec8e8" stroke-width="2"/>
+  <text x="913" y="215" text-anchor="middle" class="body" font-weight="700">锚帧集合（固定）</text>
+  <g transform="translate(800 234)">
+    <rect x="0" y="0" width="70" height="25" rx="6" class="patch"/><rect x="0" y="31" width="70" height="25" rx="6" class="patch"/><text x="35" y="18" text-anchor="middle" class="tiny">图像 Token</text>
+    <rect x="90" y="0" width="70" height="25" rx="6" class="patch"/><rect x="90" y="31" width="70" height="25" rx="6" class="patch"/><text x="125" y="18" text-anchor="middle" class="tiny">图像 Token</text>
+  </g>
+  <text x="913" y="314" text-anchor="middle" class="tiny">建立共同参照与规范尺度</text>
+
+  <rect x="1068" y="185" width="298" height="146" rx="14" fill="#f1f6ff" stroke="#aec8e8" stroke-width="2"/>
+  <text x="1217" y="215" text-anchor="middle" class="body" font-weight="700">近期局部窗口</text>
+  <g transform="translate(1093 237)">
+    <rect x="0" y="0" width="48" height="28" rx="6" class="patch"/><rect x="54" y="0" width="48" height="28" rx="6" class="patch"/><rect x="108" y="0" width="48" height="28" rx="6" class="patch"/><rect x="162" y="0" width="48" height="28" rx="6" class="patch"/>
+    <rect x="0" y="36" width="48" height="28" rx="6" class="patch"/><rect x="54" y="36" width="48" height="28" rx="6" class="patch"/><rect x="108" y="36" width="48" height="28" rx="6" class="patch"/><rect x="162" y="36" width="48" height="28" rx="6" class="patch"/>
+  </g>
+  <text x="1217" y="320" text-anchor="middle" class="tiny">每帧保留完整图像特征</text>
+
+  <text x="776" y="376" class="label">更早帧：每帧只留 6 个上下文 Token</text>
+  <rect x="776" y="394" width="590" height="132" rx="14" fill="#faf8ff" stroke="#c9b8ea" stroke-width="2"/>
+  <g transform="translate(800 416)">
+    <text x="0" y="21" class="small">帧 t−3</text>
+    <rect x="78" y="0" width="66" height="39" rx="8" class="cam"/><text x="111" y="26" text-anchor="middle" class="tiny">Camera</text>
+    <rect x="151" y="0" width="62" height="39" rx="8" class="anchor"/><text x="182" y="26" text-anchor="middle" class="tiny">Anchor</text>
+    <rect x="220" y="0" width="43" height="39" rx="8" class="reg"/><text x="241" y="26" text-anchor="middle" class="tiny">R₁</text>
+    <rect x="270" y="0" width="43" height="39" rx="8" class="reg"/><text x="291" y="26" text-anchor="middle" class="tiny">R₂</text>
+    <rect x="320" y="0" width="43" height="39" rx="8" class="reg"/><text x="341" y="26" text-anchor="middle" class="tiny">R₃</text>
+    <rect x="370" y="0" width="43" height="39" rx="8" class="reg"/><text x="391" y="26" text-anchor="middle" class="tiny">R₄</text>
+    <text x="438" y="25" class="small">= 6</text>
+    <text x="0" y="78" class="small">帧 t−2</text>
+    <rect x="78" y="57" width="66" height="39" rx="8" class="cam"/><text x="111" y="83" text-anchor="middle" class="tiny">Camera</text>
+    <rect x="151" y="57" width="62" height="39" rx="8" class="anchor"/><text x="182" y="83" text-anchor="middle" class="tiny">Anchor</text>
+    <rect x="220" y="57" width="43" height="39" rx="8" class="reg"/><text x="241" y="83" text-anchor="middle" class="tiny">R₁</text>
+    <rect x="270" y="57" width="43" height="39" rx="8" class="reg"/><text x="291" y="83" text-anchor="middle" class="tiny">R₂</text>
+    <rect x="320" y="57" width="43" height="39" rx="8" class="reg"/><text x="341" y="83" text-anchor="middle" class="tiny">R₃</text>
+    <rect x="370" y="57" width="43" height="39" rx="8" class="reg"/><text x="391" y="83" text-anchor="middle" class="tiny">R₄</text>
+    <text x="438" y="82" class="small">…</text>
+  </g>
+
+  <path d="M776 331 C760 340 754 352 754 370 V535 C754 557 782 572 844 584" class="line"/>
+  <path d="M1350 331 C1378 348 1384 365 1384 390 V520 C1384 552 1360 570 1300 584" class="line"/>
+  <path d="M1072 528 V566" class="line"/>
+  <rect x="824" y="572" width="494" height="94" rx="16" fill="#edf3fb" stroke="#b9c8dc" stroke-width="2"/>
+  <text x="1071" y="611" text-anchor="middle" class="label">Geometric Context Attention (GCA)</text>
+  <text x="1071" y="640" text-anchor="middle" class="small">跨帧读取锚、局部窗口和压缩轨迹上下文</text>
+  <path d="M962 666 C962 686 930 689 930 703" class="line"/>
+  <path d="M1180 666 C1180 686 1212 689 1212 703" class="line"/>
+  <rect x="800" y="710" width="260" height="64" rx="14" fill="#fff0d9" stroke="#e7b36f" stroke-width="2"/>
+  <text x="930" y="749" text-anchor="middle" class="label">Camera Token → Camera Head</text>
+  <rect x="1082" y="710" width="260" height="64" rx="14" fill="#eaf3ff" stroke="#8eb7e8" stroke-width="2"/>
+  <text x="1212" y="749" text-anchor="middle" class="label">Image Tokens → Depth Head</text>
+  <text x="1071" y="813" text-anchor="middle" class="small">Register Tokens 参与注意力，但不由预测头直接解码</text>
+
+  <rect x="100" y="865" width="22" height="18" rx="4" class="patch"/><text x="130" y="880" class="tiny">图像 Patch</text>
+  <rect x="275" y="865" width="22" height="18" rx="4" class="cam"/><text x="305" y="880" class="tiny">Camera</text>
+  <rect x="420" y="865" width="22" height="18" rx="4" class="anchor"/><text x="450" y="880" class="tiny">Anchor</text>
+  <rect x="565" y="865" width="22" height="18" rx="4" class="reg"/><text x="595" y="880" class="tiny">Register</text>
+  <text x="720" y="885" text-anchor="middle" class="tiny">自绘结构对照；不表示两种记忆可以互换</text>
+</svg>

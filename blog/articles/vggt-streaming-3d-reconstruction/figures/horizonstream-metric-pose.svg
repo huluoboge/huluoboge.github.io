@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">HorizonStream 的尺度读出、在线位姿与回环后端</title>
+  <desc id="desc">MRT 从 GLA 状态读出尺度并缩放当前相机深度与平移。Pose Tokens 经窗口上下文形成在线位姿。可选地点检索分支产生回环约束并由位姿图校正轨迹，但没有说明将修正同步写回长期隐藏状态。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#475569"/></marker>
+    <marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+    <marker id="orange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#d97706"/></marker>
+    <marker id="green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#059669"/></marker>
+    <marker id="purple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#7c3aed"/></marker>
+    <style>
+      text{font-family:"Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif;fill:#172033}.title{font-size:40px;font-weight:700}.sub{font-size:23px;fill:#526176}.head{font-size:27px;font-weight:700}.label{font-size:23px;font-weight:650}.body{font-size:21px}.small{font-size:19px;fill:#526176}.panel{fill:#fff;stroke:#d7e0ea;stroke-width:2}.bluebox{fill:#eff6ff;stroke:#60a5fa;stroke-width:2}.orangebox{fill:#fff7ed;stroke:#fb923c;stroke-width:2}.greenbox{fill:#ecfdf5;stroke:#34d399;stroke-width:2}.purplebox{fill:#f5f3ff;stroke:#a78bfa;stroke-width:2}.gray{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}.bline{fill:none;stroke:#2563eb;stroke-width:3;marker-end:url(#blue)}.oline{fill:none;stroke:#d97706;stroke-width:3;marker-end:url(#orange)}.gline{fill:none;stroke:#059669;stroke-width:3;marker-end:url(#green)}.pline{fill:none;stroke:#7c3aed;stroke-width:3;marker-end:url(#purple)}.line{fill:none;stroke:#475569;stroke-width:2.5;marker-end:url(#arrow)}.dash{stroke-dasharray:8 7}
+    </style>
+  </defs>
+  <rect width="1200" height="820" fill="#f5f8fc"/>
+  <text x="38" y="58" class="title">尺度、位姿、回环：三条不同的路径</text>
+  <text x="40" y="96" class="sub">长期状态提供尺度线索，窗口 Token 预测相机运动，回环后端校正全局轨迹。</text>
+
+  <rect x="32" y="135" width="552" height="390" rx="20" class="panel"/>
+  <rect x="32" y="135" width="11" height="390" rx="5" fill="#7c3aed"/>
+  <text x="62" y="180" class="head" fill="#6d28d9">① MRT：度量尺度读出</text>
+  <rect x="62" y="225" width="205" height="70" rx="13" class="purplebox"/><text x="164" y="269" text-anchor="middle" class="label">GLA 长期状态</text>
+  <rect x="62" y="335" width="205" height="70" rx="13" class="purplebox"/><text x="164" y="379" text-anchor="middle" class="label">当前 MRT Query</text>
+  <path d="M164 295 V329" class="pline"/>
+  <rect x="302" y="280" width="125" height="85" rx="14" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/><text x="364" y="316" text-anchor="middle" class="label">尺度头</text><text x="364" y="346" text-anchor="middle" class="small">预测 s</text>
+  <path d="M267 260 H284 V305 H295" class="pline"/><path d="M267 370 H284 V340 H295" class="pline"/>
+  <rect x="452" y="280" width="105" height="85" rx="14" class="gray"/><text x="504" y="316" text-anchor="middle" class="label">缩放</text><text x="504" y="346" text-anchor="middle" class="small">乘以 s</text>
+  <path d="M427 322 H445" class="line"/>
+  <text x="62" y="455" class="body">D̂ = sD　　t̂ = st</text>
+  <text x="62" y="491" class="small">校正度量尺度；不指定世界原点。</text>
+
+  <rect x="616" y="135" width="552" height="390" rx="20" class="panel"/>
+  <rect x="616" y="135" width="11" height="390" rx="5" fill="#d97706"/>
+  <text x="646" y="180" class="head" fill="#b45309">② Pose Tokens：在线位姿</text>
+  <rect x="650" y="260" width="195" height="90" rx="14" class="orangebox"/><text x="747" y="297" text-anchor="middle" class="label">近期窗口</text><text x="747" y="328" text-anchor="middle" class="small">当前与邻近帧</text>
+  <rect x="650" y="385" width="195" height="76" rx="14" class="orangebox"/><text x="747" y="432" text-anchor="middle" class="label">Pose Tokens</text>
+  <rect x="900" y="320" width="125" height="90" rx="14" fill="#ffedd5" stroke="#fb923c" stroke-width="2.5"/><text x="962" y="357" text-anchor="middle" class="label">Pose</text><text x="962" y="387" text-anchor="middle" class="label">Head</text>
+  <path d="M845 305 H875 V350 H893" class="oline"/><path d="M845 423 H875 V380 H893" class="oline"/>
+  <rect x="1060" y="320" width="82" height="90" rx="14" class="gray"/><text x="1101" y="357" text-anchor="middle" class="label">相机</text><text x="1101" y="387" text-anchor="middle" class="small">位姿</text>
+  <path d="M1025 365 H1053" class="oline"/>
+  <text x="650" y="491" class="small">Pose Head 联合窗口上下文；MRT 负责的是尺度。</text>
+
+  <rect x="32" y="565" width="1136" height="220" rx="20" class="panel"/>
+  <rect x="32" y="565" width="11" height="220" rx="5" fill="#059669"/>
+  <text x="62" y="610" class="head" fill="#047857">③ 可选回环：网络外侧的全局轨迹纠错</text>
+  <rect x="62" y="650" width="220" height="76" rx="13" class="gray"/><text x="172" y="682" text-anchor="middle" class="label">地点检索</text><text x="172" y="711" text-anchor="middle" class="small">找可能重访帧</text>
+  <rect x="335" y="650" width="230" height="76" rx="13" class="bluebox"/><text x="450" y="682" text-anchor="middle" class="label">局部几何重估</text><text x="450" y="711" text-anchor="middle" class="small">验证候选关系</text>
+  <rect x="618" y="650" width="205" height="76" rx="13" class="greenbox"/><text x="720" y="682" text-anchor="middle" class="label">位姿图约束</text><text x="720" y="711" text-anchor="middle" class="small">形成回环边</text>
+  <rect x="875" y="650" width="250" height="76" rx="13" class="greenbox"/><text x="1000" y="682" text-anchor="middle" class="label">优化相机轨迹</text><text x="1000" y="711" text-anchor="middle" class="small">修正累计漂移</text>
+  <path d="M282 688 H327" class="line"/><path d="M565 688 H610" class="gline"/><path d="M823 688 H867" class="gline"/>
+  <text x="62" y="758" class="small">轨迹可被修正；论文未说明把这类后端改动同步回写 GLA 隐状态。</text>
+</svg>

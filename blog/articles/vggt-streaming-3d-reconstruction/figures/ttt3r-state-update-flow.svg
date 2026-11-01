@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" role="img" aria-labelledby="title desc">
+  <title id="title">TTT3R 如何把注意力对齐分数变成状态写入率</title>
+  <desc id="desc">当前图像与历史状态进入解码器，解码器产生候选状态和 State-to-Image 的预 Softmax 注意力 logits。实现将这些 logits 沿当前帧 Token、解码层和注意力头取均值，经 sigmoid 得到逐状态 Token 的 beta，再混合候选状态与旧状态。Pose Retriever 记忆走独立更新路径。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#526176"/></marker>
+    <marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+    <marker id="orange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#d97706"/></marker>
+    <marker id="green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#059669"/></marker>
+    <style>
+      text{font-family:"Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif;fill:#172033}.title{font-size:34px;font-weight:700}.subtitle{font-size:21px;fill:#526176}.head{font-size:24px;font-weight:700}.label{font-size:20px;font-weight:650}.body{font-size:18px}.small{font-size:16px;fill:#526176}.tiny{font-size:14px;fill:#526176}.panel{fill:#fff;stroke:#d7e0ea;stroke-width:2}.bluebox{fill:#eff6ff;stroke:#60a5fa;stroke-width:2}.orangebox{fill:#fff7ed;stroke:#fb923c;stroke-width:2}.greenbox{fill:#ecfdf5;stroke:#34d399;stroke-width:2}.graybox{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}.line{fill:none;stroke:#526176;stroke-width:2.5;marker-end:url(#arrow)}.bline{fill:none;stroke:#2563eb;stroke-width:2.7;marker-end:url(#blue)}.oline{fill:none;stroke:#d97706;stroke-width:2.7;marker-end:url(#orange)}.gline{fill:none;stroke:#059669;stroke-width:2.7;marker-end:url(#green)}
+    </style>
+  </defs>
+  <rect width="1440" height="960" fill="#f5f8fc"/>
+  <text x="40" y="52" class="title">TTT3R：注意力对齐如何控制状态写入</text>
+  <text x="42" y="86" class="subtitle">它不更新模型参数；每帧只调节候选状态写回固定长度记忆的幅度。</text>
+
+  <rect x="28" y="112" width="1384" height="258" rx="18" class="panel"/>
+  <text x="54" y="151" class="head">① 当前帧同时产生候选状态和对齐分数</text>
+  <rect x="62" y="184" width="274" height="82" rx="14" class="bluebox"/>
+  <text x="199" y="215" text-anchor="middle" class="label">历史状态 Sₜ₋₁</text>
+  <text x="199" y="244" text-anchor="middle" class="small">固定数量的 State Tokens</text>
+  <rect x="62" y="284" width="274" height="60" rx="14" class="orangebox"/>
+  <text x="199" y="321" text-anchor="middle" class="label">当前帧图像 Tokens Xₜ</text>
+  <rect x="408" y="222" width="242" height="112" rx="16" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+  <text x="529" y="263" text-anchor="middle" class="label">State Decoder</text>
+  <text x="529" y="294" text-anchor="middle" class="small">状态与当前观测交互</text>
+  <path d="M336 225 H399" class="bline"/><path d="M336 314 H374 V300 H399" class="oline"/>
+  <rect x="730" y="180" width="242" height="76" rx="14" class="greenbox"/>
+  <text x="851" y="211" text-anchor="middle" class="label">候选状态 S̃ₜ</text>
+  <text x="851" y="238" text-anchor="middle" class="small">解码器输出的新状态</text>
+  <rect x="730" y="278" width="242" height="67" rx="14" class="graybox"/>
+  <text x="851" y="306" text-anchor="middle" class="label">State → Image logits</text>
+  <text x="851" y="330" text-anchor="middle" class="small">QKᵀ / √d，Softmax 之前</text>
+  <path d="M650 249 H690 V218 H721" class="gline"/><path d="M650 300 H721" class="line"/>
+  <rect x="1050" y="216" width="300" height="112" rx="16" fill="#ecfdf5" stroke="#34d399" stroke-width="2"/>
+  <text x="1200" y="256" text-anchor="middle" class="label">对齐分数 → Sigmoid</text>
+  <text x="1200" y="287" text-anchor="middle" class="small">为每个 State Token 得到 βₜ,ᵢ</text>
+  <text x="1200" y="312" text-anchor="middle" class="small">β 越大，越多采用候选状态</text>
+  <path d="M972 312 H1041" class="gline"/>
+
+  <rect x="28" y="392" width="1384" height="250" rx="18" class="panel"/>
+  <text x="54" y="431" class="head">② 每个状态 Token 都有自己的 β</text>
+  <text x="94" y="467" class="small">缩放后的 QKᵀ logits（示意）</text>
+  <text x="267" y="492" text-anchor="middle" class="tiny">当前帧图像 Token</text>
+  <text x="135" y="520" text-anchor="middle" class="tiny">p₁</text><text x="201" y="520" text-anchor="middle" class="tiny">p₂</text><text x="267" y="520" text-anchor="middle" class="tiny">p₃</text><text x="333" y="520" text-anchor="middle" class="tiny">… pₘ</text>
+  <text x="83" y="555" class="tiny">S₁</text><text x="83" y="588" class="tiny">S₂</text><text x="83" y="621" class="tiny">Sₙ</text>
+  <rect x="108" y="530" width="59" height="27" rx="5" fill="#dbeafe" stroke="#93c5fd"/><rect x="174" y="530" width="59" height="27" rx="5" fill="#e0f2fe" stroke="#93c5fd"/><rect x="240" y="530" width="59" height="27" rx="5" fill="#bfdbfe" stroke="#93c5fd"/><rect x="306" y="530" width="59" height="27" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/>
+  <rect x="108" y="563" width="59" height="27" rx="5" fill="#fee2e2" stroke="#fca5a5"/><rect x="174" y="563" width="59" height="27" rx="5" fill="#dbeafe" stroke="#93c5fd"/><rect x="240" y="563" width="59" height="27" rx="5" fill="#bfdbfe" stroke="#93c5fd"/><rect x="306" y="563" width="59" height="27" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/>
+  <rect x="108" y="596" width="59" height="27" rx="5" fill="#bfdbfe" stroke="#93c5fd"/><rect x="174" y="596" width="59" height="27" rx="5" fill="#dbeafe" stroke="#93c5fd"/><rect x="240" y="596" width="59" height="27" rx="5" fill="#fee2e2" stroke="#fca5a5"/><rect x="306" y="596" width="59" height="27" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/>
+  <path d="M380 575 H445" class="line"/>
+  <rect x="454" y="500" width="312" height="124" rx="14" class="bluebox"/>
+  <text x="610" y="537" text-anchor="middle" class="label">求均值，压缩为每个状态一个分数</text>
+  <text x="610" y="570" text-anchor="middle" class="small">跨当前帧 Tokens、解码层与 Attention Heads</text>
+  <text x="610" y="599" text-anchor="middle" class="tiny">mean(logits) → sigmoid</text>
+  <path d="M766 562 H823" class="line"/>
+  <rect x="832" y="517" width="144" height="88" rx="14" class="greenbox"/>
+  <text x="904" y="553" text-anchor="middle" class="label">Sigmoid</text>
+  <text x="904" y="580" text-anchor="middle" class="small">0 到 1</text>
+  <path d="M976 562 H1034" class="gline"/>
+  <rect x="1043" y="500" width="312" height="124" rx="14" class="greenbox"/>
+  <text x="1199" y="535" text-anchor="middle" class="label">逐 Token 更新率 βₜ</text>
+  <g font-size="16" font-family="Arial,sans-serif" text-anchor="middle">
+    <rect x="1080" y="557" width="51" height="38" rx="8" fill="#d1fae5" stroke="#6ee7b7"/><text x="1105" y="582" fill="#065f46">β₁</text>
+    <rect x="1143" y="557" width="51" height="38" rx="8" fill="#a7f3d0" stroke="#34d399"/><text x="1168" y="582" fill="#065f46">β₂</text>
+    <rect x="1206" y="557" width="51" height="38" rx="8" fill="#ecfdf5" stroke="#6ee7b7"/><text x="1231" y="582" fill="#065f46">…</text>
+    <rect x="1269" y="557" width="51" height="38" rx="8" fill="#bbf7d0" stroke="#34d399"/><text x="1294" y="582" fill="#065f46">βₙ</text>
+  </g>
+  <text x="720" y="635" text-anchor="middle" class="tiny">实现读取的是 Softmax 前的缩放 logits；这是一种特征关联统计量，不是经过校准的几何正确率。</text>
+
+  <rect x="28" y="664" width="1384" height="268" rx="18" class="panel"/>
+  <text x="54" y="703" class="head">③ 用 β 在旧状态与候选状态之间插值</text>
+  <rect x="76" y="740" width="255" height="83" rx="14" class="bluebox"/>
+  <text x="203" y="773" text-anchor="middle" class="label">旧状态 Sₜ₋₁</text>
+  <text x="203" y="800" text-anchor="middle" class="small">保留历史内容</text>
+  <text x="372" y="791" text-anchor="middle" class="head">+</text>
+  <rect x="420" y="740" width="270" height="83" rx="14" class="greenbox"/>
+  <text x="555" y="773" text-anchor="middle" class="label">候选状态 S̃ₜ</text>
+  <text x="555" y="800" text-anchor="middle" class="small">含当前观测的新内容</text>
+  <path d="M331 780 H354" class="bline"/><path d="M690 780 H731" class="gline"/>
+  <rect x="742" y="731" width="365" height="102" rx="16" fill="#f0fdf4" stroke="#34d399" stroke-width="2"/>
+  <text x="924" y="771" text-anchor="middle" class="label">Sₜ = βₜ · S̃ₜ + (1 − βₜ) · Sₜ₋₁</text>
+  <text x="924" y="805" text-anchor="middle" class="small">每个 Token 单独混合</text>
+  <path d="M1199 624 V685 H924 V722" class="gline"/>
+  <path d="M1107 782 H1153" class="line"/>
+  <rect x="1162" y="740" width="205" height="83" rx="14" class="orangebox"/>
+  <text x="1264" y="773" text-anchor="middle" class="label">更新后的状态 Sₜ</text>
+  <text x="1264" y="800" text-anchor="middle" class="small">读取相机与点图</text>
+  <rect x="220" y="853" width="1000" height="55" rx="12" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+  <text x="720" y="877" text-anchor="middle" class="small">实现边界：β 门控全局 state_feat；Pose Retriever 的 mem 是另一份记忆，仍按独立路径更新。</text>
+  <text x="720" y="899" text-anchor="middle" class="tiny">自绘解释图；论文用 attention 更新项表达公式，图中插值式对应官方代码对候选状态与旧状态的融合。</text>
+</svg>

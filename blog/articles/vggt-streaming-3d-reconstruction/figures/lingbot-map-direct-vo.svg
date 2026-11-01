@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="940" viewBox="0 0 1440 940" role="img" aria-labelledby="title desc">
+  <title id="title">LingBot-Map Direct 与 VO 推理模式对照</title>
+  <desc id="desc">Direct 保持同一锚坐标和连续上下文，轨迹记忆以每帧六个 Token 增长；VO 将序列分成有重叠的局部窗口，窗口末重置状态，并通过 Sim(3) 对齐重叠轨迹。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5d6b82"/></marker>
+    <marker id="arroworange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c7832c"/></marker>
+    <style>
+      text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; fill: #1f2d43; }
+      .title { font-size: 31px; font-weight: 700; }
+      .head { font-size: 25px; font-weight: 700; }
+      .label { font-size: 19px; font-weight: 600; }
+      .body { font-size: 17px; }
+      .small { font-size: 15px; fill: #526176; }
+      .tiny { font-size: 13px; fill: #526176; }
+      .panel { fill: #ffffff; stroke: #d7dfeb; stroke-width: 2; }
+      .frame { fill: #edf4ff; stroke: #9dbde3; stroke-width: 1.5; }
+      .anchor { fill: #e9deff; stroke: #ad91e2; stroke-width: 1.5; }
+      .mem { fill: #fff0d9; stroke: #e2ad64; stroke-width: 1.5; }
+      .local { fill: #eaf6f0; stroke: #8fc5a8; stroke-width: 2; }
+      .line { stroke: #66758b; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .orange { stroke: #c7832c; stroke-width: 2.5; fill: none; marker-end: url(#arroworange); }
+      .dashed { stroke: #98a3b2; stroke-width: 2; stroke-dasharray: 7 7; fill: none; }
+    </style>
+  </defs>
+  <rect width="1440" height="940" fill="#f5f7fb"/>
+  <text x="720" y="54" text-anchor="middle" class="title">两种长序列推理：不断累积，还是分窗重置？</text>
+
+  <!-- Direct mode -->
+  <rect x="42" y="84" width="1356" height="330" rx="20" class="panel"/>
+  <rect x="66" y="108" width="132" height="46" rx="14" fill="#e9f1ff" stroke="#a9c4e8" stroke-width="2"/>
+  <text x="132" y="138" text-anchor="middle" class="head">Direct</text>
+  <text x="224" y="137" class="label">同一锚定坐标；上下文持续向前</text>
+
+  <rect x="94" y="185" width="120" height="76" rx="13" class="anchor"/>
+  <text x="154" y="216" text-anchor="middle" class="label">初始化锚帧</text>
+  <text x="154" y="242" text-anchor="middle" class="tiny">共同参照 + 尺度</text>
+  <path d="M216 223 H288" class="line"/>
+  <g transform="translate(300 184)">
+    <rect x="0" y="0" width="105" height="78" rx="12" class="frame"/><text x="52" y="33" text-anchor="middle" class="label">帧 t</text><text x="52" y="58" text-anchor="middle" class="tiny">输入 / 输出</text>
+    <path d="M110 39 H143" class="line"/>
+    <rect x="150" y="0" width="105" height="78" rx="12" class="frame"/><text x="202" y="33" text-anchor="middle" class="label">帧 t+1</text><text x="202" y="58" text-anchor="middle" class="tiny">输入 / 输出</text>
+    <path d="M260 39 H293" class="line"/>
+    <rect x="300" y="0" width="105" height="78" rx="12" class="frame"/><text x="352" y="33" text-anchor="middle" class="label">帧 t+2</text><text x="352" y="58" text-anchor="middle" class="tiny">输入 / 输出</text>
+    <path d="M410 39 H443" class="line"/>
+    <rect x="450" y="0" width="105" height="78" rx="12" class="frame"/><text x="502" y="33" text-anchor="middle" class="label">更多帧</text><text x="502" y="58" text-anchor="middle" class="tiny">持续处理</text>
+  </g>
+  <path d="M396 270 V305 H1050 V270" class="dashed"/>
+  <rect x="390" y="300" width="666" height="66" rx="14" class="mem"/>
+  <text x="723" y="329" text-anchor="middle" class="label">轨迹记忆：每个离窗历史帧保留 6 个上下文 Token</text>
+  <text x="723" y="352" text-anchor="middle" class="small">不重置；总历史仍按约 6T 增长，低于完整 Patch KV 的增长量</text>
+  <rect x="1114" y="190" width="222" height="74" rx="14" fill="#f1f6ff" stroke="#aec8e8" stroke-width="2"/>
+  <text x="1225" y="222" text-anchor="middle" class="label">连续绝对位姿</text>
+  <text x="1225" y="246" text-anchor="middle" class="tiny">由初始锚点定义坐标</text>
+  <path d="M855 222 H1105" class="line"/>
+  <text x="1104" y="389" text-anchor="end" class="small">报告经验：训练至 320 帧；Direct 约 3,000 帧后质量逐渐下降</text>
+
+  <!-- VO mode -->
+  <rect x="42" y="438" width="1356" height="456" rx="20" class="panel"/>
+  <rect x="66" y="462" width="132" height="46" rx="14" fill="#eaf6f0" stroke="#9bcab0" stroke-width="2"/>
+  <text x="132" y="492" text-anchor="middle" class="head">VO</text>
+  <text x="224" y="491" class="label">窗口内建立局部坐标；窗口间对齐并拼接</text>
+  <text x="1345" y="493" text-anchor="end" class="tiny">窗口长度与重叠帧数仅为示意</text>
+
+  <!-- timeline frames and windows -->
+  <g transform="translate(100 548)">
+    <g>
+      <rect x="0" y="0" width="82" height="62" rx="10" class="frame"/><text x="41" y="37" text-anchor="middle" class="small">F₁</text>
+      <rect x="91" y="0" width="82" height="62" rx="10" class="frame"/><text x="132" y="37" text-anchor="middle" class="small">F₂</text>
+      <rect x="182" y="0" width="82" height="62" rx="10" class="frame"/><text x="223" y="37" text-anchor="middle" class="small">F₃</text>
+      <rect x="273" y="0" width="82" height="62" rx="10" class="frame"/><text x="314" y="37" text-anchor="middle" class="small">F₄</text>
+      <rect x="364" y="0" width="82" height="62" rx="10" class="frame"/><text x="405" y="37" text-anchor="middle" class="small">F₅</text>
+      <rect x="455" y="0" width="82" height="62" rx="10" class="frame"/><text x="496" y="37" text-anchor="middle" class="small">F₆</text>
+      <rect x="546" y="0" width="82" height="62" rx="10" class="frame"/><text x="587" y="37" text-anchor="middle" class="small">F₇</text>
+      <rect x="637" y="0" width="82" height="62" rx="10" class="frame"/><text x="678" y="37" text-anchor="middle" class="small">F₈</text>
+      <rect x="728" y="0" width="82" height="62" rx="10" class="frame"/><text x="769" y="37" text-anchor="middle" class="small">F₉</text>
+      <rect x="819" y="0" width="82" height="62" rx="10" class="frame"/><text x="860" y="37" text-anchor="middle" class="small">F₁₀</text>
+      <rect x="910" y="0" width="82" height="62" rx="10" class="frame"/><text x="951" y="37" text-anchor="middle" class="small">F₁₁</text>
+      <rect x="1001" y="0" width="82" height="62" rx="10" class="frame"/><text x="1042" y="37" text-anchor="middle" class="small">F₁₂</text>
+    </g>
+    <rect x="-10" y="-18" width="560" height="98" rx="18" fill="none" stroke="#70ae89" stroke-width="3"/>
+    <rect x="446" y="-18" width="560" height="98" rx="18" fill="none" stroke="#86a8dc" stroke-width="3"/>
+    <text x="270" y="-26" text-anchor="middle" class="small">局部窗口 A</text>
+    <text x="726" y="-26" text-anchor="middle" class="small">局部窗口 B</text>
+    <text x="500" y="99" text-anchor="middle" class="tiny">重叠帧用于窗口间坐标对齐</text>
+  </g>
+
+  <path d="M239 630 V675" class="line"/>
+  <path d="M695 630 V675" class="line"/>
+  <rect x="91" y="680" width="310" height="98" rx="15" class="local"/>
+  <text x="246" y="714" text-anchor="middle" class="label">窗口 A：起始帧联合初始化</text>
+  <text x="246" y="742" text-anchor="middle" class="small">之后因果处理 + 关键帧选择</text>
+  <text x="246" y="765" text-anchor="middle" class="tiny">窗口内坐标 A / 尺度 A</text>
+  <rect x="547" y="680" width="310" height="98" rx="15" class="local"/>
+  <text x="702" y="714" text-anchor="middle" class="label">窗口 B：重新初始化状态</text>
+  <text x="702" y="742" text-anchor="middle" class="small">之后因果处理 + 关键帧选择</text>
+  <text x="702" y="765" text-anchor="middle" class="tiny">窗口内坐标 B / 尺度 B</text>
+  <path d="M405 729 H527" class="orange"/>
+  <rect x="415" y="687" width="106" height="36" rx="10" fill="#fff8ed" stroke="#e6ba7a" stroke-width="1.5"/>
+  <text x="468" y="711" text-anchor="middle" class="tiny">窗口末重置</text>
+
+  <path d="M857 729 H908" class="line"/>
+  <rect x="916" y="677" width="208" height="104" rx="15" fill="#fff5e7" stroke="#e5b56f" stroke-width="2"/>
+  <text x="1020" y="712" text-anchor="middle" class="label">Sim(3) 对齐</text>
+  <text x="1020" y="740" text-anchor="middle" class="small">重叠区域估计</text>
+  <text x="1020" y="763" text-anchor="middle" class="tiny">尺度 + 旋转 + 平移</text>
+  <path d="M1125 729 H1171" class="line"/>
+  <rect x="1178" y="677" width="186" height="104" rx="15" fill="#f1f6ff" stroke="#aec8e8" stroke-width="2"/>
+  <text x="1271" y="712" text-anchor="middle" class="label">拼接轨迹</text>
+  <text x="1271" y="740" text-anchor="middle" class="small">局部段 → 全局输出</text>
+  <text x="1271" y="763" text-anchor="middle" class="tiny">边界误差逐窗累积</text>
+
+  <rect x="100" y="818" width="1240" height="50" rx="13" fill="#f8f3ee" stroke="#e5d3bd" stroke-width="1.5"/>
+  <text x="720" y="850" text-anchor="middle" class="body">VO 把有界的网络工作状态与长程全局一致性分开：状态被重置，轨迹靠窗口外 Sim(3) 对齐延续。</text>
+</svg>
