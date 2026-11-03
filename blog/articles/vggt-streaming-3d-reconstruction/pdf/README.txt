@@ -1,6 +1,6 @@
 # 论文 PDF 索引
 
-本目录保存文章引用的论文 PDF 快照，方便后续搜索正文、核对方法和提取原图。文件于 2026-11-01 下载；论文更新时，建议同时记录新的版本号。
+本目录保存文章引用的论文 PDF 快照，方便后续搜索正文、核对方法和提取原图。现有快照于 2026-11-01 至 2026-11-02 整理；论文更新时，建议同时记录新的版本号。
 
 | 方法 | PDF 文件 | arXiv |
 |---|---|---|
@@ -20,7 +20,7 @@
 | Slot3R | [slot3r.pdf](slot3r.pdf) | [2610.12282](https://arxiv.org/abs/2610.12282) |
 | XStreamVGGT | [xstreamvggt.pdf](xstreamvggt.pdf) | [2602.21780](https://arxiv.org/abs/2602.21780) |
 | StreamCacheVGGT | [streamcachevggt.pdf](streamcachevggt.pdf) | [2604.15237](https://arxiv.org/abs/2604.15237) |
-| ABot-Recon | [abot-recon.pdf](abot-recon.pdf) | [2608.27529](https://arxiv.org/abs/2608.27529) |
+| ABot-Recon | [本地快照](abot-recon.pdf) | [2608.27529](https://arxiv.org/abs/2608.27529) · [在线 PDF](https://arxiv.org/pdf/2608.27529) |
 | Wid3R | [wid3r.pdf](wid3r.pdf) | [2602.05321](https://arxiv.org/abs/2602.05321) |
 | Any3R | [any3r.pdf](any3r.pdf) | [2610.36150](https://arxiv.org/abs/2610.36150) |
 | OmniRay | [omniray.pdf](omniray.pdf) | [2610.31645](https://arxiv.org/abs/2610.31645) |

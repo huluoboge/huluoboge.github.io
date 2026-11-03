@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="740" viewBox="0 0 1600 740" role="img" aria-labelledby="title desc">
+  <title id="title">TTSA3R 的 SCUM 空间掩码与 State 写回</title>
+  <desc id="desc">图从左到右展示：先比较相邻帧同一 Patch 位置的特征差异，再读取 State Token 对当前图像 Patch 的交叉注意力，将差异分配给各 State Token，得到空间掩码。空间掩码与时间掩码相乘后，控制候选 State 和旧 State 的混合。相同 Patch 索引不保证对应同一个三维点。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#526176"/></marker>
+    <style>
+      text{font-family:"Noto Sans CJK SC","SimSun","Microsoft YaHei",Arial,sans-serif;fill:#172033}
+      .title{font-size:30px;font-weight:700}.subtitle{font-size:19px;fill:#526176}
+      .head{font-size:21px;font-weight:700}.label{font-size:18px;font-weight:650}
+      .body{font-size:17px}.small{font-size:15px;fill:#526176}.tiny{font-size:14px;fill:#526176}
+      .card{fill:#fff;stroke:#d8e1eb;stroke-width:2}.orange{fill:#fff7ed;stroke:#fb923c;stroke-width:2}
+      .blue{fill:#eff6ff;stroke:#60a5fa;stroke-width:2}.purple{fill:#f5f3ff;stroke:#a78bfa;stroke-width:2}
+      .green{fill:#ecfdf5;stroke:#34d399;stroke-width:2}.yellow{fill:#fffbeb;stroke:#fbbf24;stroke-width:1.6}
+      .arrow{fill:none;stroke:#526176;stroke-width:2.5;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="740" fill="#f5f8fc"/>
+  <text x="36" y="46" class="title">SCUM：从 Patch 特征变化，到 State 写回</text>
+  <text x="38" y="78" class="subtitle">按论文 Figure 3 的机制重绘：先看图像变化，再看哪个 State Token 关注这些位置。</text>
+
+  <rect x="28" y="108" width="490" height="544" rx="16" class="card"/>
+  <text x="50" y="150" class="head">① 哪些图像 Patch 发生了变化？</text>
+  <text x="62" y="199" class="small">前一帧 F_prev</text>
+  <rect x="73" y="214" width="66" height="48" rx="5" fill="#b9d8f3" stroke="#718096"/>
+  <rect x="151" y="214" width="66" height="48" rx="5" fill="#d2e6f7" stroke="#718096"/>
+  <rect x="229" y="214" width="66" height="48" rx="5" fill="#b7dfc4" stroke="#718096"/>
+  <rect x="307" y="214" width="66" height="48" rx="5" fill="#f4d5a6" stroke="#718096"/>
+  <text x="106" y="284" text-anchor="middle" class="tiny">p0</text><text x="184" y="284" text-anchor="middle" class="tiny">p1</text><text x="262" y="284" text-anchor="middle" class="tiny">p2</text><text x="340" y="284" text-anchor="middle" class="tiny">p3</text>
+  <text x="62" y="328" class="small">当前帧 F_now</text>
+  <rect x="73" y="343" width="66" height="48" rx="5" fill="#c4def4" stroke="#718096"/>
+  <rect x="151" y="343" width="66" height="48" rx="5" fill="#efd2a5" stroke="#718096"/>
+  <rect x="229" y="343" width="66" height="48" rx="5" fill="#e9b87e" stroke="#718096"/>
+  <rect x="307" y="343" width="66" height="48" rx="5" fill="#f1d8ac" stroke="#718096"/>
+  <text x="106" y="413" text-anchor="middle" class="tiny">p0</text><text x="184" y="413" text-anchor="middle" class="tiny">p1</text><text x="262" y="413" text-anchor="middle" class="tiny">p2</text><text x="340" y="413" text-anchor="middle" class="tiny">p3</text>
+  <rect x="50" y="439" width="446" height="108" rx="12" class="orange"/>
+  <text x="273" y="474" text-anchor="middle" class="label">同一网格位置逐 Patch 比较</text>
+  <text x="273" y="505" text-anchor="middle" class="body">D(p) = 1 − cos(F_now(p),</text>
+  <text x="273" y="530" text-anchor="middle" class="body">F_prev(p))</text>
+  <text x="53" y="584" class="small">D(p) 越大，表示该位置的图像特征变化越大。</text>
+  <text x="53" y="615" class="tiny">p 是二维 Patch 索引；不是三维地标编号。</text>
+
+  <path d="M523 375 H546" class="arrow"/>
+  <rect x="555" y="108" width="490" height="544" rx="16" class="card"/>
+  <text x="577" y="150" class="head">② 哪个 State Token 关注这些位置？</text>
+  <text x="580" y="195" class="small">Decoder 的 Cross-Attention map：A(i,p)</text>
+  <text x="714" y="234" text-anchor="middle" class="tiny">p0</text><text x="784" y="234" text-anchor="middle" class="tiny">p1</text><text x="854" y="234" text-anchor="middle" class="tiny">p2</text><text x="924" y="234" text-anchor="middle" class="tiny">p3</text>
+  <text x="584" y="279" class="tiny">State 0</text><text x="584" y="338" class="tiny">State 1</text><text x="584" y="397" class="tiny">State 2</text>
+  <rect x="677" y="247" width="64" height="50" fill="#dbeafe" stroke="#fff"/><rect x="747" y="247" width="64" height="50" fill="#93c5fd" stroke="#fff"/><rect x="817" y="247" width="64" height="50" fill="#2563eb" stroke="#fff"/><rect x="887" y="247" width="64" height="50" fill="#bfdbfe" stroke="#fff"/>
+  <rect x="677" y="306" width="64" height="50" fill="#60a5fa" stroke="#fff"/><rect x="747" y="306" width="64" height="50" fill="#dbeafe" stroke="#fff"/><rect x="817" y="306" width="64" height="50" fill="#93c5fd" stroke="#fff"/><rect x="887" y="306" width="64" height="50" fill="#1d4ed8" stroke="#fff"/>
+  <rect x="677" y="365" width="64" height="50" fill="#bfdbfe" stroke="#fff"/><rect x="747" y="365" width="64" height="50" fill="#2563eb" stroke="#fff"/><rect x="817" y="365" width="64" height="50" fill="#dbeafe" stroke="#fff"/><rect x="887" y="365" width="64" height="50" fill="#60a5fa" stroke="#fff"/>
+  <text x="580" y="458" class="small">一行对应一个 State Token；一列对应一个图像 Patch。</text>
+  <rect x="580" y="480" width="440" height="87" rx="12" class="blue"/>
+  <text x="800" y="515" text-anchor="middle" class="label">State Token 作 Query</text>
+  <text x="800" y="543" text-anchor="middle" class="body">当前图像 Patch 作 Key / Value</text>
+  <text x="580" y="606" class="small">A(i,p) 越大，表示该 State Token 越关注 Patch p。</text>
+
+  <path d="M1050 375 H1073" class="arrow"/>
+  <rect x="1082" y="108" width="490" height="544" rx="16" class="card"/>
+  <text x="1104" y="150" class="head">③ 变化和关注一起控制写入</text>
+  <rect x="1107" y="181" width="440" height="77" rx="12" class="purple"/>
+  <text x="1327" y="213" text-anchor="middle" class="label">逐 Patch 相乘：A(i,p) × D(p)</text>
+  <text x="1327" y="240" text-anchor="middle" class="small">每个 State 行都乘上相同位置的 D(p)</text>
+  <path d="M1327 263 V281" class="arrow"/>
+  <rect x="1107" y="289" width="440" height="76" rx="12" class="orange"/>
+  <text x="1327" y="322" text-anchor="middle" class="label">沿 Patch 维度取最大值，再经 Sigmoid</text>
+  <text x="1327" y="348" text-anchor="middle" class="body">max over p → M_spat(i)</text>
+  <text x="1109" y="396" class="small">对每个 State Token 得到一个空间掩码。</text>
+  <rect x="1107" y="416" width="440" height="62" rx="10" class="green"/>
+  <text x="1327" y="454" text-anchor="middle" class="label">M_final(i) = M_temp(i) × M_spat(i)</text>
+  <text x="1109" y="509" class="small">再用 M_final 混合候选 State 和旧 State：</text>
+  <rect x="1107" y="523" width="440" height="87" rx="12" class="blue"/>
+  <text x="1327" y="558" text-anchor="middle" class="small">S_new(i) = M_final(i) × S_candidate(i)</text>
+  <text x="1327" y="587" text-anchor="middle" class="small">+ [1 − M_final(i)] × S_old(i)</text>
+  <text x="1109" y="633" class="tiny">M_spat 在 [0.5, 1) 内，只调制时间门控强弱。</text>
+
+  <rect x="28" y="674" width="1544" height="50" rx="12" class="yellow"/>
+  <text x="50" y="706" class="body">几何边界：两帧中相同的 Patch 网格位置不保证对应同一个三维点；SCUM 不做位姿、深度或光流重投影验证。</text>
+</svg>

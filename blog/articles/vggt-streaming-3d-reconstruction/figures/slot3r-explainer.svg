@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="650" viewBox="0 0 1280 650" role="img" aria-labelledby="title desc">
+  <title id="title">Slot3R 的空间记忆读写流程</title>
+  <desc id="desc">当前帧根据上一帧点图提供的空间先验读取局部记忆，并结合少量全局锚点；冻结的 Point3R 主干预测点图、深度和位姿。新观测变成带置信度的空间指针，按球面哈希地址写入最多含 K 个槽位的桶，相似证据加权融合，不同证据占用另一槽位或替换最低置信度状态。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#52677f"/>
+    </marker>
+    <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#16877a"/>
+    </marker>
+    <style>
+      text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; fill: #203047; }
+      .title { font-size: 28px; font-weight: 700; }
+      .sub { font-size: 16px; fill: #53647a; }
+      .head { font-size: 19px; font-weight: 700; }
+      .body { font-size: 15px; }
+      .small { font-size: 13px; fill: #53647a; }
+      .panel { fill: #ffffff; stroke: #c9d5e3; stroke-width: 1.5; }
+      .pill { fill: #f1f5f9; stroke: #d4dee9; }
+      .arrow { fill: none; stroke: #52677f; stroke-width: 2.2; marker-end: url(#arrow); }
+      .teal-arrow { fill: none; stroke: #16877a; stroke-width: 2.2; marker-end: url(#arrow-teal); }
+    </style>
+  </defs>
+  <rect width="1280" height="650" rx="18" fill="#f7f9fc"/>
+  <text x="42" y="48" class="title">Slot3R：地址按位置组织，状态按证据区分</text>
+  <text x="42" y="76" class="sub">在 Point3R 的流式预测框架上，分别设计稀疏读取与多槽写入</text>
+
+  <!-- Read path -->
+  <rect x="36" y="104" width="1208" height="188" rx="14" class="panel"/>
+  <circle cx="65" cy="134" r="16" fill="#2764a5"/><text x="65" y="140" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">1</text>
+  <text x="91" y="141" class="head">读取：从增长中的空间表中挑出当前帧需要的记忆</text>
+
+  <rect x="62" y="169" width="205" height="83" rx="10" fill="#edf4fb" stroke="#b7cce1"/>
+  <text x="164" y="194" text-anchor="middle" class="body" font-weight="700">当前图像块</text>
+  <text x="164" y="218" text-anchor="middle" class="small">上一帧全局点图提供</text>
+  <text x="164" y="238" text-anchor="middle" class="small">近似空间先验</text>
+
+  <path d="M267 210 H314" class="arrow"/>
+  <rect x="316" y="169" width="220" height="83" rx="10" fill="#eef7f5" stroke="#acd5ce"/>
+  <text x="426" y="194" text-anchor="middle" class="body" font-weight="700">局部读取</text>
+  <text x="426" y="218" text-anchor="middle" class="small">查询先验地址周围的</text>
+  <text x="426" y="238" text-anchor="middle" class="small">相邻哈希桶</text>
+
+  <rect x="316" y="257" width="220" height="26" rx="13" fill="#fff8e7" stroke="#eed38c"/>
+  <text x="426" y="275" text-anchor="middle" font-size="12" fill="#72520a">全局读取：均匀抽取少量锚点</text>
+  <path d="M536 270 H566 V250 H594" class="arrow"/>
+
+  <path d="M536 210 H594" class="arrow"/>
+  <rect x="596" y="169" width="220" height="83" rx="10" fill="#f4f0fb" stroke="#d1c1e6"/>
+  <text x="706" y="194" text-anchor="middle" class="body" font-weight="700">合并、去重并截断</text>
+  <text x="706" y="218" text-anchor="middle" class="small">局部证据 + 全局粗略上下文</text>
+  <text x="706" y="238" text-anchor="middle" class="small">最多保留固定读取预算</text>
+
+  <path d="M816 210 H873" class="arrow"/>
+  <rect x="875" y="169" width="329" height="83" rx="10" fill="#edf4fb" stroke="#b7cce1"/>
+  <text x="1039" y="194" text-anchor="middle" class="body" font-weight="700">当前帧与选出的记忆交互</text>
+  <text x="1039" y="218" text-anchor="middle" class="small">冻结的 Point3R 主干预测点图、深度、位姿</text>
+  <text x="1039" y="238" text-anchor="middle" class="small">论文实验的读取预算为 640 个 Token</text>
+
+  <!-- Write path -->
+  <rect x="36" y="310" width="1208" height="268" rx="14" class="panel"/>
+  <circle cx="65" cy="340" r="16" fill="#16877a"/><text x="65" y="346" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">2</text>
+  <text x="91" y="347" class="head">写入：同一地址最多保留 K 份可区分的状态</text>
+
+  <rect x="62" y="377" width="222" height="82" rx="10" fill="#edf4fb" stroke="#b7cce1"/>
+  <text x="173" y="402" text-anchor="middle" class="body" font-weight="700">新预测形成指针候选</text>
+  <text x="173" y="426" text-anchor="middle" class="small">三维位置 p · 特征 m</text>
+  <text x="173" y="446" text-anchor="middle" class="small">置信度 c</text>
+
+  <path d="M284 418 H330" class="arrow"/>
+  <rect x="332" y="377" width="205" height="82" rx="10" fill="#fff8e7" stroke="#eed38c"/>
+  <text x="434" y="402" text-anchor="middle" class="body" font-weight="700">置信度筛选</text>
+  <text x="434" y="428" text-anchor="middle" class="small">丢弃低于本帧分位阈值</text>
+  <text x="434" y="447" text-anchor="middle" class="small">的候选</text>
+
+  <path d="M537 418 H584" class="arrow"/>
+  <rect x="586" y="377" width="205" height="82" rx="10" fill="#eef7f5" stroke="#acd5ce"/>
+  <text x="688" y="402" text-anchor="middle" class="body" font-weight="700">球面哈希寻址</text>
+  <text x="688" y="428" text-anchor="middle" class="small">位置决定空间桶</text>
+  <text x="688" y="447" text-anchor="middle" class="small">寻址不代表必须融合</text>
+
+  <path d="M791 418 H838" class="arrow"/>
+  <rect x="840" y="369" width="361" height="177" rx="12" fill="#f4f0fb" stroke="#c8b5df" stroke-width="1.5"/>
+  <text x="1020" y="395" text-anchor="middle" class="body" font-weight="700">同一空间桶：最多 K 个槽位</text>
+  <rect x="865" y="413" width="91" height="42" rx="8" fill="#dceaf8" stroke="#9dbbd7"/><text x="910" y="439" text-anchor="middle" class="small">位置 p₁</text>
+  <rect x="969" y="413" width="91" height="42" rx="8" fill="#e7def3" stroke="#bba5d4"/><text x="1014" y="439" text-anchor="middle" class="small">位置 p₂</text>
+  <rect x="1073" y="413" width="91" height="42" rx="8" fill="#e3f2ed" stroke="#9cc8b8"/><text x="1118" y="439" text-anchor="middle" class="small">… pₖ</text>
+  <text x="1020" y="480" text-anchor="middle" class="small">槽位分别保存位置、特征与置信度</text>
+  <text x="1020" y="505" text-anchor="middle" font-size="13" fill="#52677f">相似且不低于匹配槽 → 加权融合</text>
+  <text x="1020" y="527" text-anchor="middle" font-size="13" fill="#52677f">不同且不低于最弱槽 → 插入空槽或替换最弱槽</text>
+
+  <!-- Takeaway -->
+  <rect x="36" y="596" width="1208" height="38" rx="10" fill="#e9f1f8"/>
+  <text x="640" y="621" text-anchor="middle" font-size="15" font-weight="700" fill="#294c6e">每帧读取量受固定预算约束；持久空间记忆仍随已探索区域增长。</text>
+</svg>

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">ABot-Recon 从局部预测到全局轨迹与回环修正</title>
+  <desc id="desc">固定十二帧上下文预测当前相机系点图和相邻帧相对位姿，位姿链将局部结果组合到全局参考系；可选的地点检索与位姿图在模型之外修正轨迹。</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#2563eb"/></marker>
+    <marker id="arrow-purple" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#7c3aed"/></marker>
+    <marker id="arrow-green" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#059669"/></marker>
+    <marker id="arrow-orange" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#d97706"/></marker>
+    <marker id="arrow-gray" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#64748b"/></marker>
+    <style>
+      text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif; fill: #172033; }
+      .title { font-size: 38px; font-weight: 700; }
+      .subtitle { font-size: 21px; fill: #526176; }
+      .head { font-size: 26px; font-weight: 700; }
+      .label { font-size: 21px; font-weight: 600; }
+      .body { font-size: 18px; }
+      .small { font-size: 16px; fill: #526176; }
+      .tiny { font-size: 14px; fill: #526176; }
+      .panel { fill: #ffffff; stroke: #d7e0ea; stroke-width: 2; }
+      .blue { fill: #eff6ff; stroke: #60a5fa; stroke-width: 2; }
+      .purple { fill: #f5f3ff; stroke: #a78bfa; stroke-width: 2; }
+      .green { fill: #ecfdf5; stroke: #34d399; stroke-width: 2; }
+      .orange { fill: #fff7ed; stroke: #fb923c; stroke-width: 2; }
+      .gray { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; }
+      .bline { fill: none; stroke: #2563eb; stroke-width: 3; marker-end: url(#arrow-blue); }
+      .pline { fill: none; stroke: #7c3aed; stroke-width: 3; marker-end: url(#arrow-purple); }
+      .gline { fill: none; stroke: #059669; stroke-width: 3; marker-end: url(#arrow-green); }
+      .oline { fill: none; stroke: #d97706; stroke-width: 3; marker-end: url(#arrow-orange); }
+      .line { fill: none; stroke: #64748b; stroke-width: 3; marker-end: url(#arrow-gray); }
+      .dash { stroke-dasharray: 9 8; }
+    </style>
+  </defs>
+  <rect width="1600" height="980" fill="#f5f8fc"/>
+  <text x="58" y="64" class="title">ABot-Recon：局部估计如何接成长程结果</text>
+  <text x="60" y="101" class="subtitle">网络只保留近期 KV；轨迹、地图和可选回环约束在网络外逐步组织。</text>
+
+  <rect x="38" y="132" width="1524" height="354" rx="22" class="panel"/>
+  <text x="68" y="175" class="head">① 在线预测：当前帧只读固定的局部上下文</text>
+  <rect x="70" y="224" width="250" height="116" rx="16" class="gray"/>
+  <text x="195" y="265" text-anchor="middle" class="label">当前帧 Iᵢ</text>
+  <text x="195" y="298" text-anchor="middle" class="body">当前帧进入编码器</text>
+  <text x="195" y="324" text-anchor="middle" class="small">生成本帧图像特征</text>
+
+  <rect x="378" y="224" width="210" height="116" rx="16" class="blue"/>
+  <text x="483" y="265" text-anchor="middle" class="label">共享图像编码器</text>
+  <text x="483" y="301" text-anchor="middle" class="small">每帧生成图像特征</text>
+  <path d="M320 282 H368" class="bline"/>
+
+  <rect x="650" y="208" width="330" height="148" rx="18" class="purple"/>
+  <text x="815" y="248" text-anchor="middle" class="label">交替注意力</text>
+  <rect x="680" y="270" width="122" height="54" rx="12" fill="#ffffff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="741" y="303" text-anchor="middle" class="body">帧内注意力</text>
+  <rect x="826" y="270" width="124" height="54" rx="12" fill="#ffffff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="888" y="294" text-anchor="middle" class="small">因果时间</text>
+  <text x="888" y="315" text-anchor="middle" class="small">注意力</text>
+  <path d="M588 282 H640" class="bline"/>
+
+  <rect x="1040" y="205" width="230" height="112" rx="16" class="blue"/>
+  <text x="1155" y="246" text-anchor="middle" class="label">Geometry Head</text>
+  <text x="1155" y="279" text-anchor="middle" class="body">Pᵢ + 置信度 Sᵢ</text>
+  <text x="1155" y="302" text-anchor="middle" class="small">当前相机坐标系</text>
+  <path d="M980 258 H1030" class="bline"/>
+
+  <rect x="1040" y="343" width="230" height="92" rx="16" class="purple"/>
+  <text x="1155" y="380" text-anchor="middle" class="label">Camera Head</text>
+  <text x="1155" y="411" text-anchor="middle" class="body">Tᵢ₋₁←ᵢ · 相邻位姿</text>
+  <path d="M980 306 H1010 V386 H1030" class="pline"/>
+
+  <rect x="650" y="372" width="330" height="76" rx="16" class="gray"/>
+  <text x="815" y="402" text-anchor="middle" class="label">滚动 KV 缓存</text>
+  <text x="815" y="430" text-anchor="middle" class="small">读最近 11 帧 · 写当前帧 · 淘汰最旧项</text>
+  <path d="M744 372 V357" class="line"/>
+  <path d="M886 357 V372" class="pline"/>
+  <text x="809" y="476" text-anchor="middle" class="tiny">帧内注意力混合同帧特征；时间注意力与缓存只覆盖当前帧和最近 11 帧，共 K = 12 帧。</text>
+
+  <rect x="38" y="512" width="1524" height="428" rx="22" class="panel"/>
+  <text x="68" y="555" class="head">② 从局部结果到全局：组合轨迹，按需加回环约束</text>
+
+  <rect x="75" y="608" width="260" height="104" rx="16" class="blue"/>
+  <text x="205" y="649" text-anchor="middle" class="label">局部几何</text>
+  <text x="205" y="683" text-anchor="middle" class="body">点图 Pᵢ 留在相机 i 系</text>
+  <rect x="75" y="758" width="260" height="104" rx="16" class="purple"/>
+  <text x="205" y="799" text-anchor="middle" class="label">相邻相机变换</text>
+  <text x="205" y="833" text-anchor="middle" class="body">Tᵢ₋₁←ᵢ 把 i 系映到 i−1 系</text>
+
+  <rect x="435" y="659" width="280" height="140" rx="18" class="green"/>
+  <text x="575" y="704" text-anchor="middle" class="label">逐帧位姿链</text>
+  <text x="575" y="739" text-anchor="middle" class="body">T₀←ᵢ = T₀←₁ ··· Tᵢ₋₁←ᵢ</text>
+  <text x="575" y="772" text-anchor="middle" class="small">全局坐标由组合结果建立</text>
+  <path d="M335 662 H425" class="bline"/>
+  <path d="M335 810 H425" class="pline"/>
+
+  <rect x="810" y="608" width="270" height="104" rx="16" class="green"/>
+  <text x="945" y="649" text-anchor="middle" class="label">全局相机轨迹</text>
+  <text x="945" y="683" text-anchor="middle" class="small">由局部相对位姿连乘</text>
+  <rect x="810" y="758" width="270" height="104" rx="16" class="green"/>
+  <text x="945" y="799" text-anchor="middle" class="label">全局点云</text>
+  <text x="945" y="833" text-anchor="middle" class="small">用 T₀←ᵢ 变换当前点图</text>
+  <path d="M715 696 H760 V660 H800" class="gline"/>
+  <path d="M715 762 H760 V810 H800" class="gline"/>
+
+  <rect x="1140" y="588" width="380" height="284" rx="18" class="orange"/>
+  <text x="1330" y="628" text-anchor="middle" class="label">可选：独立回环后端</text>
+  <text x="1170" y="672" class="body">① DINOv2-SALAD 描述子检索旧帧</text>
+  <text x="1170" y="710" class="body">② ABot-Recon 联合估计局部帧对</text>
+  <text x="1170" y="748" class="body">③ 加入回环因子并优化稀疏位姿图</text>
+  <text x="1170" y="798" class="small">修正全局轨迹；不改写模型 KV 状态</text>
+  <text x="1170" y="828" class="small">局部点图可按修正位姿重新放置</text>
+  <path d="M1080 660 H1128" class="oline dash"/>
+  <path d="M1080 810 H1128" class="oline dash"/>
+  <text x="800" y="907" text-anchor="middle" class="small">模型每步工作量受 K 限制；模型外的轨迹、地图和检索索引需另行管理存储预算。</text>
+</svg>
